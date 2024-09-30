@@ -8,7 +8,7 @@ from pathlib import Path
 # external
 
 # internal
-#from app_config import read_config
+from app_config import read_config
 from app_path import resource_path
 
 
@@ -22,6 +22,36 @@ ICON_FILE: Path = resource_path("resources/icon.ico")
 #print(ICON_FILE)
 SETTINGS_FILE: Path = resource_path("resources/AuraCalc.ini")
 #print(SETTINGS_FILE)
+
+
+# Settings
+settings: dict[str, dict[str, any]] = read_config(SETTINGS_FILE)
+
+START_HEIGHT: int = settings["WINDOW_DIMENSIONS"]["iDefaultHeight"]
+START_WIDTH: int = settings["WINDOW_DIMENSIONS"]["iDefaultWidth"]
+MIN_HEIGHT: int = settings["WINDOW_DIMENSIONS"]["iMinHeight"]
+MIN_WIDTH: int = settings["WINDOW_DIMENSIONS"]["iMinWidth"]
+
+if settings["WINDOW_POSITION"]["sDefaultPosition"] == "center":
+	START_POS: str = "center"
+else:
+	START_POS: tuple[int, int] = tuple(settings["WINDOW_POSITION"]["iXOffset"], settings["WINDOW_POSITION"]["iYOffset"])
+
+#FORCE_FOCUS: bool = True
+START_EXPANDED: bool = settings["WINDOW_FLAGS"]["bStartExpanded"]
+START_PINNED: bool = settings["WINDOW_FLAGS"]["bStartPinned"]
+
+DEC_PRECISION: int = settings["CALCULATION"]["iDecimalPrecision"]
+DEC_DISPLAY: int = settings["CALCULATION"]["iDecimalDisplay"]
+if DEC_DISPLAY > DEC_PRECISION:
+	DEC_DISPLAY = DEC_PRECISION
+ONLY_SIMPLIFY: bool = settings["CALCULATION"]["bOnlySimplify"]
+
+DEBUG: bool = settings["DEBUG"]["bDebugMode"]
+SANITIZE: bool = settings["DEBUG"]["bSanitizeInput"]
+
+DEF_EXPRESSION: str = ""
+DEF_RESULT: str = "0"
 
 
 # Window Size and Position
@@ -39,28 +69,6 @@ EXPANDED: bool = False
 PINNED: bool = False
 
 
-# Settings
-DEF_HEIGHT: int = 110
-DEF_WIDTH: int = 250
-DEF_POS: tuple[int, int] | str = "center"
-#DEF_POS: tuple[int, int] | str = (100, 100)
-MIN_WIDTH: int = DEF_WIDTH
-MIN_HEIGHT: int = DEF_HEIGHT
-
-DEF_EXPRESSION: str = ""
-DEF_RESULT: str = "0"
-
-#FORCE_FOCUS: bool = True
-DEF_EXPANDED: bool = False
-DEF_PINNED: bool = True
-
-DEC_PRECISION: int = 100
-DEC_DISPLAY: int = 20
-if DEC_DISPLAY > DEC_PRECISION:
-	DEC_DISPLAY = DEC_PRECISION
-ONLY_SIMPLIFY: bool = True
-SANITIZE: bool = False
-
 
 # Saved data
 LAST_EXPRESSION: str = DEF_EXPRESSION
@@ -70,7 +78,9 @@ HISTORY: dict[str, any] = {
 	"expression_history": [],
 	"result_history": [],
 	"pinned_state": False,
-	"expanded_state": False
+	"expanded_state": False,
+	"dimensions": (CUR_WIDTH, CUR_HEIGHT),
+	"position": CUR_POS
 }
 
 

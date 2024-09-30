@@ -100,7 +100,7 @@ def main():
 	# Pin Window ELement (CTkButton)
 	pin_button = ctk.CTkButton(root, text="Pin", command=lambda: pin_window(root, pin_button), width=30)
 	pin_button.grid(row=2, column=0, columnspan=1, sticky="new", padx=x_padding, pady=y_padding)
-	if app_globals.DEF_PINNED:
+	if app_globals.START_PINNED:
 		pin_window(root, pin_button)
 
 	# Clear Entry/Result Element (CTkButton)
@@ -110,7 +110,7 @@ def main():
 	# Expand Options Element (CTkButton)
 	expand_button = ctk.CTkButton(root, text="Expand", command=lambda: expand_options(root, expand_button), width=30)
 	expand_button.grid(row=2, column=4, columnspan=1, sticky="new", padx=x_padding, pady=y_padding)
-	if app_globals.DEF_EXPANDED:
+	if app_globals.START_EXPANDED:
 		expand_options(root, expand_button)
 
 

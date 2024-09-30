@@ -22,6 +22,13 @@
 			"type": "shell",
 			"command": "${cwd}/scripts/build-win.bat",
 			"presentation": {"echo": false, "reveal": "always", "focus": false, "panel": "shared", "showReuseMessage": false, "clear": true}
-		}
+		},
+		//{
+		//	"label": "Build to EXE",
+		//	"group": "build",
+		//	"type": "shell",
+		//	"command": "${command:python.interpreterPath}",
+		//	"args": ["scripts/build.py"]
+		//}
 	]
 }

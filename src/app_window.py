@@ -6,7 +6,6 @@
 import customtkinter as ctk
 
 # internal
-#from app_globals import *
 import app_globals
 #from app_history import save_history
 
@@ -18,7 +17,6 @@ def center_window(window):
 	"""
 	Centers the window on the screen.
 	"""
-	#window.update()
 	app_globals.X_POS = (window.winfo_screenwidth() // 2) - (app_globals.WIDTH // 2)
 	app_globals.Y_POS = (window.winfo_screenheight() // 2) - (app_globals.HEIGHT // 2)
 	window.geometry(f"{app_globals.WIDTH}x{app_globals.HEIGHT}+{app_globals.X_POS}+{app_globals.Y_POS}")
