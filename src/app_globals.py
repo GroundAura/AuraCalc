@@ -25,33 +25,45 @@ SETTINGS_FILE: Path = resource_path("resources/AuraCalc.ini")
 
 
 # Settings
-settings: dict[str, dict[str, any]] = read_config(SETTINGS_FILE)
+settings: dict[str, dict[str, any]] = read_config(SETTINGS_FILE, preserve_key_case=True)
 
-START_HEIGHT: int = settings["WINDOW_DIMENSIONS"]["iDefaultHeight"]
-START_WIDTH: int = settings["WINDOW_DIMENSIONS"]["iDefaultWidth"]
-MIN_HEIGHT: int = settings["WINDOW_DIMENSIONS"]["iMinHeight"]
-MIN_WIDTH: int = settings["WINDOW_DIMENSIONS"]["iMinWidth"]
+BASE_MIN_HEIGHT: int = settings["WIN_BASIC"]["iMinHeight"]
+BASE_MIN_WIDTH: int = settings["WIN_BASIC"]["iMinWidth"]
+BASE_DEF_HEIGHT: int = settings["WIN_BASIC"]["iDefaultHeight"]
+BASE_DEF_WIDTH: int = settings["WIN_BASIC"]["iDefaultWidth"]
 
-if settings["WINDOW_POSITION"]["sDefaultPosition"] == "center":
-	START_POS: str = "center"
-else:
-	START_POS: tuple[int, int] = tuple(settings["WINDOW_POSITION"]["iXOffset"], settings["WINDOW_POSITION"]["iYOffset"])
+ADV_DEF_HEIGHT: int = settings["WIN_ADV"]["iDefaultHeight"]
+ADV_DEF_WIDTH: int = settings["WIN_ADV"]["iDefaultWidth"]
+ADV_MIN_HEIGHT: int = settings["WIN_ADV"]["iMinHeight"]
+ADV_MIN_WIDTH: int = settings["WIN_ADV"]["iMinWidth"]
+
+#if settings["WIN_POS"]["bCenterWindow"] == True:
+	#START_POS: str = "center"
+#else:
+	#START_POS: tuple[int, int] = tuple(settings["WIN_POS"]["iXOffset"], settings["WIN_POS"]["iYOffset"])
+DEF_CENTERED: bool = settings["WIN_POS"]["bCenterWindow"]
+DEF_X_POS: int = settings["WIN_POS"]["iXOffset"]
+DEF_Y_POS: int = settings["WIN_POS"]["iYOffset"]
 
 #FORCE_FOCUS: bool = True
-START_EXPANDED: bool = settings["WINDOW_FLAGS"]["bStartExpanded"]
-START_PINNED: bool = settings["WINDOW_FLAGS"]["bStartPinned"]
+START_EXPANDED: bool = settings["WIN_FLAGS"]["bStartExpanded"]
+START_PINNED: bool = settings["WIN_FLAGS"]["bStartPinned"]
 
 DEC_PRECISION: int = settings["CALCULATION"]["iDecimalPrecision"]
 DEC_DISPLAY: int = settings["CALCULATION"]["iDecimalDisplay"]
 if DEC_DISPLAY > DEC_PRECISION:
 	DEC_DISPLAY = DEC_PRECISION
 ONLY_SIMPLIFY: bool = settings["CALCULATION"]["bOnlySimplify"]
+LIVE_EVAL: bool = settings["CALCULATION"]["bLiveEval"]
 
 DEBUG: bool = settings["DEBUG"]["bDebugMode"]
 SANITIZE: bool = settings["DEBUG"]["bSanitizeInput"]
 
 DEF_EXPRESSION: str = ""
 DEF_RESULT: str = "0"
+
+if DEBUG:
+	print(f"Settings: {settings}")
 
 
 # Window Size and Position
@@ -61,12 +73,20 @@ X_POS: int = 100
 Y_POS: int = 100
 
 
+
+
 # Window State
-CUR_WIDTH: int = 250
-CUR_HEIGHT: int = 110
-CUR_POS: tuple[int, int] = (100, 100)
+CUR_WIDTH: int | None = None
+CUR_HEIGHT: int | None = None
+CUR_X_POS: int | None = None
+CUR_Y_POS: int | None = None
+#CUR_POS: tuple[int, int] = (CUR_XOffset, CUR_YOffset)
 EXPANDED: bool = False
 PINNED: bool = False
+RESIZE_WIDTH: bool = True
+RESIZE_HEIGHT: bool = False
+SCREEN_WIDTH: int | None = None
+SCREEN_HEIGHT: int | None = None
 
 
 
@@ -80,11 +100,12 @@ HISTORY: dict[str, any] = {
 	"pinned_state": False,
 	"expanded_state": False,
 	"dimensions": (CUR_WIDTH, CUR_HEIGHT),
-	"position": CUR_POS
+	"position": (CUR_X_POS, CUR_Y_POS)
 }
 
 
 # Timeout
+PATIENCE: int = 1
 TIMEOUT_DURATION: int = 1000
 TIMEOUT_ID: any = None
 #WAIT_CHARS: list[str] = ['+','-','*','/','^','(',' ']

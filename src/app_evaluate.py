@@ -25,11 +25,12 @@ from app_random import roll_dice
 #ALLOWED_CHARS: re.Pattern[str] = re.compile(r'^[\d\+\-\*/\^()., ]+$')
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	#r'^(?:\d+|?(?:pi|e|inf)|(?:root\(|sqrt\(|ln\(|log\(log10\(|log2\(|log1p\(|sin\(|cos\(|tan\(|csc\(|sec\(|cot\(|fabs\(|exp\(|exp2\(|expm1\(|gcd\(|factorial\(|trunc\(|ceil\(|floor\(|hex\(|bin\(|oct\()\s*|\+\-\*/\^%().!, ]+)+$'
-	r'^(?:\d+|'
-	r'(?:pi|e|[nN][aA][nN])|'
+	r'^(?:'
+	r'\d+|' # Digits
+	r'(?:pi|e|[nN][aA][nN])|' # Constants: pi, e, NaN
 	#r'(?:i|inf)|'
-	r'(?:0x[0-9a-f]+|0b[01]+|0o[0-7]+)|'
-	r'(?:'
+	r'(?:0x[0-9a-f]+|0b[01]+|0o[0-7]+)|' # Hex, binary, octal numbers
+	r'(?:' # Allowed function names
 	r'exp\(|pow\('
 	r'|cbrt\(|sqrt\(|root\('
 	r'|log\(|ln\('
@@ -48,8 +49,10 @@ ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	#r'|average\(|mean\(|median\(|mode\('
 	r'|roll\('
 	#r')|'
-	r')\s*|'
-	r'[\+\-\*/\^%().!, ]+'
+	r')\s*'
+	#r'|[a-zA-Z](?!\s*\()' # Variables, letters that are not followed by '('
+	r'|[a-zA-Z]'
+	r'|[\+\-\*/\^%().!, ]+'
 	r')+$'
 )
 #BUILTIN_FUNCTIONS = [
@@ -159,6 +162,36 @@ BUILTIN_FUNCTIONS = {
 	#'mean': {'func': 'statistics.mean', 'args': 1},
 	#'median': {'func': 'statistics.median', 'args': 1},
 	#'mode': {'func': 'statistics.mode', 'args': 1},
+	'Add': {'func': 'Add'},
+	'add': {'func': 'Add'},
+	'Mult': {'func': 'Mult'},
+	'mult': {'func': 'Mult'},
+	'Pow': {'func': 'Pow'},
+	'pow': {'func': 'Pow'},
+	'Integer': {'func': 'Integer'},
+	'integer': {'func': 'Integer'},
+	'int': {'func': 'Integer'},
+	'Rational': {'func': 'Rational'},
+	'rational': {'func': 'Rational'},
+	'Float': {'func': 'Float'},
+	'float': {'func': 'Float'},
+	'Infinity': {'func': 'Infinity'},
+	'Inf': {'func': 'Infinity'},
+	'inf': {'func': 'Infinity'},
+	'NaN': {'func': 'NaN'},
+	'nan': {'func': 'NaN'},
+	'Zero': {'func': 'Zero'},
+	'zero': {'func': 'Zero'},
+	'I': {'func': 'I'},
+	'pi': {'func': 'pi'},
+	'E': {'func': 'E'},
+	'oo': {'func': 'oo'},
+	'Poly': {'func': 'Poly'},
+	'poly': {'func': 'Poly'},
+	'Polynomial': {'func': 'Poly'},
+	'polynomial': {'func': 'Poly'},
+	'RootOf': {'func': 'RootOf'},
+	'rootof': {'func': 'RootOf'},
 }
 CUSTOM_FUNCTIONS = {
 	'roll': {'func': 'roll_dice', 'args': 1, 'returns': 2},
@@ -243,62 +276,70 @@ def eval_with_decimal(expression: any) -> str:
 def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_SIMPLIFY) -> str:
 	#global LAST_RESULT
 	#continue_eval: bool = True
-	print("Evaluating expression...")
-	print(f"Expr (0: direct):{' '*7}`{expression}`")
+	if app_globals.DEBUG:
+		print("Evaluating expression...")
 	try:
 		# Check for empty expression
-		if not expression:
-			return app_globals.DEF_RESULT
+		#if not expression:
+		#	return app_globals.DEF_RESULT
 		# Sanitize input
-		try:
-			expression: str = sanitize_input(expression)
-			print(f"Expr (1: sanitized):{' '*4}`{expression}`")
-		except ValueError:
-			#return "ERROR: Invalid characters in expression"
-			#return LAST_RESULT
-			raise ValueError
+		#try:
+		#	expression: str = sanitize_input(expression)
+		#	print(f"Expr (1: sanitized):{' '*4}`{expression}`")
+		#except ValueError:
+		#	#return "ERROR: Invalid characters in expression"
+		#	#return LAST_RESULT
+		#	raise ValueError
 		#except Exception:
 		#	raise Exception
 		# Handle implied exponentation
 		expression = implied_exp(expression)
-		print(f"Expr (2: implied_exp):{' '*2}`{expression}`")
+		if app_globals.DEBUG:
+			print(f"Expr (implied_exp):{' '*2}`{expression}`")
 		# Handle implied multiplication
 		expression = implied_mult(expression)
-		print(f"Expr (3: implied_mult):{' '*1}`{expression}`")
+		if app_globals.DEBUG:
+			print(f"Expr (implied_mult):{' '*1}`{expression}`")
 		# Handle custom functions
 		try:
 			expression: str = eval_custom_functions(expression)
-			print(f"Expr (4: eval_func):{' '*4}`{expression}`")
+			if app_globals.DEBUG:
+				print(f"Expr (eval_func):{' '*4}`{expression}`")
 		except ValueError as e:
 			return f"{e}"
 		#except Exception:
 		#	raise Exception
 		# Simpify
 		expression = sympify(expression)
-		print(f"Expr (5: sympify):{' '*6}`{expression}`")
+		print(f"Expr (sympify):{' '*6}`{expression}`")
 		if str(expression) == 'zoo':
 			return "ERROR: Division by zero"
 		# Simplify
 		expression = simplify(expression)
-		print(f"Expr (6: simplify):{' '*5}`{expression}`")
+		if app_globals.DEBUG:
+			print(f"Expr (simplify):{' '*5}`{expression}`")
 		if dont_evaluate:
 			expression: str = format_expression(str(expression))
-			print(f"Expr (7: format):{' '*7}`{expression}`")
+			if app_globals.DEBUG:
+				print(f"Expr (format):{' '*7}`{expression}`")
 			app_globals.LAST_RESULT = expression
 			return expression
 		else:
 			# Evalf
 			result = expression.evalf(app_globals.DEC_PRECISION)
-			print(f"Expr (7: evalf):{' '*8}`{result}`")
+			if app_globals.DEBUG:
+				print(f"Expr (evalf):{' '*8}`{result}`")
 			if re.search(r'[a-zA-Z]', str(result)):
 				app_globals.LAST_RESULT = result
 				return str(result)
 			# Eval with Decimal
 			result: str = eval_with_decimal(result)
-			print(f"Expr (8: eval_dec):{' '*5}`{result}`")
+			if app_globals.DEBUG:
+				print(f"Expr (eval_dec):{' '*5}`{result}`")
 			# Simplify Decimal
 			result: str = simplify_decimal(result)
-			print(f"Expr (9: simplify_dec):{' '*1}`{result}`")
+			if app_globals.DEBUG:
+				print(f"Expr (simplify_dec):{' '*1}`{result}`")
 			# Return result
 			app_globals.LAST_RESULT = result
 			return result
@@ -312,11 +353,11 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 			#	#print(type(result))
 			#	#last_valid_result = simplify_float(float(result))
 	except InvalidOperation:
-		return "ERROR: Invalid number format"
+		raise InvalidOperation("Invalid number format")
 	except ZeroDivisionError:
-		return "ERROR: Division by zero"
-	except Exception as e:
-		return f"ERROR: {e}"
+		raise ZeroDivisionError("Division by zero")
+	#except Exception as e:
+	#	return f"ERROR: {e}"
 
 def format_expression(expression: str) -> str:
 	"""
@@ -378,11 +419,11 @@ def implied_exp(expression: str) -> str:
 	return expression.replace('^', '**')
 
 def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool = app_globals.SANITIZE) -> str:
-	expression = expression.rstrip('=')
-	#print(f"Expression (1): `{expression}`")
+	expression = expression.lstrip('=').rstrip('=')
 	if sanitize and not allowed_chars.match(expression):
-		#print("UNCLEAN")
-		raise ValueError
+		raise ValueError("Invalid characters in expression")
+	if app_globals.DEBUG:
+		print(f"Expr (sanitized):{' '*4}`{expression}`")
 	return expression
 
 def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) -> str:

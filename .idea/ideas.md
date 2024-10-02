@@ -36,7 +36,8 @@
 
 ## Issues
 
-<!--`x^(y3+12)` => `x^(3y + 12)`-->
-<!--`x^2(y3+12)` => `3x^2*(y + 4)`-->
-<!--`x^(2(y3+12))` => `x^(6y + 24)`-->
-`roll(1d6)` -> `roll_dice(1*d*6)` => `ERROR: name 'd' is not defined`
+<!--- `x^(y3+12)` => `x^(3y + 12)`
+- `x^2(y3+12)` => `3x^2*(y + 4)`
+- `x^(2(y3+12))` => `x^(6y + 24)`-->
+- `roll(1d6)` -> `roll_dice(1*d*6)` => `ERROR: name 'd' is not defined`
+- `root((x^3+3)-3,3)` => `(x^3)^(1/3)`, should be `x`
