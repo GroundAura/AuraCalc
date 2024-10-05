@@ -183,10 +183,10 @@ def main():
 		entry_input.bind(app_globals.DELETE_LEFT_KEY, lambda event: entry_input.delete(0, ctk.INSERT))
 	if keybind_enabled(app_globals.DELETE_RIGHT_KEY):
 		entry_input.bind(app_globals.DELETE_RIGHT_KEY, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
-	#if keybind_enabled(app_globals.DELETE_ELEMENT_LEFT_KEY):
-	#	entry_input.bind(app_globals.DELETE_ELEMENT_LEFT_KEY, lambda event: delete_element(result_display, "L"))
-	#if keybind_enabled(app_globals.DELETE_ELEMENT_RIGHT_KEY):
-	#	entry_input.bind(app_globals.DELETE_ELEMENT_RIGHT_KEY, lambda event: delete_element(result_display, "R"))
+	#if keybind_enabled(app_globals.DELETE_TERM_LEFT_KEY):
+	#	entry_input.bind(app_globals.DELETE_TERM_LEFT_KEY, lambda event: delete_term(result_display, "L"))
+	#if keybind_enabled(app_globals.DELETE_TERM_RIGHT_KEY):
+	#	entry_input.bind(app_globals.DELETE_TERM_RIGHT_KEY, lambda event: delete_term(result_display, "R"))
 	if keybind_enabled(app_globals.EVALUATE_KEY):
 		entry_input.bind(app_globals.EVALUATE_KEY, lambda event: evaluate_input(root, entry_input, result_display, live_mode=False))
 	#if keybind_enabled(app_globals.HELP_KEY):

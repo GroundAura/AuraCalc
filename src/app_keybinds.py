@@ -38,6 +38,36 @@ import app_globals
 
 ### FUNCTIONS ###
 
+#def delete_term(element, direction: str) -> None:
+#	"""
+#	Deletes a single term in the given direction.
+#
+#	Args:
+#		element: The element to delete a term in.
+#		direction (str): The direction to delete a term in.
+#	"""
+#	if direction.lower() in ("left", "l"):
+#		...
+#	elif direction.lower in ("right", "r"):
+#		...
+#	else:
+#		raise ValueError(f"Invalid direction: {direction}. Must be 'left', 'l', 'right', or 'r'.")
+#	...
+
+def keybind_enabled(keybind: str) -> bool:
+	"""
+	Checks if the keybind is enabled.
+
+	Args:
+		keybind (str): The keybind to check.
+
+	Returns:
+		bool: Whether the keybind is enabled.
+	"""
+	if keybind.lower().strip() in ("", "<>", "none", "<none>"):
+		return False
+	return True
+
 #def valid_keybind(keybind: str) -> bool:
 #	"""
 #	Validates that the string is a valid Tkinter keybind.
@@ -60,20 +90,6 @@ import app_globals
 #		return True
 #	else:
 #		raise Exception(f"Invalid keybind: `{keybind}`")
-
-def keybind_enabled(keybind: str) -> bool:
-	"""
-	Checks if the keybind is enabled.
-
-	Args:
-		keybind (str): The keybind to check.
-
-	Returns:
-		bool: Whether the keybind is enabled.
-	"""
-	if keybind.lower().strip() in ("", "<>", "none", "<none>"):
-		return False
-	return True
 
 
 

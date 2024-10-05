@@ -59,20 +59,6 @@ def copy_text(window: ctk.CTk, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	#clipboard = window.clipboard_get()
 	window.update()
 
-#def delete_element(element, direction: str) -> None:
-#	"""
-#	Deletes an element in the given direction.
-#
-#	Args:
-#		element: The element to delete an element from.
-#		direction (str): The direction to delete an element in.
-#	"""
-#	if direction.lower() in ("left", "l"):
-#		...
-#	elif direction.lower in ("right", "r"):
-#		...
-#	...
-
 def display_result(output_element, message: str) -> None:
 	"""
 	Displays the result in the output element.
