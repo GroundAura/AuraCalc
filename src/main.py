@@ -167,7 +167,7 @@ def main():
 	# Advanced View Element (CTkButton)
 	advanced_button = ctk.CTkButton(layer, text="Expand", command=lambda: toggle_advanced(root, advanced_frame, advanced_button), width=30)
 	advanced_button.grid(row=4, column=4, columnspan=1, sticky="NEW", padx=x_padding, pady=y_padding)
-	if app_globals.START_EXPANDED:
+	if app_globals.START_ADVANCED:
 		toggle_advanced(advanced_frame, advanced_button)
 
 
@@ -179,14 +179,14 @@ def main():
 		root.bind(app_globals.ADVANCED_KEY, lambda event: toggle_advanced(root, advanced_frame, advanced_button))
 	if keybind_enabled(app_globals.CLEAR_KEY):
 		root.bind(app_globals.CLEAR_KEY, lambda event: clear_io(entry_input, result_display))
-	if keybind_enabled(app_globals.DELETE_ALL_LEFT_KEY):
-		entry_input.bind(app_globals.DELETE_ALL_LEFT_KEY, lambda event: entry_input.delete(0, ctk.INSERT))
-	if keybind_enabled(app_globals.DELETE_ALL_RIGHT_KEY):
-		entry_input.bind(app_globals.DELETE_ALL_RIGHT_KEY, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
-	#if keybind_enabled(app_globals.DELETE_WORD_LEFT_KEY):
-	#	pass
-	#if keybind_enabled(app_globals.DELETE_WORD_RIGHT_KEY):
-	#	pass
+	if keybind_enabled(app_globals.DELETE_LEFT_KEY):
+		entry_input.bind(app_globals.DELETE_LEFT_KEY, lambda event: entry_input.delete(0, ctk.INSERT))
+	if keybind_enabled(app_globals.DELETE_RIGHT_KEY):
+		entry_input.bind(app_globals.DELETE_RIGHT_KEY, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
+	#if keybind_enabled(app_globals.DELETE_ELEMENT_LEFT_KEY):
+	#	entry_input.bind(app_globals.DELETE_ELEMENT_LEFT_KEY, lambda event: delete_element(result_display, "L"))
+	#if keybind_enabled(app_globals.DELETE_ELEMENT_RIGHT_KEY):
+	#	entry_input.bind(app_globals.DELETE_ELEMENT_RIGHT_KEY, lambda event: delete_element(result_display, "R"))
 	if keybind_enabled(app_globals.EVALUATE_KEY):
 		entry_input.bind(app_globals.EVALUATE_KEY, lambda event: evaluate_input(root, entry_input, result_display, live_mode=False))
 	#if keybind_enabled(app_globals.HELP_KEY):

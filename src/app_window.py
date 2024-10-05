@@ -14,14 +14,6 @@ from app_debug import print_debug
 
 ### FUNCTIONS ###
 
-#def center_window(window: ctk.CTk) -> None:
-#	"""
-#	Centers the window on the screen.
-#	"""
-#	app_globals.X_POS = (window.winfo_screenwidth() // 2) - (app_globals.WIDTH // 2)
-#	app_globals.Y_POS = (window.winfo_screenheight() // 2) - (app_globals.HEIGHT // 2)
-#	window.geometry(f"{app_globals.WIDTH}x{app_globals.HEIGHT}+{app_globals.X_POS}+{app_globals.Y_POS}")
-
 def clear_io(input_element, output_element) -> None:
 	"""
 	Clears the input and output elements.
@@ -66,6 +58,20 @@ def copy_text(window: ctk.CTk, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	window.clipboard_append(element.get())
 	#clipboard = window.clipboard_get()
 	window.update()
+
+#def delete_element(element, direction: str) -> None:
+#	"""
+#	Deletes an element in the given direction.
+#
+#	Args:
+#		element: The element to delete an element from.
+#		direction (str): The direction to delete an element in.
+#	"""
+#	if direction.lower() in ("left", "l"):
+#		...
+#	elif direction.lower in ("right", "r"):
+#		...
+#	...
 
 def display_result(output_element, message: str) -> None:
 	"""
