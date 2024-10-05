@@ -16,6 +16,7 @@ from sympy import simplify, sympify
 # internal
 #from app_globals import *
 import app_globals
+from app_debug import print_debug
 from app_random import roll_dice
 
 
@@ -205,7 +206,7 @@ OPERATORS = {
 	'**': lambda x, y: x ** y
 }
 KNOWN_FUNCTIONS = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
-#print(KNOWN_FUNCTIONS)
+#print_debug(KNOWN_FUNCTIONS)
 getcontext().prec = app_globals.DEC_PRECISION
 
 
@@ -221,14 +222,14 @@ def eval_custom_functions(expression: str):
 		function_name = match.group(1).strip('(')
 		argument_str = match.group(2)
 		args = [arg.strip() for arg in argument_str.split(',')]
-		print(f"Function: {function_name}, Arguments: {args}")
+		print_debug(f"Function: {function_name}, Arguments: {args}")
 		#if function_name in BUILTIN_FUNCTIONS:
 		#	return f"{function_name}({', '.join(args)})"
 		if function_name in BUILTIN_FUNCTIONS:
 			return f"{BUILTIN_FUNCTIONS[function_name]['func']}({', '.join(args)})"
 		elif function_name in CUSTOM_FUNCTIONS:
 			function = CUSTOM_FUNCTIONS[function_name]
-			print(function)
+			print_debug(function)
 			#if function['args'] != len(args):
 			#	if function['args'] == 1:
 			#		raise ValueError(f"{function_name}() expects 1 argument.")
@@ -237,7 +238,7 @@ def eval_custom_functions(expression: str):
 			if function['returns'] == 1:
 				return eval(f"{function['func']}({', '.join(args)})")
 			elif function['returns'] == 2:
-				print(f"{function['func']}({', '.join(args)})")
+				print_debug(f"{function['func']}({', '.join(args)})")
 				result, _ = eval(f"{function['func']}({', '.join(args)})")
 				return result
 			else:
@@ -276,8 +277,7 @@ def eval_with_decimal(expression: any) -> str:
 def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_SIMPLIFY) -> str:
 	#global LAST_RESULT
 	#continue_eval: bool = True
-	if app_globals.DEBUG:
-		print("Evaluating expression...")
+	print_debug("Evaluating expression...")
 	try:
 		# Check for empty expression
 		#if not expression:
@@ -285,7 +285,7 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 		# Sanitize input
 		#try:
 		#	expression: str = sanitize_input(expression)
-		#	print(f"Expr (1: sanitized):{' '*4}`{expression}`")
+		#	print_debug(f"Expr (1: sanitized):{' '*4}`{expression}`")
 		#except ValueError:
 		#	#return "ERROR: Invalid characters in expression"
 		#	#return LAST_RESULT
@@ -295,51 +295,51 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 		# Handle implied exponentation
 		expression = implied_exp(expression)
 		if app_globals.DEBUG:
-			print(f"Expr (implied_exp):{' '*2}`{expression}`")
+			print_debug(f"Expr (implied_exp):{' '*2}`{expression}`")
 		# Handle implied multiplication
 		expression = implied_mult(expression)
 		if app_globals.DEBUG:
-			print(f"Expr (implied_mult):{' '*1}`{expression}`")
+			print_debug(f"Expr (implied_mult):{' '*1}`{expression}`")
 		# Handle custom functions
 		try:
 			expression: str = eval_custom_functions(expression)
 			if app_globals.DEBUG:
-				print(f"Expr (eval_func):{' '*4}`{expression}`")
+				print_debug(f"Expr (eval_func):{' '*4}`{expression}`")
 		except ValueError as e:
 			return f"{e}"
 		#except Exception:
 		#	raise Exception
 		# Simpify
 		expression = sympify(expression)
-		print(f"Expr (sympify):{' '*6}`{expression}`")
+		print_debug(f"Expr (sympify):{' '*6}`{expression}`")
 		if str(expression) == 'zoo':
 			return "ERROR: Division by zero"
 		# Simplify
 		expression = simplify(expression)
 		if app_globals.DEBUG:
-			print(f"Expr (simplify):{' '*5}`{expression}`")
+			print_debug(f"Expr (simplify):{' '*5}`{expression}`")
 		if dont_evaluate:
 			expression: str = format_expression(str(expression))
 			if app_globals.DEBUG:
-				print(f"Expr (format):{' '*7}`{expression}`")
+				print_debug(f"Expr (format):{' '*7}`{expression}`")
 			app_globals.LAST_RESULT = expression
 			return expression
 		else:
 			# Evalf
 			result = expression.evalf(app_globals.DEC_PRECISION)
 			if app_globals.DEBUG:
-				print(f"Expr (evalf):{' '*8}`{result}`")
+				print_debug(f"Expr (evalf):{' '*8}`{result}`")
 			if re.search(r'[a-zA-Z]', str(result)):
 				app_globals.LAST_RESULT = result
 				return str(result)
 			# Eval with Decimal
 			result: str = eval_with_decimal(result)
 			if app_globals.DEBUG:
-				print(f"Expr (eval_dec):{' '*5}`{result}`")
+				print_debug(f"Expr (eval_dec):{' '*5}`{result}`")
 			# Simplify Decimal
 			result: str = simplify_decimal(result)
 			if app_globals.DEBUG:
-				print(f"Expr (simplify_dec):{' '*1}`{result}`")
+				print_debug(f"Expr (simplify_dec):{' '*1}`{result}`")
 			# Return result
 			app_globals.LAST_RESULT = result
 			return result
@@ -349,8 +349,8 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 			#	#result = eval(expression, {'__builtins__': None}, {"Decimal": Decimal})
 			#	#result = simplify_float(float(expression))
 			#	#result = expression
-			#	#print(result)
-			#	#print(type(result))
+			#	#print_debug(result)
+			#	#print_debug(type(result))
 			#	#last_valid_result = simplify_float(float(result))
 	except InvalidOperation:
 		raise InvalidOperation("Invalid number format")
@@ -410,7 +410,7 @@ def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTION
 		r'|(?<=[a-zA-Z])(?=\d)'                       # Case 8: variable followed by a number, e.g., x2 -> x*2
 		r'|(?<=[a-zA-Z])(?=\()'                       # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
 	)
-	#print(pattern)
+	#print_debug(pattern)
 	modified_expression = re.sub(pattern, '*', expression)
 	modified_expression = re.sub(r'(' + functions_pattern + r')\*\(', r'\1(', modified_expression) # Remove '*' between functions and '('
 	return modified_expression
@@ -423,7 +423,7 @@ def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize
 	if sanitize and not allowed_chars.match(expression):
 		raise ValueError("Invalid characters in expression")
 	if app_globals.DEBUG:
-		print(f"Expr (sanitized):{' '*4}`{expression}`")
+		print_debug(f"Expr (sanitized):{' '*4}`{expression}`")
 	return expression
 
 def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) -> str:
@@ -432,7 +432,7 @@ def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) 
 	"""
 	if not isinstance(value, Decimal):
 		value = Decimal(str(value))
-	#print(value)
+	#print_debug(value)
 	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
 	rounded_value = value.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
 	if rounded_value.is_zero():

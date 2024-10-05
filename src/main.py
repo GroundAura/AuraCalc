@@ -14,23 +14,45 @@ import customtkinter as ctk
 # internal
 #from app_globals import *
 import app_globals
+from app_debug import print_debug
 from app_evaluate import evaluate_expression, sanitize_input
-from app_window import clear_io, close_window, display_result, expand_options, focus_element, pin_window, update_window
+from app_keybinds import keybind_enabled
+from app_window import clear_io, close_window, display_result, toggle_advanced, focus_element, pin_window, update_window
 
 
 
 ### FUNCTIONS ###
 
+def delayed_display(window: ctk.CTk, output_element, message: str) -> None:
+	"""
+	Displays the result in the the output element after a delay.
+
+	Args:
+		window (ctk.CTk): The window to display the result in.
+		output_element: The element to display the result in.
+		message (str): The message to display in the output element.
+	"""
+	#if app_globals.TIMEOUT_ID is not None:
+	#	window.after_cancel(app_globals.TIMEOUT_ID)
+	#	app_globals.TIMEOUT_ID = None
+	app_globals.TIMEOUT_ID = window.after(app_globals.TIMEOUT_DURATION, lambda: display_result(output_element, message))
+	display_result(output_element, app_globals.LAST_RESULT)
+
 def evaluate_input(window, input_element, output_element, live_mode: bool = False) -> None:
 	"""
-	Evaluates or simplifies the expression in the `entry_input` element and displays the result in the `result_display` element.
+	Evaluates or simplifies the expression in the input element and displays the result in the output element.
+
+	Args:
+		window (ctk.CTk): The window to display the result in.
+		input_element: The element to get the expression to evaluate from.
+		output_element: The element to display the result in.
+		live_mode (bool, optional): Whether to update the result in real-time. Defaults to `False`.
 	"""
 	expression = input_element.get()
 	if app_globals.TIMEOUT_ID is not None:
 		window.after_cancel(app_globals.TIMEOUT_ID)
 		app_globals.TIMEOUT_ID = None
-	if app_globals.DEBUG:
-		print(f"Expr (initial):{' '*6}`{expression}`")
+	print_debug(f"Expr (initial):{' '*6}`{expression}`")
 	if not expression:
 		display_result(output_element, app_globals.LAST_RESULT)
 		return
@@ -41,7 +63,7 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 		return
 	except Exception as e:
 		if live_mode and app_globals.PATIENCE > 0 and expression[-1] in app_globals.WAIT_CHARS:
-			delayed_display(window, output_element, f"ERROR: Incomplete expression")
+			delayed_display(window, output_element, "ERROR: Incomplete expression")
 			return
 		elif live_mode and app_globals.PATIENCE > 1:
 			delayed_display(window, output_element, f"ERROR: {e}")
@@ -57,13 +79,6 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 	#		display_result(output_element, f"ERROR: {e}")
 	#		return
 
-def delayed_display(window, output_element, message: str) -> None:
-	#if app_globals.TIMEOUT_ID is not None:
-	#	window.after_cancel(app_globals.TIMEOUT_ID)
-	#	app_globals.TIMEOUT_ID = None
-	app_globals.TIMEOUT_ID = window.after(app_globals.TIMEOUT_DURATION, lambda: display_result(output_element, message))
-	display_result(output_element, app_globals.LAST_RESULT)
-
 
 
 ### MAIN ###
@@ -72,12 +87,13 @@ def main():
 	### WINDOW SETUP ###
 
 	# Initialize window
-	print("Starting application...")
+	print_debug(f"{app_globals.NAME} v{app_globals.VERSION} by {app_globals.AUTHOR}")
+	print_debug("Initializing...")
 	root = ctk.CTk()
 
 	# Configure window
-	root.title("AuraCalc")
-	update_window(root, update_pos=True)
+	root.title(app_globals.NAME)
+	update_window(root, def_pos=True)
 
 	# Theme
 	root.iconbitmap(app_globals.ICON_FILE)
@@ -107,9 +123,9 @@ def main():
 	# Basic calculator frame
 	basic_frame = ctk.CTkFrame(root)
 	basic_frame.grid(row=0, column=0, padx=0, pady=0, sticky="NSEW")
-	#print(basic_frame.winfo_pointerxy())
-	#print(basic_frame.winfo_manager())
-	#print(basic_frame.winfo_screen())
+	#print_debug(basic_frame.winfo_pointerxy())
+	#print_debug(basic_frame.winfo_manager())
+	#print_debug(basic_frame.winfo_screen())
 	basic_frame.grid_columnconfigure(0, weight=1)
 	basic_frame.grid_columnconfigure(1, weight=1)
 	basic_frame.grid_columnconfigure(2, weight=1)
@@ -149,37 +165,51 @@ def main():
 	clear_button = ctk.CTkButton(layer, text="Clear", command=lambda: clear_io(entry_input, result_display), width=30)
 	clear_button.grid(row=4, column=1, columnspan=3, sticky="NEW", padx=x_padding, pady=y_padding)
 
-	# Expand Options Element (CTkButton)
-	expand_button = ctk.CTkButton(layer, text="Expand", command=lambda: expand_options(root, advanced_frame, expand_button), width=30)
-	expand_button.grid(row=4, column=4, columnspan=1, sticky="NEW", padx=x_padding, pady=y_padding)
+	# Advanced View Element (CTkButton)
+	advanced_button = ctk.CTkButton(layer, text="Expand", command=lambda: toggle_advanced(root, advanced_frame, advanced_button), width=30)
+	advanced_button.grid(row=4, column=4, columnspan=1, sticky="NEW", padx=x_padding, pady=y_padding)
 	if app_globals.START_EXPANDED:
-		expand_options(advanced_frame, expand_button)
+		toggle_advanced(advanced_frame, advanced_button)
 
 
 
 	### APP FUNCTIONALITY ###
 
 	# Focus
-	#root.focus_force()
+	if app_globals.FORCE_FOCUS:
+		print_debug("Forcing window focus")
+		root.focus_force()
 	root.after(100, lambda: focus_element(entry_input))
-	#entry.focus_set()
 
 	# Keybinds
-	root.bind("<Escape>", lambda event: close_window(root))
+	if keybind_enabled(app_globals.ADVANCED_KEY):
+		root.bind(app_globals.ADVANCED_KEY, lambda event: toggle_advanced(root, advanced_frame, advanced_button))
+	if keybind_enabled(app_globals.CLEAR_KEY):
+		root.bind(app_globals.CLEAR_KEY, lambda event: clear_io(entry_input, result_display))
+	if keybind_enabled(app_globals.DELETE_ALL_LEFT_KEY):
+		entry_input.bind(app_globals.DELETE_ALL_LEFT_KEY, lambda event: entry_input.delete(0, ctk.INSERT))
+	if keybind_enabled(app_globals.DELETE_ALL_RIGHT_KEY):
+		entry_input.bind(app_globals.DELETE_ALL_RIGHT_KEY, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
+	#if keybind_enabled(app_globals.DELETE_WORD_LEFT_KEY):
+	#	pass
+	#if keybind_enabled(app_globals.DELETE_WORD_RIGHT_KEY):
+	#	pass
+	if keybind_enabled(app_globals.EVALUATE_KEY):
+		entry_input.bind(app_globals.EVALUATE_KEY, lambda event: evaluate_input(root, entry_input, result_display, live_mode=False))
+	#if keybind_enabled(app_globals.HELP_KEY):
+	#	root.bind(app_globals.HELP_KEY, lambda event: toggle_help(root, help_frame, help_button))
+	#if keybind_enabled(app_globals.OPTIONS_KEY):
+	#	root.bind(app_globals.OPTIONS_KEY, lambda event: toggle_options(root, options_frame, options_button))
+	if keybind_enabled(app_globals.QUIT_KEY):
+		root.bind(app_globals.QUIT_KEY, lambda event: close_window(root))
 	if app_globals.LIVE_EVAL:
 		entry_input.bind("<KeyRelease>", lambda event: evaluate_input(root, entry_input, result_display, live_mode=True))
 
 	# Close app
 	root.protocol("WM_DELETE_WINDOW", lambda: close_window(root))
 
-	# Set saved statuses
-	#pin_window(root, pin_button)
-	#if app_globals.PINNED:
-	#	root.after(1000, lambda: pin_window(root, pin_button))
-	#if app_globals.EXPANDED:
-	#	root.after(1000, lambda: expand_options(expand_button))
-
-	# Main loop
+	# Start main loop
+	print_debug("Initialization complete!")
 	root.mainloop()
 
 if __name__ == "__main__":

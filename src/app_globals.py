@@ -15,13 +15,23 @@ from app_path import resource_path
 
 ### GLOBAL VARIABLES ###
 
+# Metadata
+NAME: str = "AuraCalc"
+VERSION: str = "0.3.0-alpha"
+AUTHOR: str = "GroundAura"
+
+
+
 # Files
 HISTORY_FILE: Path = resource_path("resources/history.json")
-#print(HISTORY_FILE)
+#print(f"HISTORY FILE: {HISTORY_FILE}")
 ICON_FILE: Path = resource_path("resources/icon.ico")
-#print(ICON_FILE)
+#print(f"ICON FILE: {ICON_FILE}")
+LOG_FILE: Path = resource_path("resources/debug.log")
+#print(f"LOG FILE: {LOG_FILE}")
 SETTINGS_FILE: Path = resource_path("resources/AuraCalc.ini")
-#print(SETTINGS_FILE)
+#print(f"SETTINGS FILE: {SETTINGS_FILE}")
+
 
 
 # Settings
@@ -37,15 +47,10 @@ ADV_DEF_WIDTH: int = settings["WIN_ADV"]["iDefaultWidth"]
 ADV_MIN_HEIGHT: int = settings["WIN_ADV"]["iMinHeight"]
 ADV_MIN_WIDTH: int = settings["WIN_ADV"]["iMinWidth"]
 
-#if settings["WIN_POS"]["bCenterWindow"] == True:
-	#START_POS: str = "center"
-#else:
-	#START_POS: tuple[int, int] = tuple(settings["WIN_POS"]["iXOffset"], settings["WIN_POS"]["iYOffset"])
 DEF_CENTERED: bool = settings["WIN_POS"]["bCenterWindow"]
 DEF_X_POS: int = settings["WIN_POS"]["iXOffset"]
 DEF_Y_POS: int = settings["WIN_POS"]["iYOffset"]
 
-#FORCE_FOCUS: bool = True
 START_EXPANDED: bool = settings["WIN_FLAGS"]["bStartExpanded"]
 START_PINNED: bool = settings["WIN_FLAGS"]["bStartPinned"]
 
@@ -56,7 +61,21 @@ if DEC_DISPLAY > DEC_PRECISION:
 ONLY_SIMPLIFY: bool = settings["CALCULATION"]["bOnlySimplify"]
 LIVE_EVAL: bool = settings["CALCULATION"]["bLiveEval"]
 
+ADVANCED_KEY: str = settings["KEYBINDS"]["sAdvancedKey"]
+CLEAR_KEY: str = settings["KEYBINDS"]["sClearKey"]
+DELETE_ALL_LEFT_KEY: str = settings["KEYBINDS"]["sDeleteAllLKey"]
+DELETE_ALL_RIGHT_KEY: str = settings["KEYBINDS"]["sDeleteAllRKey"]
+DELETE_WORD_LEFT_KEY: str = settings["KEYBINDS"]["sDeleteWordLKey"]
+DELETE_WORD_RIGHT_KEY: str = settings["KEYBINDS"]["sDeleteWordRKey"]
+EVALUATE_KEY: str = settings["KEYBINDS"]["sEvaluateKey"]
+HELP_KEY: str = settings["KEYBINDS"]["sHelpKey"]
+OPTIONS_KEY: str = settings["KEYBINDS"]["sOptionsKey"]
+REDO_KEY: str = settings["KEYBINDS"]["sRedoKey"]
+UNDO_KEY: str = settings["KEYBINDS"]["sUndoKey"]
+QUIT_KEY: str = settings["KEYBINDS"]["sQuitKey"]
+
 DEBUG: bool = settings["DEBUG"]["bDebugMode"]
+FORCE_FOCUS: bool = settings["DEBUG"]["bForceFocus"]
 SANITIZE: bool = settings["DEBUG"]["bSanitizeInput"]
 
 DEF_EXPRESSION: str = ""
@@ -64,14 +83,6 @@ DEF_RESULT: str = "0"
 
 if DEBUG:
 	print(f"Settings: {settings}")
-
-
-# Window Size and Position
-WIDTH: int = 250
-HEIGHT: int = 110
-X_POS: int = 100
-Y_POS: int = 100
-
 
 
 
