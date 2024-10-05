@@ -90,12 +90,10 @@ def main():
 	print_debug(f"{app_globals.NAME} v{app_globals.VERSION} by {app_globals.AUTHOR}")
 	print_debug("Initializing...")
 	root = ctk.CTk()
-
-	# Configure window
 	root.title(app_globals.NAME)
 	update_window(root, def_pos=True)
 
-	# Theme
+	# Configure theme
 	root.iconbitmap(app_globals.ICON_FILE)
 	ctk.set_appearance_mode("dark")
 	ctk.set_default_color_theme("green")
@@ -116,6 +114,7 @@ def main():
 	y_padding = 3
 	#y_pad_try = window_height / 2 - 25
 	#y_padding = y_pad_try if y_pad_try > 5 and window_height > 100 else 5
+
 
 
 	### FRAME SETUP ###
@@ -173,13 +172,7 @@ def main():
 
 
 
-	### APP FUNCTIONALITY ###
-
-	# Focus
-	if app_globals.FORCE_FOCUS:
-		print_debug("Forcing window focus")
-		root.focus_force()
-	root.after(100, lambda: focus_element(entry_input))
+	### EVENT HANDLING ###
 
 	# Keybinds
 	if keybind_enabled(app_globals.ADVANCED_KEY):
@@ -202,11 +195,23 @@ def main():
 	#	root.bind(app_globals.OPTIONS_KEY, lambda event: toggle_options(root, options_frame, options_button))
 	if keybind_enabled(app_globals.QUIT_KEY):
 		root.bind(app_globals.QUIT_KEY, lambda event: close_window(root))
+
+	# Key release
 	if app_globals.LIVE_EVAL:
 		entry_input.bind("<KeyRelease>", lambda event: evaluate_input(root, entry_input, result_display, live_mode=True))
 
-	# Close app
+	# Window close
 	root.protocol("WM_DELETE_WINDOW", lambda: close_window(root))
+
+
+
+	### FINAL INITIALIZATION ###
+
+	# Set focus
+	if app_globals.FORCE_FOCUS:
+		print_debug("Forcing window focus")
+		root.focus_force()
+	root.after(100, lambda: focus_element(entry_input))
 
 	# Start main loop
 	print_debug("Initialization complete!")
