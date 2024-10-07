@@ -54,7 +54,7 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 		app_globals.TIMEOUT_ID = None
 	print_debug(f"Expr (initial):{' '*6}`{expression}`")
 	if not expression:
-		display_result(output_element, app_globals.LAST_RESULT)
+		display_result(output_element, app_globals.DEF_RESULT)
 		return
 	try:
 		expression = sanitize_input(expression)
