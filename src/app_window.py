@@ -22,12 +22,12 @@ def clear_io(input_element, output_element) -> None:
 		input_element: The element to clear the input from.
 		output_element: The element to clear the output from.
 	"""
-	input_element.delete(0, ctk.END)
-	input_element.insert(0, app_globals.DEF_EXPRESSION)
+	input_element.delete("0", "end")
+	input_element.insert("0", app_globals.DEF_EXPRESSION)
 	focus_element(input_element)
 	output_element.configure(state="normal")
-	output_element.delete(1.0, ctk.END)
-	output_element.insert(ctk.END, app_globals.DEF_RESULT)
+	output_element.delete("1.0", "end")
+	output_element.insert("end", app_globals.DEF_RESULT)
 	output_element.configure(state="disabled")
 
 def close_window(window: ctk.CTk) -> None:
@@ -52,7 +52,7 @@ def copy_text(window: ctk.CTk, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
 	window.clipboard_clear()
 	if isinstance(element, ctk.CTkEntry):
-		element.get(0, ctk.END)
+		element.get(0, "end")
 	elif isinstance(element, ctk.CTkText):
 		element.get("1.0", "end-1c")
 	window.clipboard_append(element.get())
@@ -68,8 +68,8 @@ def display_result(output_element, message: str) -> None:
 		message (str): The message to display in the output element.
 	"""
 	output_element.configure(state="normal")
-	output_element.delete(1.0, ctk.END)
-	output_element.insert(ctk.END, f"{message}")
+	output_element.delete("1.0", "end")
+	output_element.insert("end", f"{message}")
 	output_element.configure(state="disabled")
 	print_debug(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
 
@@ -108,9 +108,9 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
 	element.focus_set()
 	if isinstance(element, ctk.CTkEntry):
-		element.select_range(0, ctk.END)
+		element.select_range("0", "end")
 	elif isinstance(element, ctk.CTkText):
-		element.tag_add("sel", "1.0", "end")
+		element.tag_add("sel", "1.0", "end-1c")
 
 def pin_window(window: ctk.CTk, button: ctk.CTkButton) -> None:
 	"""
