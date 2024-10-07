@@ -275,89 +275,54 @@ def eval_with_decimal(expression: any) -> str:
 		return Decimal(str(expression))
 
 def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_SIMPLIFY) -> str:
-	#global LAST_RESULT
 	#continue_eval: bool = True
 	print_debug("Evaluating expression...")
 	try:
-		# Check for empty expression
-		#if not expression:
-		#	return app_globals.DEF_RESULT
-		# Sanitize input
-		#try:
-		#	expression: str = sanitize_input(expression)
-		#	print_debug(f"Expr (1: sanitized):{' '*4}`{expression}`")
-		#except ValueError:
-		#	#return "ERROR: Invalid characters in expression"
-		#	#return LAST_RESULT
-		#	raise ValueError
-		#except Exception:
-		#	raise Exception
+		# Remove leading zeros
+		expression = strip_leading_zeros(expression)
+		print_debug(f"Expr (strip_zeros):{' '*2}`{expression}`")
 		# Handle implied exponentation
 		expression = implied_exp(expression)
-		if app_globals.DEBUG:
-			print_debug(f"Expr (implied_exp):{' '*2}`{expression}`")
+		print_debug(f"Expr (implied_exp):{' '*2}`{expression}`")
 		# Handle implied multiplication
 		expression = implied_mult(expression)
-		if app_globals.DEBUG:
-			print_debug(f"Expr (implied_mult):{' '*1}`{expression}`")
+		print_debug(f"Expr (implied_mult):{' '*1}`{expression}`")
 		# Handle custom functions
-		try:
-			expression: str = eval_custom_functions(expression)
-			if app_globals.DEBUG:
-				print_debug(f"Expr (eval_func):{' '*4}`{expression}`")
-		except ValueError as e:
-			return f"{e}"
-		#except Exception:
-		#	raise Exception
+		expression: str = eval_custom_functions(expression)
+		print_debug(f"Expr (eval_func):{' '*4}`{expression}`")
 		# Simpify
 		expression = sympify(expression)
 		print_debug(f"Expr (sympify):{' '*6}`{expression}`")
 		if str(expression) == 'zoo':
-			return "ERROR: Division by zero"
+			raise ZeroDivisionError("Division by zero")
 		# Simplify
 		expression = simplify(expression)
-		if app_globals.DEBUG:
-			print_debug(f"Expr (simplify):{' '*5}`{expression}`")
+		print_debug(f"Expr (simplify):{' '*5}`{expression}`")
 		if dont_evaluate:
 			expression: str = format_expression(str(expression))
-			if app_globals.DEBUG:
-				print_debug(f"Expr (format):{' '*7}`{expression}`")
+			print_debug(f"Expr (format):{' '*7}`{expression}`")
 			app_globals.LAST_RESULT = expression
 			return expression
 		else:
-			# Evalf
+			# Eval with Float
 			result = expression.evalf(app_globals.DEC_PRECISION)
-			if app_globals.DEBUG:
-				print_debug(f"Expr (evalf):{' '*8}`{result}`")
+			print_debug(f"Expr (evalf):{' '*8}`{result}`")
 			if re.search(r'[a-zA-Z]', str(result)):
-				app_globals.LAST_RESULT = result
+				app_globals.LAST_RESULT = str(result)
 				return str(result)
 			# Eval with Decimal
 			result: str = eval_with_decimal(result)
-			if app_globals.DEBUG:
-				print_debug(f"Expr (eval_dec):{' '*5}`{result}`")
+			print_debug(f"Expr (eval_dec):{' '*5}`{result}`")
 			# Simplify Decimal
 			result: str = simplify_decimal(result)
-			if app_globals.DEBUG:
-				print_debug(f"Expr (simplify_dec):{' '*1}`{result}`")
+			print_debug(f"Expr (simplify_dec):{' '*1}`{result}`")
 			# Return result
 			app_globals.LAST_RESULT = result
 			return result
-			#try:
-			#	pass
-			#	#expression = expression.replace('^', '**')
-			#	#result = eval(expression, {'__builtins__': None}, {"Decimal": Decimal})
-			#	#result = simplify_float(float(expression))
-			#	#result = expression
-			#	#print_debug(result)
-			#	#print_debug(type(result))
-			#	#last_valid_result = simplify_float(float(result))
 	except InvalidOperation:
 		raise InvalidOperation("Invalid number format")
 	except ZeroDivisionError:
 		raise ZeroDivisionError("Division by zero")
-	#except Exception as e:
-	#	return f"ERROR: {e}"
 
 def format_expression(expression: str) -> str:
 	"""
@@ -422,8 +387,7 @@ def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize
 	expression = expression.lstrip('=').rstrip('=')
 	if sanitize and not allowed_chars.match(expression):
 		raise ValueError("Invalid characters in expression")
-	if app_globals.DEBUG:
-		print_debug(f"Expr (sanitized):{' '*4}`{expression}`")
+	print_debug(f"Expr (sanitized):{' '*4}`{expression}`")
 	return expression
 
 def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) -> str:
@@ -463,6 +427,13 @@ def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) 
 #			return Decimal(float_value)
 #	else:
 #		raise ValueError("Input must be a float to be simplified.")
+
+#def split_terms(expression: str) -> list[str]:
+#	terms = expression.split()
+#	return terms
+
+def strip_leading_zeros(expression: str) -> str:
+	return re.sub(r'\b0+(\d+)', r'\1', expression)
 
 
 

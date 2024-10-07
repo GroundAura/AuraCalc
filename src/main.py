@@ -61,6 +61,9 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 		result = evaluate_expression(expression)
 		display_result(output_element, result)
 		return
+	except ZeroDivisionError:
+		display_result(output_element, "Undefined (division by zero)")
+		return
 	except Exception as e:
 		if live_mode and app_globals.PATIENCE > 0 and expression[-1] in app_globals.WAIT_CHARS:
 			delayed_display(window, output_element, "ERROR: Incomplete expression")
