@@ -17,6 +17,16 @@
 - [ ] #(#) to #*#
 - [x] #^# to #**#
 - [ ] remove newline character from result box, related to textbox height
+- [ ] date calculation
+- [ ] unit conversion
+
+## Modes
+
+- [ ] Angle mode (degrees/degrees:minutes:seconds/radians/gradients)
+- [ ] Scientific notation or not
+- [ ] Exact or decimal approximation
+- [ ] Approximate constants (pi, e, etc.)
+- [ ] which var to isolate
 
 ## Error Handling
 
