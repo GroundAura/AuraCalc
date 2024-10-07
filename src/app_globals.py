@@ -66,6 +66,7 @@ if DEC_DISPLAY > DEC_PRECISION:
 	DEC_DISPLAY = DEC_PRECISION
 ONLY_SIMPLIFY: bool = settings["CALCULATION"]["bOnlySimplify"]
 LIVE_EVAL: bool = settings["CALCULATION"]["bLiveEval"]
+TIMEOUT_DURATION: int = settings["CALCULATION"]["iTimeoutDelay"]
 
 ADVANCED_KEY: str = settings["KEYBINDS"]["sAdvancedKey"]
 CLEAR_KEY: str = settings["KEYBINDS"]["sClearKey"]
@@ -119,12 +120,12 @@ HISTORY: dict[str, any] = {
 	"dimensions": (CUR_WIDTH, CUR_HEIGHT),
 	"position": (CUR_X_POS, CUR_Y_POS)
 }
+TIMEOUT_ID: any = None
+
 
 
 # Timeout
 PATIENCE: int = 1
-TIMEOUT_DURATION: int = 1000
-TIMEOUT_ID: any = None
 #WAIT_CHARS: list[str] = ['+','-','*','/','^','(',' ']
 WAIT_CHARS: str = r'+-*/^%.([{_, '
 
