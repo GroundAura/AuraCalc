@@ -2,19 +2,19 @@
 
 ## Features
 
-- [ ] Exand window with expand button
-- [ ] change result element so it can't be typed in
-- [ ] add option to only evaluate when pressing enter or result button
+- [x] Exand window with expand button
+- [x] change result element so it can't be typed in
+- [x] add option to only evaluate when pressing enter or result button
 - [ ] enter to move (expression,result) to memory and clear i/o
 - [ ] up/down arrow keys to move through previous i/o
 - [ ] viewable saved i/o
 - [ ] save i/o history to file
-- [ ] button to clear i/o history
+- [x] button to clear i/o history
 - [ ] random generation (whole or decimal)
-- [ ] dice rolling (ex 2d6-3), `roll(23d6-2)`
+- [-] dice rolling (ex 2d6-3), `roll(23d6-2)`
 - [ ] various math functions
 - [ ] long division (`ldiv(x,y)`, `longdiv(x,y)`, `x/%y`, `x//%y`)
-- [ ] #(#) to #*#
+- [x] #(#) to #*#
 - [x] #^# to #**#
 - [ ] remove newline character from result box, related to textbox height
 - [ ] date calculation
@@ -26,7 +26,7 @@
 - [ ] Scientific notation or not
 - [ ] Exact or decimal approximation
 - [ ] Approximate constants (pi, e, etc.)
-- [ ] which var to isolate
+- [ ] which var to isolate ("Solve for var: [x]")
 
 ## Error Handling
 
