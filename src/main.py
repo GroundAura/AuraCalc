@@ -1,18 +1,16 @@
 ### IMPORTS ###
 
 # builtins
-#from decimal import Decimal, getcontext, InvalidOperation, ROUND_HALF_UP
-#import math
-#from pathlib import Path
-#import random
-#import sys
-#import tkinter as tk
+import tkinter as tk
+#from tkinter import ttk
 
 # external
 import customtkinter as ctk
+#import PyQt6 as pyqt
+#import tkinterdnd2 as tkdnd
+#import tkinterplus as tkp
 
 # internal
-#from app_globals import *
 import app_globals
 from app_debug import print_debug
 from app_evaluate import evaluate_expression, sanitize_input
@@ -100,6 +98,7 @@ def main():
 	root.iconbitmap(app_globals.ICON_FILE)
 	ctk.set_appearance_mode("dark")
 	ctk.set_default_color_theme("green")
+	#tk.ttk.Style().theme_use("clam")
 
 	# Configure grid
 	root.grid_columnconfigure(0, weight=1)
@@ -140,6 +139,22 @@ def main():
 	## Advanced calculator frame
 	advanced_frame = ctk.CTkFrame(root)
 	#advanced_frame.grid(row=1, column=0, padx=0, pady=0, sticky="NSEW")
+
+
+
+	### MENU BAR SETUP ###
+
+	## Create the menu bar
+	#menu_bar = tk.Menu(root)
+
+	## Create the File menu
+	#file_menu = tk.Menu(menu_bar, tearoff=0, activebackground="#106a43")
+	#file_menu.add_command(label="Exit", command=lambda: close_window(root))
+	###file_menu.grid(row=0, column=0, padx=x_padding, pady=y_padding)
+
+	## Add the menus to the menu bar
+	#menu_bar.add_cascade(label="File", menu=file_menu)
+	#root.config(menu=menu_bar)
 
 
 

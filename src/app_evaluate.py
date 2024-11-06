@@ -14,7 +14,6 @@ import re
 from sympy import simplify, sympify
 
 # internal
-#from app_globals import *
 import app_globals
 from app_debug import print_debug
 from app_random import roll_dice
@@ -23,7 +22,6 @@ from app_random import roll_dice
 
 ### GLOBAL VARIABLES ###
 
-#ALLOWED_CHARS: re.Pattern[str] = re.compile(r'^[\d\+\-\*/\^()., ]+$')
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	#r'^(?:\d+|?(?:pi|e|inf)|(?:root\(|sqrt\(|ln\(|log\(log10\(|log2\(|log1p\(|sin\(|cos\(|tan\(|csc\(|sec\(|cot\(|fabs\(|exp\(|exp2\(|expm1\(|gcd\(|factorial\(|trunc\(|ceil\(|floor\(|hex\(|bin\(|oct\()\s*|\+\-\*/\^%().!, ]+)+$'
 	r'^(?:'
@@ -56,61 +54,7 @@ ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	r'|[\+\-\*/\^%().!, ]+'
 	r')+$'
 )
-#BUILTIN_FUNCTIONS = [
-#	'exp',
-#	'pow',
-#	'cbrt',
-#	'sqrt',
-#	'root',
-#	'log',
-#	'ln',
-#	'acos',
-#	'acosh',
-#	'acot',
-#	'acoth',
-#	'acsc',
-#	'acsch',
-#	'asec',
-#	'asech',
-#	'asin',
-#	'asinh',
-#	'atan',
-#	'atan2',
-#	'atanh',
-#	'cos',
-#	'cosh',
-#	'cot',
-#	'coth',
-#	'csc',
-#	'csch',
-#	'sec',
-#	'sech',
-#	'sin',
-#	'sinh',
-#	'tan',
-#	'tanh',
-#	'abs',
-#	'gcd',
-#	'lcm',
-#	'factorial',
-#	#'comb',
-#	#'perm',
-#	#'remainder',
-#	'ceiling',
-#	'floor',
-#	'trunc',
-#	'erf',
-#	'erfc',
-#	'gamma',
-#	#'bin',
-#	#'hex',
-#	#'oct',
-#	#'average',
-#	#'mean',
-#	#'median',
-#	#'mode',
-#]
-BUILTIN_FUNCTIONS = {
+BUILTIN_FUNCTIONS: dict[str, dict[str, any]] = {
 	'exp': {'func': 'exp', 'args': 1},
 	'pow': {'func': 'pow', 'args': 2},
 	'cbrt': {'func': 'cbrt', 'args': 1},
@@ -194,18 +138,18 @@ BUILTIN_FUNCTIONS = {
 	'RootOf': {'func': 'RootOf'},
 	'rootof': {'func': 'RootOf'},
 }
-CUSTOM_FUNCTIONS = {
+CUSTOM_FUNCTIONS: dict[str, dict[str, any]] = {
 	'roll': {'func': 'roll_dice', 'args': 1, 'returns': 2},
 	#'average': {'func': 'statistics.mean', 'args': 1},
 }
-OPERATORS = {
+OPERATIONS: dict[str, any] = {
 	'+': lambda x, y: x + y,
 	'-': lambda x, y: x - y,
 	'*': lambda x, y: x * y,
 	'/': lambda x, y: x / y,
 	'**': lambda x, y: x ** y
 }
-KNOWN_FUNCTIONS = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
+KNOWN_FUNCTIONS: tuple[str] = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
 #print_debug(KNOWN_FUNCTIONS)
 getcontext().prec = app_globals.DEC_PRECISION
 
@@ -213,47 +157,77 @@ getcontext().prec = app_globals.DEC_PRECISION
 
 ### FUNCTIONS ###
 
-def eval_custom_functions(expression: str):
+def eval_custom_functions(expression: str) -> str:
 	"""
+	Evaluates custom functions in an expression.
+
+	Args:
+		expression (str): The expression to evaluate.
+
+	Returns:
+		str: The processed expression.
 	"""
 	#pattern = re.compile(r'(\b\w+\()([^)]+)\)')
-	pattern = re.compile(r'(\b\w+)\(([^)]*)\)')
-	def replacer(match):
+	pattern: re.Pattern = re.compile(r'(\b\w+)\(([^)]*)\)')
+	def replacer(match) -> str:
+		"""
+		Replaces a function call with its result.
+
+		Args:
+			match: The match object.
+
+		Returns:
+			str: The result of the function call.
+		"""
 		function_name = match.group(1).strip('(')
 		argument_str = match.group(2)
-		args = [arg.strip() for arg in argument_str.split(',')]
-		print_debug(f"Function: {function_name}, Arguments: {args}")
+		args = [f"\'{arg.strip()}\'" for arg in argument_str.split(',')]
+		print_debug(f"Function requested: {function_name}, Arguments: {args}")
 		#if function_name in BUILTIN_FUNCTIONS:
 		#	return f"{function_name}({', '.join(args)})"
 		if function_name in BUILTIN_FUNCTIONS:
 			return f"{BUILTIN_FUNCTIONS[function_name]['func']}({', '.join(args)})"
 		elif function_name in CUSTOM_FUNCTIONS:
-			function = CUSTOM_FUNCTIONS[function_name]
-			print_debug(function)
+			function_info = CUSTOM_FUNCTIONS[function_name]
+			print_debug(f"Matching function: '{function_name}': {function_info}")
+			function_to_call: str = f"{function_info['func']}({', '.join(args)})"
+			#function_to_call: str = f"{function_info['func']}({', '.join([f'\"{arg}\"' if 'd' in arg else arg for arg in args])})"
+			print_debug(f"Function to call: {function_to_call}")
 			#if function['args'] != len(args):
 			#	if function['args'] == 1:
 			#		raise ValueError(f"{function_name}() expects 1 argument.")
 			#	else:
 			#		raise ValueError(f"{function_name}() expects {function['args']} arguments.")
-			if function['returns'] == 1:
-				return eval(f"{function['func']}({', '.join(args)})")
-			elif function['returns'] == 2:
-				print_debug(f"{function['func']}({', '.join(args)})")
-				result, _ = eval(f"{function['func']}({', '.join(args)})")
+			if function_info['returns'] == 1:
+				result = eval(function_to_call)
+				result = str(result)
+				print_debug(f"Function result: '{result}' (type: {type(result)})")
+				return result
+			elif function_info['returns'] == 2:
+				result, _ = eval(function_to_call)
+				result = str(result)
+				print_debug(f"Function result: '{result}' (type: {type(result)})")
 				return result
 			else:
-				raise ValueError(f"{function_name}() returns {function['returns']} values. Only 1 or 2 values are supported.")
+				raise ValueError(f"{function_name}() returns {function_info['returns']} values. Only 1 or 2 values are supported.")
 		#elif function_name == 'roll':
 		#	if len(args) != 1:
 		#		raise ValueError(f"{function_name} expects exactly 1 argument.")
 		#	result, _ = roll_dice(args[0])
 		#	return result
 		#raise ValueError(f"Unknown function: {function_name}()")
-	return pattern.sub(replacer, expression)
+	processed_expression: str = pattern.sub(replacer, expression)
+	return processed_expression
 
 def eval_with_decimal(expression: any) -> str:
 	"""
 	Recursively evaluate sympy expressions using Decimal for high precision.
+
+	Args:
+		expression (any): The expression to evaluate.
+
+	Returns:
+		str: The result of the expression.
 	"""
 	if expression.is_Number:
 		# Convert sympy numbers to Decimal
@@ -263,7 +237,7 @@ def eval_with_decimal(expression: any) -> str:
 		# If it's an addition, multiplication, or power, evaluate the arguments
 		args = [eval_with_decimal(arg) for arg in expression.args]
 		operator = str(expression.func)
-		return OPERATORS[operator](*args)
+		return OPERATIONS[operator](*args)
 
 	# Handle division separately
 	elif expression.is_Div:
@@ -275,6 +249,16 @@ def eval_with_decimal(expression: any) -> str:
 		return Decimal(str(expression))
 
 def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_SIMPLIFY) -> str:
+	"""
+	Evaluates an expression.
+
+	Args:
+		expression (str): The expression to evaluate.
+		dont_evaluate (bool, optional): Whether to only simplify the expression. Defaults to `app_globals.ONLY_SIMPLIFY`.
+
+	Returns:
+		str: The result of the expression.
+	"""
 	#continue_eval: bool = True
 	print_debug("Evaluating expression...")
 	try:
@@ -334,35 +318,16 @@ def format_expression(expression: str) -> str:
 	return expression
 
 def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTIONS) -> str:
-	#pattern = r'(?<=\d)(\()|(\))(?=\d)|(\))(?=\()'
-	#pattern = r'(?<=\d)(?=\()|(?<=\))(?=\d)|(?<=\))(?=\()'
-	#functions_pattern = r'(' + '|'.join(KNOWN_FUNCTIONS) + r')\('
-	#pattern = (
-	#	r'(?<=\d)(?=\()'
-	#	r'|(?<=\))(?=\d)'
-	#	r'|(?<=\))(?=\()'
-	#)
-	#pattern = (
-	#	r'(?<=\d)(?=\()' # Case 1: number followed by an opening parenthesis, e.g., 1(2)
-	#	r'|(?<=\))(?=\d)' # Case 2: closing parenthesis followed by a number, e.g., (3)4
-	#	r'|(?<=\))(?=\()' # Case 3: two sets of parentheses, e.g., (3)(4)
-	#	r'|(?<=\d)(?=' # Case 4: number followed by a function name, e.g., 2sqrt(9)
-	#	r'(' + '|'.join(KNOWN_FUNCTIONS) + r')\()'
-	#	r'|(?<=\))(?=' # Case 5: closing parenthesis followed by a function name, e.g., (2)sqrt(9)
-	#	r'(' + '|'.join(KNOWN_FUNCTIONS) + r')\()'
-	#)
-	#pattern = (
-	#	r'(?<=\d)(?=\()'                                # Case 1: number followed by an opening parenthesis, e.g., 1(2)
-	#	r'|(?<=\))(?=\d)'                               # Case 2: closing parenthesis followed by a number, e.g., (3)4
-	#	r'|(?<=\))(?=\()'                               # Case 3: two sets of parentheses, e.g., (3)(4)
-	#	r'|(?<=\d)(?=(' + '|'.join(functions) + r')\()' # Case 4: number followed by a function, e.g., 2sqrt(9)
-	#	r'|(?<=\))(?=(' + '|'.join(functions) + r')\()' # Case 5: closing parenthesis followed by a function, e.g., (2)sqrt(9)
-	#	r'|(?<=\d)(?=[a-zA-Z])'                         # Case 6: number followed by a variable, e.g., 2x -> 2*x
-	#	r'|(?<=\))(?=[a-zA-Z])'                         # Case 7: closing parenthesis followed by a variable, e.g., (2)x -> (2)*x
-	#	r'|(?<=[a-zA-Z])(?=\d)'                         # Case 8: variable followed by a number, e.g., x2 -> x*2
-	#	r'|(?<=[a-zA-Z])(?=\()'                         # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
-	#)
-	#return re.sub(pattern, '*', expression)
+	"""
+	Evaluates whether an expression contains implied multiplication and adds explicit multiplication if necessary.
+
+	Args:
+		expression (str): The expression to evaluate.
+		functions (list | tuple | set, optional): The list of known functions. Defaults to `KNOWN_FUNCTIONS`.
+
+	Returns:
+		str: The processed expression.
+	"""
 	functions_pattern = r'|'.join(functions)
 	pattern = (
 		r'(?<=\d)(?=\()'                              # Case 1: number followed by an opening parenthesis, e.g., 1(2)
@@ -376,39 +341,61 @@ def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTION
 		r'|(?<=[a-zA-Z])(?=\()'                       # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
 	)
 	#print_debug(pattern)
-	modified_expression = re.sub(pattern, '*', expression)
+	modified_expression = re.sub(pattern, '*', expression)                                         # Add '*' in all matched cases
 	modified_expression = re.sub(r'(' + functions_pattern + r')\*\(', r'\1(', modified_expression) # Remove '*' between functions and '('
+	modified_expression = re.sub(r'(?<=roll\()(\d+)\*d\*(\d+)', r'\1d\2', modified_expression)     # Remove '*' between numbers and 'd' in the roll() function
 	return modified_expression
 
 def implied_exp(expression: str) -> str:
+	"""
+	Evaluates whether an expression contains implied exponentation and adds explicit exponentation if necessary.
+
+	Args:
+		expression (str): The expression to evaluate.
+
+	Returns:
+		str: The processed expression.
+	"""
 	return expression.replace('^', '**')
 
 def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool = app_globals.SANITIZE) -> str:
-	expression = expression.lstrip('=').rstrip('=')
-	if sanitize and not allowed_chars.match(expression):
-		raise ValueError("Invalid characters in expression")
-	print_debug(f"Expr (sanitized):{' '*4}`{expression}`")
-	return expression
+	"""
+	Sanitize an expression by removing invalid sequences of characters if possible, or raising an exception if not.
 
-def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) -> str:
+	Args:
+		expression (str): The expression to sanitize.
+		allowed_chars (str, optional): The allowed characters. Defaults to `ALLOWED_CHARS`.
+		sanitize (bool, optional): Whether to sanitize the expression. Defaults to `app_globals.SANITIZE`.
+
+	Returns:
+		str: The sanitized expression.
 	"""
-	Simplifies a number with decimal places by rounding to `DEC_DISPLAY` places and truncating trailing empty decimal places.
+	sanitized_expression = expression.lstrip('=').rstrip('=')
+	if sanitize and not allowed_chars.match(sanitized_expression):
+		raise ValueError("Invalid characters in expression")
+	print_debug(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
+	return sanitized_expression
+
+def simplify_decimal(number: any, decimal_places: int = app_globals.DEC_DISPLAY) -> str:
 	"""
-	if not isinstance(value, Decimal):
-		value = Decimal(str(value))
+	Simplifies a number with decimals by rounding to the specified decimal places and truncating trailing empty decimal places.
+
+	Args:
+		value (any): The number to simplify.
+		decimal_places (int, optional): The number of decimal places to round to. Defaults to `app_globals.DEC_DISPLAY`.
+
+	Returns:
+		str: The simplified number.
+	"""
+	if not isinstance(number, Decimal):
+		number = Decimal(str(number))
 	#print_debug(value)
 	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
-	rounded_value = value.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
-	if rounded_value.is_zero():
+	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
+	if rounded_number.is_zero():
 		return "0"
-	simplified_value = str(rounded_value).rstrip('0').rstrip('.')
-	return simplified_value
-	#if isinstance(value, Decimal):
-	#	str_value = str(value)
-	#	if value.is_integer():
-	#		return value.quantize(Decimal(1))
-	#else:
-	#	raise ValueError("Input must be a Decimal to be truncated.")
+	simplified_number = str(rounded_number).rstrip('0').rstrip('.')
+	return simplified_number
 
 #def simplify_float(value: float):
 #	value = float(value)
@@ -433,7 +420,17 @@ def simplify_decimal(value: any, decimal_places: int = app_globals.DEC_DISPLAY) 
 #	return terms
 
 def strip_leading_zeros(expression: str) -> str:
-	return re.sub(r'\b0+(\d+)', r'\1', expression)
+	"""
+	Strip leading zeros from any numbers in an expression.
+
+	Args:
+		expression (str): The expression to process.
+
+	Returns:
+		str: The processed expression.
+	"""
+	processed_expression = re.sub(r'\b0+(\d+)', r'\1', expression)
+	return processed_expression
 
 
 

@@ -30,13 +30,13 @@
 
 ## Error Handling
 
-- [ ] log errors to console
-- [ ] log errors to AuraPy.log
+- [x] log errors to console
+- [x] log errors to AuraPy.log
 - [ ] improve error messages
 
 ## Organization
 
-- [ ] separate functions into separate modules
+- [x] separate functions into separate modules
 - [ ] add docstrings for each function
 - [ ] document possible operations
 
