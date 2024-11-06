@@ -16,7 +16,7 @@ from sympy import simplify, sympify
 # internal
 import app_globals
 from app_debug import print_debug
-from app_random import roll_dice
+from app_random import roll_dice, quad_zero
 
 
 
@@ -140,6 +140,9 @@ BUILTIN_FUNCTIONS: dict[str, dict[str, any]] = {
 }
 CUSTOM_FUNCTIONS: dict[str, dict[str, any]] = {
 	'roll': {'func': 'roll_dice', 'args': 1, 'returns': 2},
+	'quad': {'func': 'quad_zero', 'args': 4, 'returns': 1},
+	'quadratic': {'func': 'quad_zero', 'args': 4, 'returns': 1},
+	'quadratic_formula': {'func': 'quad_zero', 'args': 4, 'returns': 1},
 	#'average': {'func': 'statistics.mean', 'args': 1},
 }
 OPERATIONS: dict[str, any] = {

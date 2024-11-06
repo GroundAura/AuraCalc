@@ -1,6 +1,8 @@
 ### IMPORTS ###
 
 # builtins
+import cmath
+from decimal import Decimal
 import random
 import re
 
@@ -44,6 +46,29 @@ def roll_dice(dice_string: str) -> tuple[int, list]:
 	except ValueError:
 		#return 0, []
 		raise ValueError("Invalid dice notation. Use 'XdY' format, e.g., '3d6'.")
+
+def quadratic_formula(a, b, c):
+	# Calculate the discriminant
+	#discriminant = sympify(b**2) - sympify(4) * sympify(a) * sympify(c)
+	discriminant = b**2 - 4 * a * c
+	# Calculate the two solutions
+	#root1 = sympify((-sympify(b) + sympify(discriminant)) / (2 * sympify(a)))
+	#root2 = sympify((-sympify(b) - sympify(discriminant)) / (2 * sympify(a)))
+	root1 = (-b + cmath.sqrt(discriminant)) / (2 * a)
+	root2 = (-b - cmath.sqrt(discriminant)) / (2 * a)
+	return root1, root2
+
+def quad_zero(a, b, c, positive = "+"):
+	a = float(a)
+	b = float(b)
+	c = float(c)
+	root1, root2 = quadratic_formula(a, b, c)
+	if positive in ["True", "p", "+", "positive"]:
+		return root1
+	elif positive in ["False", "n", "-", "negative"]:
+		return root2
+	else:
+		raise ValueError("Invalid positive argument. Use 'p' for positive, 'n' for negative.")
 
 if __name__ == "__main__":
 	#dice_input = "3d6"
