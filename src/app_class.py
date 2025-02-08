@@ -200,7 +200,7 @@ class GuiApp(App):
 		self._win_centered_def = self._config["WIN_POS"]["bCenterWindow"] if self._config else win_centered
 		self._win_pinned_def = self._config["WIN_FLAGS"]["bStartPinned"] if self._config else win_pinned
 
-		# window values
+		# window state
 		self._win_width = self._win_width_def
 		self._win_height = self._win_height_def
 		self._win_x_pos = self._win_x_pos_def
@@ -322,7 +322,7 @@ class GuiApp(App):
 class CalculatorApp(GuiApp):
 	# constructor
 	def __init__(self,
-			name: str = "App",
+			name: str = "Calculator",
 			version: str = "1.0.0",
 			author: str = "Unknown",
 			resources_dir: str = "resources",
@@ -330,23 +330,89 @@ class CalculatorApp(GuiApp):
 			icon_file: str = "icon.ico",
 			log_file: str = "debug.log",
 			config_file: str = "config.ini",
-			use_config: bool = False,
-			win_width: int = 800,
-			win_height: int = 600,
-			win_width_min: int = 400,
-			win_height_min: int = 300,
-			win_x_pos: int = 0,
-			win_y_pos: int = 0,
-			win_centered: bool = False,
+			use_config: bool = True,
+			win_width: int = 250,
+			win_height: int = 110,
+			win_width_min: int = 250,
+			win_height_min: int = 110,
+			win_x_pos: int = 100,
+			win_y_pos: int = 100,
+			win_centered: bool = True,
 			win_pinned: bool = False,
 			win_width_resizable: bool = True,
-			win_height_resizable: bool = True
+			win_height_resizable: bool = False
 		) -> None:
 		# parent constructor
 		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_width_resizable, win_height_resizable)
 
 		# paths
 		self._set_history_path(history_file)
+
+		# window default values
+		self._win_width_adv = self._config["WIN_ADV"]["iDefaultWidth"] if self._config else 400
+		self._win_height_adv = self._config["WIN_ADV"]["iDefaultHeight"] if self._config else 410
+		self._win_width_min_adv = self._config["WIN_ADV"]["iMinWidth"] if self._config else 400
+		self._win_height_min_adv = self._config["WIN_ADV"]["iMinHeight"] if self._config else 410
+		self._win_advanced_def = self._config["WIN_FLAGS"]["bStartAdvanced"] if self._config else False
+		self._win_force_focus = self._config["DEBUG"]["bForceFocus"] if self._config else False
+		#self._win_restore_mode = self._config["WIN_RESTORE"]["bRestoreMode"]
+		#self._win_restore_dimensions = self._config["WIN_RESTORE"]["bRestoreDimensions"]
+		#self._win_restore_position = self._config["WIN_RESTORE"]["bRestorePosition"]
+		#self._win_restore_pinned = self._config["WIN_RESTORE"]["bRestorePinned"]
+		#self._win_restore_advanced = self._config["WIN_RESTORE"]["bRestoreAdvanced"]
+
+		# window state
+		self._win_expanded = False
+
+		# calculator default values
+		self._dec_precision = self._config["CALCULATION"]["iDecimalPrecision"] if self._config else 100
+		self._dec_display = self._config["CALCULATION"]["iDecimalDisplay"] if self._config else 10
+		if self._dec_display > self._dec_precision:
+			self._dec_display = self._dec_precision
+		self._only_simplify = self._config["CALCULATION"]["bOnlySimplify"] if self._config else False
+		self._live_eval = self._config["CALCULATION"]["bLiveEval"] if self._config else True
+		self._live_eval_delay = self._config["CALCULATION"]["iTimeoutDelay"] if self._config else 1000
+		self._sanitize_input = self._config["DEBUG"]["bSanitizeInput"] if self._config else True
+		self._def_expression = ''
+		self._def_result = '0'
+		self._timeout_patience = 1
+		self._calc_wait_chars = r'+-*/^%.([{_, '
+
+		# calculator state
+		self._calc_last_expression = self._def_expression
+		self._calc_last_result = self._def_result
+		self._calc_expressions = [self._def_expression]
+		self._calc_results = [self._def_result]
+
+		# app state
+		self._timeout_id = None
+		self._history = {
+			"expressions": self._calc_expressions,
+			"results": self._calc_results,
+			"pinned": self._win_pinned,
+			"advanced": self._win_expanded,
+			"dimensions": self.window_dimensions,
+			"position": self.window_position
+		}
+
+		# keybinds
+		self._advanced_key = self._config["KEYBINDS"]["sAdvancedKey"] if self._config else "<F3>"
+		self._clear_key = self._config["KEYBINDS"]["sClearKey"] if self._config else "<Alt-BackSpace>"
+		self._delete_left_key = self._config["KEYBINDS"]["sDeleteAllLKey"] if self._config else "<Control-BackSpace>"
+		self._delete_right_key = self._config["KEYBINDS"]["sDeleteAllRKey"] if self._config else "<Control-Delete>"
+		#self._delete_term_left_key = self._config["KEYBINDS"]["sDeleteTermLKey"] if self._config else "<Shift-BackSpace>"
+		#self._delete_term_right_key = self._config["KEYBINDS"]["sDeleteTermRKey"] if self._config else "<Shift-Delete>"
+		self._evaluate_key = self._config["KEYBINDS"]["sEvaluateKey"] if self._config else "<Enter>"
+		#self._help_key = self._config["KEYBINDS"]["sHelpKey"] if self._config else "<F1>"
+		#self._options_key = self._config["KEYBINDS"]["sOptionsKey"] if self._config else "<F2>"
+		#self._redo_key = self._config["KEYBINDS"]["sRedoKey"] if self._config else "<Control-y>"
+		#self._undo_key = self._config["KEYBINDS"]["sUndoKey"] if self._config else "<Control-z>"
+		self._quit_key = self._config["KEYBINDS"]["sQuitKey"] if self._config else "<Escape>"
+
+		# debug
+		self._debug_mode = self._config["DEBUG"]["bDebugMode"] if self._config else False
+		if self._debug_mode:
+			print(f"Settings: {self._config}")
 
 
 	# private methods
