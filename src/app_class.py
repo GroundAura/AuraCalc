@@ -184,29 +184,29 @@ class GuiApp(App):
 			win_y_pos: int = 0,
 			win_centered: bool = False,
 			win_pinned: bool = False,
-			win_width_resizable: bool = True,
-			win_height_resizable: bool = True
+			win_resize_width: bool = True,
+			win_resize_height: bool = True
 		) -> None:
 		# parent constructor
 		App.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config)
 
 		# window default values
-		self._win_width_def = self._config["WIN_BASIC"]["iDefaultWidth"] if self._config else win_width
-		self._win_height_def = self._config["WIN_BASIC"]["iDefaultHeight"] if self._config else win_height
-		self._win_width_min = self._config["WIN_BASIC"]["iMinWidth"] if self._config else win_width_min
-		self._win_height_min = self._config["WIN_BASIC"]["iMinHeight"] if self._config else win_height_min
-		self._win_x_pos_def = self._config["WIN_POS"]["iXOffset"] if self._config else win_x_pos
-		self._win_y_pos_def = self._config["WIN_POS"]["iYOffset"] if self._config else win_y_pos
-		self._win_centered_def = self._config["WIN_POS"]["bCenterWindow"] if self._config else win_centered
-		self._win_pinned_def = self._config["WIN_FLAGS"]["bStartPinned"] if self._config else win_pinned
+		self._set_win_width_min(win_width_min)
+		self._set_win_height_min(win_height_min)
+		self._set_win_width_def(win_width)
+		self._set_win_height_def(win_height)
+		self._set_win_x_pos_def(win_x_pos)
+		self._set_win_y_pos_def(win_y_pos)
+		self._set_win_centered_def(win_centered)
+		self._set_win_pinned_def(win_pinned)
 
 		# window state
 		self._win_width = self._win_width_def
 		self._win_height = self._win_height_def
 		self._win_x_pos = self._win_x_pos_def
 		self._win_y_pos = self._win_y_pos_def
-		self._win_width_resizable = win_width_resizable
-		self._win_height_resizable = win_height_resizable
+		self._set_win_resize_width(win_resize_width)
+		self._set_win_resize_height(win_resize_height)
 		self._win_pinned = False
 
 		# window
@@ -225,6 +225,132 @@ class GuiApp(App):
 
 
 	# private methods
+	def _set_win_centered_def(self, win_centered: bool) -> None:
+		if self._config and self._config["WIN_POS"]["bCenterWindow"]:
+			if not type(self._config["WIN_POS"]["bCenterWindow"]) == bool:
+				raise TypeError(f"Expected type `bool` for config value `['WIN_POS']['bCenterWindow']`, got `{type(self._config['WIN_POS']['bCenterWindow']).__name__}`")
+			self._win_centered_def = self._config["WIN_POS"]["bCenterWindow"]
+		else:
+			if not type(win_centered) == bool:
+				raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_centered`, got `{type(win_centered).__name__}`")
+			self._win_centered_def = win_centered
+
+	def _set_win_height_def(self, win_height: int) -> None:
+		if self._config and self._config["WIN_BASIC"]["iDefaultHeight"]:
+			if not type(self._config["WIN_BASIC"]["iDefaultHeight"]) == int:
+				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iDefaultHeight']`, got `{type(self._config['WIN_BASIC']['iDefaultHeight']).__name__}`")
+			if self._config["WIN_BASIC"]["iDefaultHeight"] <= 0:
+				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iDefaultHeight']`, got `{self._config['WIN_BASIC']['iDefaultHeight']}`")
+			if self._config["WIN_BASIC"]["iDefaultHeight"] < self._win_height_min:
+				self._win_height_def = self._win_height_min
+			else:
+				self._win_height_def = self._config["WIN_BASIC"]["iDefaultHeight"]
+		else:
+			if not type(win_height) == int:
+				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_height`, got `{type(win_height).__name__}`")
+			if win_height <= 0:
+				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_height`, got `{type(win_height)}`")
+			if win_height < self._win_height_min:
+				self._win_height_def = self._win_height_min
+			else:
+				self._win_height_def = win_height
+
+	def _set_win_height_min(self, win_height_min: int) -> None:
+		if self._config and self._config["WIN_BASIC"]["iMinHeight"]:
+			if not type(self._config["WIN_BASIC"]["iMinHeight"]) == int:
+				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iMinHeight']`, got `{type(self._config['WIN_BASIC']['iMinHeight']).__name__}`")
+			if self._config["WIN_BASIC"]["iMinHeight"] <= 0:
+				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iMinHeight']`, got `{self._config['WIN_BASIC']['iMinHeight']}`")
+			self._win_height_min = self._config["WIN_BASIC"]["iMinHeight"]
+		else:
+			if not type(win_height_min) == int:
+				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_height_min`, got `{type(win_height_min).__name__}`")
+			if win_height_min <= 0:
+				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_height_min`, got `{type(win_height_min)}`")
+			self._win_height_min = win_height_min
+
+	def _set_win_pinned_def(self, win_pinned: bool) -> None:
+		if self._config and self._config["WIN_FLAGS"]["bStartPinned"]:
+			if not type(self._config["WIN_FLAGS"]["bStartPinned"]) == bool:
+				raise TypeError(f"Expected type `bool` for config value `['WIN_FLAGS']['bStartPinned']`, got `{type(self._config['WIN_FLAGS']['bStartPinned']).__name__}`")
+			self._win_pinned_def = self._config["WIN_FLAGS"]["bStartPinned"]
+		else:
+			if not type(win_pinned) == bool:
+				raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_pinned`, got `{type(win_pinned).__name__}`")
+			self._win_pinned_def = win_pinned
+
+	def _set_win_resize_height(self, win_resize_height: bool) -> None:
+		if not type(win_resize_height) == bool:
+			raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_resize_height`, got `{type(win_resize_height).__name__}`")
+		self._win_resize_height = win_resize_height
+
+	def _set_win_resize_width(self, win_resize_width: bool) -> None:
+		if not type(win_resize_width) == bool:
+			raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_resize_width`, got `{type(win_resize_width).__name__}`")
+		self._win_resize_width = win_resize_width
+
+	def _set_win_width_def(self, win_width: int) -> None:
+		if self._config and self._config["WIN_BASIC"]["iDefaultWidth"]:
+			if not type(self._config["WIN_BASIC"]["iDefaultWidth"]) == int:
+				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iDefaultWidth']`, got `{type(self._config['WIN_BASIC']['iDefaultWidth']).__name__}`")
+			if self._config["WIN_BASIC"]["iDefaultWidth"] <= 0:
+				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iDefaultWidth']`, got `{self._config['WIN_BASIC']['iDefaultWidth']}`")
+			if self._config["WIN_BASIC"]["iDefaultWidth"] < self._win_width_min:
+				self._win_width_def = self._win_width_min
+			else:
+				self._win_width_def = self._config["WIN_BASIC"]["iDefaultWidth"]
+		else:
+			if not type(win_width) == int:
+				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_width`, got `{type(win_width).__name__}`")
+			if win_width <= 0:
+				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_width`, got `{type(win_width)}`")
+			if win_width < self._win_width_min:
+				self._win_width_def = self._win_width_min
+			else:
+				self._win_width_def = win_width
+
+	def _set_win_width_min(self, win_width_min: int) -> None:
+		if self._config and self._config["WIN_BASIC"]["iMinWidth"]:
+			if not type(self._config["WIN_BASIC"]["iMinWidth"]) == int:
+				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iMinWidth']`, got `{type(self._config['WIN_BASIC']['iMinWidth']).__name__}`")
+			if self._config["WIN_BASIC"]["iMinWidth"] <= 0:
+				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iMinWidth']`, got `{self._config['WIN_BASIC']['iMinWidth']}`")
+			self._win_width_min = self._config["WIN_BASIC"]["iMinWidth"]
+		else:
+			if not type(win_width_min) == int:
+				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_width_min`, got `{type(win_width_min).__name__}`")
+			if win_width_min <= 0:
+				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_width_min`, got `{type(win_width_min)}`")
+			self._win_width_min = win_width_min
+
+	def _set_win_x_pos_def(self, win_x_pos: int) -> None:
+		if self._config and self._config["WIN_POS"]["iXOffset"]:
+			if not type(self._config["WIN_POS"]["iXOffset"]) == int:
+				raise TypeError(f"Expected type `int` for config value `['WIN_POS']['iXOffset']`, got `{type(self._config['WIN_POS']['iXOffset']).__name__}`")
+			if self._config["WIN_POS"]["iXOffset"] < 0:
+				raise ValueError(f"Expected value `>= 0` for config value `['WIN_POS']['iXOffset']`, got `{self._config['WIN_POS']['iXOffset']}`")
+			self._win_x_pos_def = self._config["WIN_POS"]["iXOffset"]
+		else:
+			if not type(win_x_pos) == int:
+				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_x_pos`, got `{type(win_x_pos).__name__}`")
+			if win_x_pos < 0:
+				raise ValueError(f"Expected value `>= 0` for class `{self.__class__.__name__}` constructor argument `win_x_pos`, got `{type(win_x_pos)}`")
+			self._win_x_pos_def = win_x_pos
+
+	def _set_win_y_pos_def(self, win_y_pos: int) -> None:
+		if self._config and self._config["WIN_POS"]["iYOffset"]:
+			if not type(self._config["WIN_POS"]["iYOffset"]) == int:
+				raise TypeError(f"Expected type `int` for config value `['WIN_POS']['iYOffset']`, got `{type(self._config['WIN_POS']['iYOffset']).__name__}`")
+			if self._config["WIN_POS"]["iYOffset"] < 0:
+				raise ValueError(f"Expected value `>= 0` for config value `['WIN_POS']['iYOffset']`, got `{self._config['WIN_POS']['iYOffset']}`")
+			self._win_y_pos_def = self._config["WIN_POS"]["iYOffset"]
+		else:
+			if not type(win_y_pos) == int:
+				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_y_pos`, got `{type(win_y_pos).__name__}`")
+			if win_y_pos < 0:
+				raise ValueError(f"Expected value `>= 0` for class `{self.__class__.__name__}` constructor argument `win_y_pos`, got `{type(win_y_pos)}`")
+			self._win_y_pos_def = win_y_pos
+
 	def _set_window_icon(self) -> None:
 		if not isinstance(self._icon_file, Path):
 			raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_icon_file`, got `{type(self._icon_file).__name__}`")
@@ -293,7 +419,7 @@ class GuiApp(App):
 		target_height = current_height if current_height > self._win_height_min else self._win_height_min
 		self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
 		self._window.minsize(self._win_width_min, self._win_height_min)
-		self._window.resizable(self._win_width_resizable, self._win_height_resizable)
+		self._window.resizable(self._win_resize_width, self._win_resize_height)
 		self._win_width, self._win_height = self.window_dimensions
 		self._win_x_pos, self._win_y_pos = self.window_position
 		#self._window.update()
@@ -339,11 +465,11 @@ class CalculatorApp(GuiApp):
 			win_y_pos: int = 100,
 			win_centered: bool = True,
 			win_pinned: bool = False,
-			win_width_resizable: bool = True,
-			win_height_resizable: bool = False
+			win_resize_width: bool = True,
+			win_resize_height: bool = False
 		) -> None:
 		# parent constructor
-		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_width_resizable, win_height_resizable)
+		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_resize_width, win_resize_height)
 
 		# paths
 		self._set_history_path(history_file)
