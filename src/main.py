@@ -1,7 +1,7 @@
 ### IMPORTS ###
 
 # builtins
-import tkinter as tk
+#import tkinter as tk
 #from tkinter import ttk
 
 # external
@@ -12,6 +12,7 @@ import customtkinter as ctk
 
 # internal
 import app_globals
+from app_class import CalculatorApp
 from app_debug import print_debug
 from app_evaluate import evaluate_expression, sanitize_input
 from app_keybinds import keybind_enabled
@@ -85,17 +86,39 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 ### MAIN ###
 
 def main():
+	### METADATA ###
+
+	meta_name: str = "AuraCalc"
+	meta_version: str = "0.3.0-alpha"
+	meta_author: str = "GroundAura"
+
+	resources_dir: str = "resources"
+	config_file: str = f"{meta_name}.ini"
+	history_file: str = "history.json"
+	icon_file: str = "icon.ico"
+	log_file: str = "debug.log"
+
+
+
 	### WINDOW SETUP ###
 
 	# Initialize window
-	print_debug(f"{app_globals.NAME} v{app_globals.VERSION} by {app_globals.AUTHOR}")
+	print_debug(f"{meta_name} v{meta_version} by {meta_author}")
 	print_debug("Initializing...")
-	root = ctk.CTk()
-	root.title(app_globals.NAME)
-	update_window(root, def_pos=True)
+	app = CalculatorApp(
+		name=meta_name,
+		version=meta_version,
+		author=meta_author,
+		resources_dir = resources_dir,
+		history_file = history_file,
+		icon_file = icon_file,
+		log_file = log_file,
+		config_file = config_file,
+		use_config = True,
+	)
+	root = app.window
 
 	# Configure theme
-	root.iconbitmap(app_globals.ICON_FILE)
 	ctk.set_appearance_mode("dark")
 	ctk.set_default_color_theme("green")
 	#tk.ttk.Style().theme_use("clam")
