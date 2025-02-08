@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 
 # internal
+from app_config import read_config
 
 
 
@@ -22,7 +23,8 @@ class App:
 			resources_dir: str = "resources",
 			icon_file: str = "icon.ico",
 			log_file: str = "debug.log",
-			settings_file: str = "config.ini"
+			config_file: str = "config.ini",
+			use_config: bool = False
 		) -> None:
 
 		# metadata
@@ -35,26 +37,55 @@ class App:
 		self._set_resources_path(resources_dir)
 		self._set_resource_icon_path(icon_file)
 		self._set_resource_log_path(log_file)
-		self._set_resource_settings_path(settings_file)
+		#self._set_resource_settings_path(config_file)
+
+		# config
+		self._set_config(config_file, use_config)
+		#self._read_config(use_config)
+		#try:
+		#	self._read_config()
+		#	self._config_exists = True
+		#except FileNotFoundError:
+		#	#self._config = None
+		#	self._config_exists = False
 
 
 	# private methods
+	#def _read_config(self, use_config: bool = True) -> None:
+	#	if use_config:
+	#		if not isinstance(self._config_file, Path):
+	#			raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_config_file`, got `{type(self._config_file).__name__}`")
+	#		if not self._config_file.exists():
+	#			raise FileNotFoundError(f"File `{self._config_file}` does not exist")
+	#		self._config = read_config(self._config_file, preserve_key_case=True)
+	#	else:
+	#		self._config = None
+
 	def _set_author(self, author: str) -> None:
 		if not isinstance(author, str):
 			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `author`, got `{type(author).__name__}`")
 		self._author = author
 
+	def _set_config(self, file_name: str, use_config: bool = True) -> None:
+		if use_config:
+			if not isinstance(self._resources_path, Path):
+				raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
+			if not isinstance(file_name, str):
+				raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `config_file`, got `{type(file_name).__name__}`")
+			self._config_file = self._resources_path / file_name
+			if not isinstance(self._config_file, Path):
+				raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_config_file`, got `{type(self._config_file).__name__}`")
+			if not self._config_file.exists():
+				raise FileNotFoundError(f"File `{self._config_file}` does not exist")
+			self._config = read_config(self._config_file, preserve_key_case=True)
+		else:
+			self._config_file = None
+			self._config = None
+
 	def _set_name(self, name: str) -> None:
 		if not isinstance(name, str):
 			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `name`, got `{type(name).__name__}`")
 		self._name = name
-
-	def _set_resources_path(self, resources_dir: str) -> None:
-		if not isinstance(self._root_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for private attribute `_root_path`, got `{type(self._root_path).__name__}`")
-		if not isinstance(resources_dir, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `resources_dir`, got `{type(resources_dir).__name__}`")
-		self._resources_path = self._root_path / resources_dir
 
 	def _set_resource_icon_path(self, icon_file: str) -> None:
 		if not isinstance(self._resources_path, Path):
@@ -70,12 +101,19 @@ class App:
 			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `log_file`, got `{type(log_file).__name__}`")
 		self._log_file = self._resources_path / log_file
 
-	def _set_resource_settings_path(self, settings_file: str) -> None:
-		if not isinstance(self._resources_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
-		if not isinstance(settings_file, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `settings_file`, got `{type(settings_file).__name__}`")
-		self._settings_file = self._resources_path / settings_file
+	#def _set_resource_settings_path(self, config_file: str) -> None:
+	#	if not isinstance(self._resources_path, Path):
+	#		raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
+	#	if not isinstance(config_file, str):
+	#		raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `config_file`, got `{type(config_file).__name__}`")
+	#	self._config_file = self._resources_path / config_file
+
+	def _set_resources_path(self, resources_dir: str) -> None:
+		if not isinstance(self._root_path, Path):
+			raise TypeError(f"Expected type `pathlib.Path` for private attribute `_root_path`, got `{type(self._root_path).__name__}`")
+		if not isinstance(resources_dir, str):
+			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `resources_dir`, got `{type(resources_dir).__name__}`")
+		self._resources_path = self._root_path / resources_dir
 
 	def _set_root_path(self) -> Path:
 		try:
@@ -103,7 +141,7 @@ class App:
 		data.append(f'Root Path: {self.root_path}')
 		data.append(f'Icon Path: {self._icon_file}')
 		data.append(f'Log Path: {self._log_file}')
-		data.append(f'Config Path: {self._settings_file}')
+		data.append(f'Config Path: {self._config_file}')
 		for line in data:
 			print(line)
 
@@ -136,7 +174,8 @@ class GuiApp(App):
 			resources_dir: str = "resources",
 			icon_file: str = "icon.ico",
 			log_file: str = "debug.log",
-			settings_file: str = "config.ini",
+			config_file: str = "config.ini",
+			use_config: bool = False,
 			win_width: int = 800,
 			win_height: int = 600,
 			win_width_min: int = 400,
@@ -149,23 +188,23 @@ class GuiApp(App):
 			win_height_resizable: bool = True
 		) -> None:
 		# parent constructor
-		App.__init__(self, name, version, author, resources_dir, icon_file, log_file, settings_file)
+		App.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config)
 
 		# window default values
-		self._win_width_def = win_width
-		self._win_height_def = win_height
-		self._win_width_min = win_width_min
-		self._win_height_min = win_height_min
-		self._win_x_pos_def = win_x_pos
-		self._win_y_pos_def = win_y_pos
-		self._win_centered_def = win_centered
-		self._win_pinned_def = win_pinned
+		self._win_width_def = self._config["WIN_BASIC"]["iDefaultWidth"] if self._config else win_width
+		self._win_height_def = self._config["WIN_BASIC"]["iDefaultHeight"] if self._config else win_height
+		self._win_width_min = self._config["WIN_BASIC"]["iMinWidth"] if self._config else win_width_min
+		self._win_height_min = self._config["WIN_BASIC"]["iMinHeight"] if self._config else win_height_min
+		self._win_x_pos_def = self._config["WIN_POS"]["iXOffset"] if self._config else win_x_pos
+		self._win_y_pos_def = self._config["WIN_POS"]["iYOffset"] if self._config else win_y_pos
+		self._win_centered_def = self._config["WIN_POS"]["bCenterWindow"] if self._config else win_centered
+		self._win_pinned_def = self._config["WIN_FLAGS"]["bStartPinned"] if self._config else win_pinned
 
 		# window values
-		self._win_width = win_width
-		self._win_height = win_height
-		self._win_x_pos = win_x_pos
-		self._win_y_pos = win_y_pos
+		self._win_width = self._win_width_def
+		self._win_height = self._win_height_def
+		self._win_x_pos = self._win_x_pos_def
+		self._win_y_pos = self._win_y_pos_def
 		self._win_width_resizable = win_width_resizable
 		self._win_height_resizable = win_height_resizable
 		self._win_pinned = False
@@ -181,7 +220,7 @@ class GuiApp(App):
 		self._window.protocol("WM_DELETE_WINDOW", self.close_window)
 		self.update_window(True)
 		if self._win_pinned_def:
-			self.toggle_pinned(self)
+			self.toggle_pinned()
 		#print('Initialized Window')
 
 
@@ -290,7 +329,8 @@ class CalculatorApp(GuiApp):
 			history_file: str = "history.txt",
 			icon_file: str = "icon.ico",
 			log_file: str = "debug.log",
-			settings_file: str = "config.ini",
+			config_file: str = "config.ini",
+			use_config: bool = False,
 			win_width: int = 800,
 			win_height: int = 600,
 			win_width_min: int = 400,
@@ -303,7 +343,7 @@ class CalculatorApp(GuiApp):
 			win_height_resizable: bool = True
 		) -> None:
 		# parent constructor
-		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, settings_file, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_width_resizable, win_height_resizable)
+		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_width_resizable, win_height_resizable)
 
 		# paths
 		self._set_history_path(history_file)
@@ -338,9 +378,12 @@ class CalculatorApp(GuiApp):
 def main():
 	pass
 
+def _test():
+	pass
+
 	#app = App("Test", "0.0.1", "GroundAura")
 	#app = GuiApp("Test App", "0.0.1", "GroundAura")
-	app = CalculatorApp("Test App", "0.0.1", "GroundAura", win_centered=True)
+	app = CalculatorApp("Test App", "0.0.1", "GroundAura", win_centered=True, config_file="AuraCalc.ini", use_config=True)
 
 	#print(app.window_position)
 	app.print_info()
@@ -351,4 +394,5 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	#main()
+	_test()
