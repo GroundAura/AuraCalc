@@ -11,8 +11,8 @@ import os
 
 # internal
 #import app_globals
-from app_path import resource_path
-from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple
+#from app_path import resource_path
+from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple, validate_type
 
 
 
@@ -55,6 +55,14 @@ def config_to_dict(
 			section_dict[option] = value
 		config_dict[section] = section_dict
 	return config_dict
+
+def get_config_value(config: dict, cfg_section: str, cfg_key: str, def_val: any = None) -> any:
+	if config is None:
+		return def_val
+	try:
+		return config[cfg_section][cfg_key]
+	except KeyError:
+		return def_val
 
 def read_config(
 		file_path: str,

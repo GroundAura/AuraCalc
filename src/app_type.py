@@ -124,6 +124,13 @@ def str_to_tuple(string: str) -> tuple:
 	except Exception as e:
 		print(f"Error while trying to convert string '{string}' to a tuple:\n  {e}")
 
+def validate_type(value, valid_type: type, num_min_val: int | float | None = None) -> bool:
+	if not isinstance(value, valid_type):
+		raise TypeError(f"Expected type `{valid_type.__name__}`, got `{type(value).__name__}`")
+	if num_min_val and value < num_min_val:
+		raise ValueError(f"Expected value `>= {num_min_val}`, got `{value}`")
+	return True
+
 def test() -> None:
 	try:
 	# get_type()

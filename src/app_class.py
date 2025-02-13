@@ -8,7 +8,8 @@ from pathlib import Path
 import sys
 
 # internal
-from app_config import read_config
+from app_config import read_config, get_config_value
+from app_type import validate_type
 
 
 
@@ -35,101 +36,66 @@ class App:
 		# paths
 		self._set_root_path()
 		self._set_resources_path(resources_dir)
-		self._set_resource_icon_path(icon_file)
-		self._set_resource_log_path(log_file)
-		#self._set_resource_settings_path(config_file)
+		self._set_icon_path(icon_file)
+		self._set_log_path(log_file)
 
 		# config
 		self._set_config(config_file, use_config)
-		#self._read_config(use_config)
-		#try:
-		#	self._read_config()
-		#	self._config_exists = True
-		#except FileNotFoundError:
-		#	#self._config = None
-		#	self._config_exists = False
 
 
 	# private methods
-	#def _read_config(self, use_config: bool = True) -> None:
-	#	if use_config:
-	#		if not isinstance(self._config_file, Path):
-	#			raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_config_file`, got `{type(self._config_file).__name__}`")
-	#		if not self._config_file.exists():
-	#			raise FileNotFoundError(f"File `{self._config_file}` does not exist")
-	#		self._config = read_config(self._config_file, preserve_key_case=True)
-	#	else:
-	#		self._config = None
-
-	def _set_author(self, author: str) -> None:
-		if not isinstance(author, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `author`, got `{type(author).__name__}`")
-		self._author = author
+	def _set_author(self, value: str) -> None:
+		validate_type(value, str)
+		self._author = value
 
 	def _set_config(self, file_name: str, use_config: bool = True) -> None:
 		if use_config:
-			if not isinstance(self._resources_path, Path):
-				raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
-			if not isinstance(file_name, str):
-				raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `config_file`, got `{type(file_name).__name__}`")
-			self._config_file = self._resources_path / file_name
-			if not isinstance(self._config_file, Path):
-				raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_config_file`, got `{type(self._config_file).__name__}`")
-			if not self._config_file.exists():
-				raise FileNotFoundError(f"File `{self._config_file}` does not exist")
-			self._config = read_config(self._config_file, preserve_key_case=True)
+			validate_type(self._resources_path, Path)
+			validate_type(file_name, str)
+			self._config_path = self._resources_path / file_name
+			validate_type(self._config_path, Path)
+			if not self._config_path.exists():
+				raise FileNotFoundError(f"File `{self._config_path}` does not exist")
+			self._config = read_config(self._config_path, preserve_key_case=True)
 		else:
-			self._config_file = None
+			self._config_path = None
 			self._config = None
 
-	def _set_name(self, name: str) -> None:
-		if not isinstance(name, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `name`, got `{type(name).__name__}`")
-		self._name = name
+	def _set_icon_path(self, file_name: str) -> None:
+		validate_type(self._resources_path, Path)
+		validate_type(file_name, str)
+		self._icon_path = self._resources_path / file_name
 
-	def _set_resource_icon_path(self, icon_file: str) -> None:
-		if not isinstance(self._resources_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
-		if not isinstance(icon_file, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `icon_file`, got `{type(icon_file).__name__}`")
-		self._icon_file = self._resources_path / icon_file
+	def _set_log_path(self, file_name: str) -> None:
+		validate_type(self._resources_path, Path)
+		validate_type(file_name, str)
+		self._log_path = self._resources_path / file_name
 
-	def _set_resource_log_path(self, log_file: str) -> None:
-		if not isinstance(self._resources_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
-		if not isinstance(log_file, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `log_file`, got `{type(log_file).__name__}`")
-		self._log_file = self._resources_path / log_file
+	def _set_name(self, value: str) -> None:
+		validate_type(value, str)
+		self._name = value
 
-	#def _set_resource_settings_path(self, config_file: str) -> None:
-	#	if not isinstance(self._resources_path, Path):
-	#		raise TypeError(f"Expected type `pathlib.Path` for private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
-	#	if not isinstance(config_file, str):
-	#		raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `config_file`, got `{type(config_file).__name__}`")
-	#	self._config_file = self._resources_path / config_file
+	def _set_resources_path(self, dir_name: str) -> None:
+		validate_type(self._root_path, Path)
+		if dir_name:
+			validate_type(dir_name, str)
+			self._resources_path = self._root_path / dir_name
+		else:
+			self._resources_path = self._root_path
 
-	def _set_resources_path(self, resources_dir: str) -> None:
-		if not isinstance(self._root_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for private attribute `_root_path`, got `{type(self._root_path).__name__}`")
-		if not isinstance(resources_dir, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `resources_dir`, got `{type(resources_dir).__name__}`")
-		self._resources_path = self._root_path / resources_dir
-
-	def _set_root_path(self) -> Path:
+	def _set_root_path(self) -> None:
 		try:
 			# PyInstaller creates a temporary folder and stores the path in _MEIPASS
 			root_path = Path(sys.MEIPASS)
 			#return Path(sys.executable).parent
 		except AttributeError:
 			root_path = Path.cwd()
-		if not isinstance(root_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_root_path`, got `{type(root_path).__name__}`")
+		validate_type(root_path, Path)
 		self._root_path = root_path
 
-	def _set_version(self, version: str) -> None:
-		if not isinstance(version, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `version`, got `{type(version).__name__}`")
-		self._version = version
+	def _set_version(self, value: str) -> None:
+		validate_type(value, str)
+		self._version = value
 
 
 	# public methods
@@ -139,9 +105,10 @@ class App:
 		data.append(f'App Version: {self.version}')
 		data.append(f'App Author: {self.author}')
 		data.append(f'Root Path: {self.root_path}')
-		data.append(f'Icon Path: {self._icon_file}')
-		data.append(f'Log Path: {self._log_file}')
-		data.append(f'Config Path: {self._config_file}')
+		data.append(f'Icon Path: {self._icon_path}')
+		data.append(f'Log Path: {self._log_path}')
+		if self._config_path is not None:
+			data.append(f'Config Path: {self._config_path}')
 		for line in data:
 			print(line)
 
@@ -225,138 +192,75 @@ class GuiApp(App):
 
 
 	# private methods
-	def _set_win_centered_def(self, win_centered: bool) -> None:
+	def _set_win_centered_def(self, new_val: bool) -> None:
+		value = get_config_value(self._config, "WIN_POS", "bCenterWindow", new_val)
+		validate_type(new_val, bool)
+		self._win_centered_def = value
+
+	def _set_win_height_def(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iDefaultHeight", new_val)
+		validate_type(value, int, 0)
 		try:
-			if not type(self._config["WIN_POS"]["bCenterWindow"]) == bool:
-				raise TypeError(f"Expected type `bool` for config value `['WIN_POS']['bCenterWindow']`, got `{type(self._config['WIN_POS']['bCenterWindow']).__name__}`")
-			self._win_centered_def = self._config["WIN_POS"]["bCenterWindow"]
-		except AttributeError or KeyError:
-			if not type(win_centered) == bool:
-				raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_centered`, got `{type(win_centered).__name__}`")
-			self._win_centered_def = win_centered
+			min_value = self._win_width_min
+			validate_type(min_value, int, 0)
+		except AttributeError:
+			min_value = None
+		if min_value is not None and value < min_value:
+			self._win_height_def = min_value
+		else:
+			self._win_height_def = value
 
-	def _set_win_height_def(self, win_height: int) -> None:
+	def _set_win_height_min(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iMinHeight", new_val)
+		validate_type(value, int, 0)
+		self._win_height_min = value
+
+	def _set_win_pinned_def(self, new_val: bool) -> None:
+		value = get_config_value(self._config, "WIN_FLAGS", "bStartPinned", new_val)
+		validate_type(new_val, bool)
+		self._win_pinned_def = value
+
+	def _set_win_resize_height(self, new_val: bool) -> None:
+		validate_type(new_val, bool)
+		self._win_resize_height = new_val
+
+	def _set_win_resize_width(self, new_val: bool) -> None:
+		validate_type(new_val, bool)
+		self._win_resize_width = new_val
+
+	def _set_win_width_def(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iDefaultWidth", new_val)
+		validate_type(value, int, 0)
 		try:
-			if not type(self._config["WIN_BASIC"]["iDefaultHeight"]) == int:
-				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iDefaultHeight']`, got `{type(self._config['WIN_BASIC']['iDefaultHeight']).__name__}`")
-			if self._config["WIN_BASIC"]["iDefaultHeight"] <= 0:
-				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iDefaultHeight']`, got `{self._config['WIN_BASIC']['iDefaultHeight']}`")
-			if self._config["WIN_BASIC"]["iDefaultHeight"] < self._win_height_min:
-				self._win_height_def = self._win_height_min
-			else:
-				self._win_height_def = self._config["WIN_BASIC"]["iDefaultHeight"]
-		except AttributeError or KeyError:
-			if not type(win_height) == int:
-				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_height`, got `{type(win_height).__name__}`")
-			if win_height <= 0:
-				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_height`, got `{type(win_height)}`")
-			if win_height < self._win_height_min:
-				self._win_height_def = self._win_height_min
-			else:
-				self._win_height_def = win_height
+			min_value = self._win_width_min
+			validate_type(min_value, int, 0)
+		except AttributeError:
+			min_value = None
+		if min_value is not None and value < min_value:
+			self._win_width_def = min_value
+		else:
+			self._win_width_def = value
 
-	def _set_win_height_min(self, win_height_min: int) -> None:
-		try:
-			if not type(self._config["WIN_BASIC"]["iMinHeight"]) == int:
-				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iMinHeight']`, got `{type(self._config['WIN_BASIC']['iMinHeight']).__name__}`")
-			if self._config["WIN_BASIC"]["iMinHeight"] <= 0:
-				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iMinHeight']`, got `{self._config['WIN_BASIC']['iMinHeight']}`")
-			self._win_height_min = self._config["WIN_BASIC"]["iMinHeight"]
-		except AttributeError or KeyError:
-			if not type(win_height_min) == int:
-				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_height_min`, got `{type(win_height_min).__name__}`")
-			if win_height_min <= 0:
-				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_height_min`, got `{type(win_height_min)}`")
-			self._win_height_min = win_height_min
+	def _set_win_width_min(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iMinWidth", new_val)
+		validate_type(value, int, 0)
+		self._win_width_min = value
 
-	def _set_win_pinned_def(self, win_pinned: bool) -> None:
-		try:
-			if not type(self._config["WIN_FLAGS"]["bStartPinned"]) == bool:
-				raise TypeError(f"Expected type `bool` for config value `['WIN_FLAGS']['bStartPinned']`, got `{type(self._config['WIN_FLAGS']['bStartPinned']).__name__}`")
-			self._win_pinned_def = self._config["WIN_FLAGS"]["bStartPinned"]
-		except AttributeError or KeyError:
-			if not type(win_pinned) == bool:
-				raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_pinned`, got `{type(win_pinned).__name__}`")
-			self._win_pinned_def = win_pinned
+	def _set_win_x_pos_def(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_POS", "iXOffset", new_val)
+		validate_type(value, int, 0)
+		self._win_x_pos_def = value
 
-	def _set_win_resize_height(self, win_resize_height: bool) -> None:
-		if not type(win_resize_height) == bool:
-			raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_resize_height`, got `{type(win_resize_height).__name__}`")
-		self._win_resize_height = win_resize_height
-
-	def _set_win_resize_width(self, win_resize_width: bool) -> None:
-		if not type(win_resize_width) == bool:
-			raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_resize_width`, got `{type(win_resize_width).__name__}`")
-		self._win_resize_width = win_resize_width
-
-	def _set_win_width_def(self, win_width: int) -> None:
-		try:
-			if not type(self._config["WIN_BASIC"]["iDefaultWidth"]) == int:
-				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iDefaultWidth']`, got `{type(self._config['WIN_BASIC']['iDefaultWidth']).__name__}`")
-			if self._config["WIN_BASIC"]["iDefaultWidth"] <= 0:
-				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iDefaultWidth']`, got `{self._config['WIN_BASIC']['iDefaultWidth']}`")
-			if self._config["WIN_BASIC"]["iDefaultWidth"] < self._win_width_min:
-				self._win_width_def = self._win_width_min
-			else:
-				self._win_width_def = self._config["WIN_BASIC"]["iDefaultWidth"]
-		except AttributeError or KeyError:
-			if not type(win_width) == int:
-				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_width`, got `{type(win_width).__name__}`")
-			if win_width <= 0:
-				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_width`, got `{type(win_width)}`")
-			if win_width < self._win_width_min:
-				self._win_width_def = self._win_width_min
-			else:
-				self._win_width_def = win_width
-
-	def _set_win_width_min(self, win_width_min: int) -> None:
-		try:
-			if not type(self._config["WIN_BASIC"]["iMinWidth"]) == int:
-				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iMinWidth']`, got `{type(self._config['WIN_BASIC']['iMinWidth']).__name__}`")
-			if self._config["WIN_BASIC"]["iMinWidth"] <= 0:
-				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iMinWidth']`, got `{self._config['WIN_BASIC']['iMinWidth']}`")
-			self._win_width_min = self._config["WIN_BASIC"]["iMinWidth"]
-		except AttributeError or KeyError:
-			if not type(win_width_min) == int:
-				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_width_min`, got `{type(win_width_min).__name__}`")
-			if win_width_min <= 0:
-				raise ValueError(f"Expected value `> 0` for class `{self.__class__.__name__}` constructor argument `win_width_min`, got `{type(win_width_min)}`")
-			self._win_width_min = win_width_min
-
-	def _set_win_x_pos_def(self, win_x_pos: int) -> None:
-		try:
-			if not type(self._config["WIN_POS"]["iXOffset"]) == int:
-				raise TypeError(f"Expected type `int` for config value `['WIN_POS']['iXOffset']`, got `{type(self._config['WIN_POS']['iXOffset']).__name__}`")
-			if self._config["WIN_POS"]["iXOffset"] < 0:
-				raise ValueError(f"Expected value `>= 0` for config value `['WIN_POS']['iXOffset']`, got `{self._config['WIN_POS']['iXOffset']}`")
-			self._win_x_pos_def = self._config["WIN_POS"]["iXOffset"]
-		except AttributeError or KeyError:
-			if not type(win_x_pos) == int:
-				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_x_pos`, got `{type(win_x_pos).__name__}`")
-			if win_x_pos < 0:
-				raise ValueError(f"Expected value `>= 0` for class `{self.__class__.__name__}` constructor argument `win_x_pos`, got `{type(win_x_pos)}`")
-			self._win_x_pos_def = win_x_pos
-
-	def _set_win_y_pos_def(self, win_y_pos: int) -> None:
-		try:
-			if not type(self._config["WIN_POS"]["iYOffset"]) == int:
-				raise TypeError(f"Expected type `int` for config value `['WIN_POS']['iYOffset']`, got `{type(self._config['WIN_POS']['iYOffset']).__name__}`")
-			if self._config["WIN_POS"]["iYOffset"] < 0:
-				raise ValueError(f"Expected value `>= 0` for config value `['WIN_POS']['iYOffset']`, got `{self._config['WIN_POS']['iYOffset']}`")
-			self._win_y_pos_def = self._config["WIN_POS"]["iYOffset"]
-		except AttributeError or KeyError:
-			if not type(win_y_pos) == int:
-				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_y_pos`, got `{type(win_y_pos).__name__}`")
-			if win_y_pos < 0:
-				raise ValueError(f"Expected value `>= 0` for class `{self.__class__.__name__}` constructor argument `win_y_pos`, got `{type(win_y_pos)}`")
-			self._win_y_pos_def = win_y_pos
+	def _set_win_y_pos_def(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_POS", "iYOffset", new_val)
+		validate_type(value, int, 0)
+		self._win_y_pos_def = value
 
 	def _set_window_icon(self) -> None:
-		if not isinstance(self._icon_file, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_icon_file`, got `{type(self._icon_file).__name__}`")
-		if not self._icon_file.exists():
-			raise FileNotFoundError(f"File `{self._icon_file}` does not exist")
-		self._window.iconbitmap(self._icon_file)
+		validate_type(self._icon_path, Path)
+		if not self._icon_path.exists():
+			raise FileNotFoundError(f"File `{self._icon_path}` does not exist")
+		self._window.iconbitmap(self._icon_path)
 
 
 	# public methods
@@ -475,12 +379,18 @@ class CalculatorApp(GuiApp):
 		self._set_history_path(history_file)
 
 		# window default values
-		self._win_width_adv = self._config["WIN_ADV"]["iDefaultWidth"] if self._config else 400
-		self._win_height_adv = self._config["WIN_ADV"]["iDefaultHeight"] if self._config else 410
-		self._win_width_min_adv = self._config["WIN_ADV"]["iMinWidth"] if self._config else 400
-		self._win_height_min_adv = self._config["WIN_ADV"]["iMinHeight"] if self._config else 410
-		self._win_advanced_def = self._config["WIN_FLAGS"]["bStartAdvanced"] if self._config else False
-		self._win_force_focus = self._config["DEBUG"]["bForceFocus"] if self._config else False
+		self._set_win_width_adv(400)
+		self._set_win_height_adv(410)
+		self._set_win_width_min_adv(400)
+		self._set_win_height_min_adv(410)
+		self._set_win_advanced_def(False)
+		self._set_win_force_focus(False)
+
+		#self._set_win_restore_mod()
+		#self._set_win_restore_dimensions()
+		#self._set_win_restore_position()
+		#self._set_win_restore_pinned()
+		#self._set_win_restore_advanced()
 		#self._win_restore_mode = self._config["WIN_RESTORE"]["bRestoreMode"]
 		#self._win_restore_dimensions = self._config["WIN_RESTORE"]["bRestoreDimensions"]
 		#self._win_restore_position = self._config["WIN_RESTORE"]["bRestorePosition"]
@@ -542,12 +452,56 @@ class CalculatorApp(GuiApp):
 
 
 	# private methods
-	def _set_history_path(self, history_file: str) -> None:
-		if not isinstance(self._resources_path, Path):
-			raise TypeError(f"Expected type `pathlib.Path` for class `{self.__class__.__name__}` private attribute `_resources_path`, got `{type(self._resources_path).__name__}`")
-		if not isinstance(history_file, str):
-			raise TypeError(f"Expected type `str` for class `{self.__class__.__name__}` constructor argument `history_file`, got `{type(history_file).__name__}`")
-		self._history_path = self._resources_path / history_file
+	def _set_history_path(self, new_val: str) -> None:
+		validate_type(self._resources_path, Path)
+		validate_type(new_val, str)
+		self._history_path = self._resources_path / new_val
+
+	def _set_win_advanced_def(self, new_val: bool) -> None:
+		value = get_config_value(self._config, "WIN_FLAGS", "bStartAdvanced", new_val)
+		validate_type(new_val, bool)
+		self._win_advanced_def = value
+
+	def _set_win_force_focus(self, new_val: bool) -> None:
+		value = get_config_value(self._config, "DEBUG", "bForceFocus", new_val)
+		validate_type(new_val, bool)
+		self._win_force_focus = value
+
+	def _set_win_height_adv(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iDefaultHeight", new_val)
+		validate_type(value, int, 0)
+		try:
+			min_value = self._win_height_min_adv
+			validate_type(min_value, int, 0)
+		except AttributeError:
+			min_value = None
+		if min_value is not None and value < min_value:
+			self._win_height_adv = min_value
+		else:
+			self._win_height_adv = value
+
+	def _set_win_height_min_adv(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iMinHeight", new_val)
+		validate_type(value, int, 0)
+		self._win_height_min_adv = value
+
+	def _set_win_width_adv(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iDefaultWidth", new_val)
+		validate_type(value, int, 0)
+		try:
+			min_value = self._win_width_min_adv
+			validate_type(min_value, int, 0)
+		except AttributeError:
+			min_value = None
+		if min_value is not None and value < min_value:
+			self._win_width_adv = min_value
+		else:
+			self._win_width_adv = value
+
+	def _set_win_width_min_adv(self, new_val: int) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iMinWidth", new_val)
+		validate_type(value, int, 0)
+		self._win_width_min_adv = value
 
 
 	# public methods
