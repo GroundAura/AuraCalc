@@ -226,17 +226,17 @@ class GuiApp(App):
 
 	# private methods
 	def _set_win_centered_def(self, win_centered: bool) -> None:
-		if self._config and self._config["WIN_POS"]["bCenterWindow"]:
+		try:
 			if not type(self._config["WIN_POS"]["bCenterWindow"]) == bool:
 				raise TypeError(f"Expected type `bool` for config value `['WIN_POS']['bCenterWindow']`, got `{type(self._config['WIN_POS']['bCenterWindow']).__name__}`")
 			self._win_centered_def = self._config["WIN_POS"]["bCenterWindow"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_centered) == bool:
 				raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_centered`, got `{type(win_centered).__name__}`")
 			self._win_centered_def = win_centered
 
 	def _set_win_height_def(self, win_height: int) -> None:
-		if self._config and self._config["WIN_BASIC"]["iDefaultHeight"]:
+		try:
 			if not type(self._config["WIN_BASIC"]["iDefaultHeight"]) == int:
 				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iDefaultHeight']`, got `{type(self._config['WIN_BASIC']['iDefaultHeight']).__name__}`")
 			if self._config["WIN_BASIC"]["iDefaultHeight"] <= 0:
@@ -245,7 +245,7 @@ class GuiApp(App):
 				self._win_height_def = self._win_height_min
 			else:
 				self._win_height_def = self._config["WIN_BASIC"]["iDefaultHeight"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_height) == int:
 				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_height`, got `{type(win_height).__name__}`")
 			if win_height <= 0:
@@ -256,13 +256,13 @@ class GuiApp(App):
 				self._win_height_def = win_height
 
 	def _set_win_height_min(self, win_height_min: int) -> None:
-		if self._config and self._config["WIN_BASIC"]["iMinHeight"]:
+		try:
 			if not type(self._config["WIN_BASIC"]["iMinHeight"]) == int:
 				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iMinHeight']`, got `{type(self._config['WIN_BASIC']['iMinHeight']).__name__}`")
 			if self._config["WIN_BASIC"]["iMinHeight"] <= 0:
 				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iMinHeight']`, got `{self._config['WIN_BASIC']['iMinHeight']}`")
 			self._win_height_min = self._config["WIN_BASIC"]["iMinHeight"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_height_min) == int:
 				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_height_min`, got `{type(win_height_min).__name__}`")
 			if win_height_min <= 0:
@@ -270,11 +270,11 @@ class GuiApp(App):
 			self._win_height_min = win_height_min
 
 	def _set_win_pinned_def(self, win_pinned: bool) -> None:
-		if self._config and self._config["WIN_FLAGS"]["bStartPinned"]:
+		try:
 			if not type(self._config["WIN_FLAGS"]["bStartPinned"]) == bool:
 				raise TypeError(f"Expected type `bool` for config value `['WIN_FLAGS']['bStartPinned']`, got `{type(self._config['WIN_FLAGS']['bStartPinned']).__name__}`")
 			self._win_pinned_def = self._config["WIN_FLAGS"]["bStartPinned"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_pinned) == bool:
 				raise TypeError(f"Expected type `bool` for class `{self.__class__.__name__}` constructor argument `win_pinned`, got `{type(win_pinned).__name__}`")
 			self._win_pinned_def = win_pinned
@@ -290,7 +290,7 @@ class GuiApp(App):
 		self._win_resize_width = win_resize_width
 
 	def _set_win_width_def(self, win_width: int) -> None:
-		if self._config and self._config["WIN_BASIC"]["iDefaultWidth"]:
+		try:
 			if not type(self._config["WIN_BASIC"]["iDefaultWidth"]) == int:
 				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iDefaultWidth']`, got `{type(self._config['WIN_BASIC']['iDefaultWidth']).__name__}`")
 			if self._config["WIN_BASIC"]["iDefaultWidth"] <= 0:
@@ -299,7 +299,7 @@ class GuiApp(App):
 				self._win_width_def = self._win_width_min
 			else:
 				self._win_width_def = self._config["WIN_BASIC"]["iDefaultWidth"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_width) == int:
 				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_width`, got `{type(win_width).__name__}`")
 			if win_width <= 0:
@@ -310,13 +310,13 @@ class GuiApp(App):
 				self._win_width_def = win_width
 
 	def _set_win_width_min(self, win_width_min: int) -> None:
-		if self._config and self._config["WIN_BASIC"]["iMinWidth"]:
+		try:
 			if not type(self._config["WIN_BASIC"]["iMinWidth"]) == int:
 				raise TypeError(f"Expected type `int` for config value `['WIN_BASIC']['iMinWidth']`, got `{type(self._config['WIN_BASIC']['iMinWidth']).__name__}`")
 			if self._config["WIN_BASIC"]["iMinWidth"] <= 0:
 				raise ValueError(f"Expected value `> 0` for config value `['WIN_BASIC']['iMinWidth']`, got `{self._config['WIN_BASIC']['iMinWidth']}`")
 			self._win_width_min = self._config["WIN_BASIC"]["iMinWidth"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_width_min) == int:
 				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_width_min`, got `{type(win_width_min).__name__}`")
 			if win_width_min <= 0:
@@ -324,13 +324,13 @@ class GuiApp(App):
 			self._win_width_min = win_width_min
 
 	def _set_win_x_pos_def(self, win_x_pos: int) -> None:
-		if self._config and self._config["WIN_POS"]["iXOffset"]:
+		try:
 			if not type(self._config["WIN_POS"]["iXOffset"]) == int:
 				raise TypeError(f"Expected type `int` for config value `['WIN_POS']['iXOffset']`, got `{type(self._config['WIN_POS']['iXOffset']).__name__}`")
 			if self._config["WIN_POS"]["iXOffset"] < 0:
 				raise ValueError(f"Expected value `>= 0` for config value `['WIN_POS']['iXOffset']`, got `{self._config['WIN_POS']['iXOffset']}`")
 			self._win_x_pos_def = self._config["WIN_POS"]["iXOffset"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_x_pos) == int:
 				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_x_pos`, got `{type(win_x_pos).__name__}`")
 			if win_x_pos < 0:
@@ -338,13 +338,13 @@ class GuiApp(App):
 			self._win_x_pos_def = win_x_pos
 
 	def _set_win_y_pos_def(self, win_y_pos: int) -> None:
-		if self._config and self._config["WIN_POS"]["iYOffset"]:
+		try:
 			if not type(self._config["WIN_POS"]["iYOffset"]) == int:
 				raise TypeError(f"Expected type `int` for config value `['WIN_POS']['iYOffset']`, got `{type(self._config['WIN_POS']['iYOffset']).__name__}`")
 			if self._config["WIN_POS"]["iYOffset"] < 0:
 				raise ValueError(f"Expected value `>= 0` for config value `['WIN_POS']['iYOffset']`, got `{self._config['WIN_POS']['iYOffset']}`")
 			self._win_y_pos_def = self._config["WIN_POS"]["iYOffset"]
-		else:
+		except AttributeError or KeyError:
 			if not type(win_y_pos) == int:
 				raise TypeError(f"Expected type `int` for class `{self.__class__.__name__}` constructor argument `win_y_pos`, got `{type(win_y_pos).__name__}`")
 			if win_y_pos < 0:
