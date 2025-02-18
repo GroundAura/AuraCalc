@@ -56,8 +56,8 @@ def config_to_dict(
 		config_dict[section] = section_dict
 	return config_dict
 
-def get_config_value(config: dict, cfg_section: str, cfg_key: str, def_val: any = None) -> any:
-	if config is None:
+def get_config_value(config: dict, cfg_section: str, cfg_key: str, def_val: any = None, use_config: bool = True) -> any:
+	if config is None or not use_config:
 		return def_val
 	try:
 		return config[cfg_section][cfg_key]

@@ -158,14 +158,14 @@ class GuiApp(App):
 		App.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config)
 
 		# window default values
-		self._set_win_width_min(win_width_min)
-		self._set_win_height_min(win_height_min)
-		self._set_win_width_def(win_width)
-		self._set_win_height_def(win_height)
-		self._set_win_x_pos_def(win_x_pos)
-		self._set_win_y_pos_def(win_y_pos)
-		self._set_win_centered_def(win_centered)
-		self._set_win_pinned_def(win_pinned)
+		self._set_win_width_min(win_width_min, use_config)
+		self._set_win_height_min(win_height_min, use_config)
+		self._set_win_width_def(win_width, use_config)
+		self._set_win_height_def(win_height, use_config)
+		self._set_win_x_pos_def(win_x_pos, use_config)
+		self._set_win_y_pos_def(win_y_pos, use_config)
+		self._set_win_centered_def(win_centered, use_config)
+		self._set_win_pinned_def(win_pinned, use_config)
 
 		# window state
 		self._win_width = self._win_width_def
@@ -178,6 +178,8 @@ class GuiApp(App):
 
 		# window
 		self._window = ctk.CTk()
+		validate_type(self._window, ctk.CTk)
+		validate_type(self._name, str)
 		self._window.title(self._name)
 		try:
 			self._set_window_icon()
@@ -192,13 +194,13 @@ class GuiApp(App):
 
 
 	# private methods
-	def _set_win_centered_def(self, new_val: bool) -> None:
-		value = get_config_value(self._config, "WIN_POS", "bCenterWindow", new_val)
+	def _set_win_centered_def(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_POS", "bCenterWindow", new_val, use_config)
 		validate_type(new_val, bool)
 		self._win_centered_def = value
 
-	def _set_win_height_def(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_BASIC", "iDefaultHeight", new_val)
+	def _set_win_height_def(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iDefaultHeight", new_val, use_config)
 		validate_type(value, int, 0)
 		try:
 			min_value = self._win_width_min
@@ -210,13 +212,13 @@ class GuiApp(App):
 		else:
 			self._win_height_def = value
 
-	def _set_win_height_min(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_BASIC", "iMinHeight", new_val)
+	def _set_win_height_min(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iMinHeight", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_height_min = value
 
-	def _set_win_pinned_def(self, new_val: bool) -> None:
-		value = get_config_value(self._config, "WIN_FLAGS", "bStartPinned", new_val)
+	def _set_win_pinned_def(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_FLAGS", "bStartPinned", new_val, use_config)
 		validate_type(new_val, bool)
 		self._win_pinned_def = value
 
@@ -228,8 +230,8 @@ class GuiApp(App):
 		validate_type(new_val, bool)
 		self._win_resize_width = new_val
 
-	def _set_win_width_def(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_BASIC", "iDefaultWidth", new_val)
+	def _set_win_width_def(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iDefaultWidth", new_val, use_config)
 		validate_type(value, int, 0)
 		try:
 			min_value = self._win_width_min
@@ -241,18 +243,18 @@ class GuiApp(App):
 		else:
 			self._win_width_def = value
 
-	def _set_win_width_min(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_BASIC", "iMinWidth", new_val)
+	def _set_win_width_min(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_BASIC", "iMinWidth", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_width_min = value
 
-	def _set_win_x_pos_def(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_POS", "iXOffset", new_val)
+	def _set_win_x_pos_def(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_POS", "iXOffset", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_x_pos_def = value
 
-	def _set_win_y_pos_def(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_POS", "iYOffset", new_val)
+	def _set_win_y_pos_def(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_POS", "iYOffset", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_y_pos_def = value
 
@@ -379,12 +381,12 @@ class CalculatorApp(GuiApp):
 		self._set_history_path(history_file)
 
 		# window default values
-		self._set_win_width_adv(400)
-		self._set_win_height_adv(410)
-		self._set_win_width_min_adv(400)
-		self._set_win_height_min_adv(410)
-		self._set_win_advanced_def(False)
-		self._set_win_force_focus(False)
+		self._set_win_width_adv(400, use_config)
+		self._set_win_height_adv(410, use_config)
+		self._set_win_width_min_adv(400, use_config)
+		self._set_win_height_min_adv(410, use_config)
+		self._set_win_advanced_def(False, use_config)
+		self._set_win_force_focus(False, use_config)
 
 		#self._set_win_restore_mod()
 		#self._set_win_restore_dimensions()
@@ -432,18 +434,18 @@ class CalculatorApp(GuiApp):
 		}
 
 		# keybinds
-		self._advanced_key = self._config["KEYBINDS"]["sAdvancedKey"] if self._config else "<F3>"
-		self._clear_key = self._config["KEYBINDS"]["sClearKey"] if self._config else "<Alt-BackSpace>"
-		self._delete_left_key = self._config["KEYBINDS"]["sDeleteAllLKey"] if self._config else "<Control-BackSpace>"
-		self._delete_right_key = self._config["KEYBINDS"]["sDeleteAllRKey"] if self._config else "<Control-Delete>"
-		#self._delete_term_left_key = self._config["KEYBINDS"]["sDeleteTermLKey"] if self._config else "<Shift-BackSpace>"
-		#self._delete_term_right_key = self._config["KEYBINDS"]["sDeleteTermRKey"] if self._config else "<Shift-Delete>"
-		self._evaluate_key = self._config["KEYBINDS"]["sEvaluateKey"] if self._config else "<Enter>"
-		#self._help_key = self._config["KEYBINDS"]["sHelpKey"] if self._config else "<F1>"
-		#self._options_key = self._config["KEYBINDS"]["sOptionsKey"] if self._config else "<F2>"
-		#self._redo_key = self._config["KEYBINDS"]["sRedoKey"] if self._config else "<Control-y>"
-		#self._undo_key = self._config["KEYBINDS"]["sUndoKey"] if self._config else "<Control-z>"
-		self._quit_key = self._config["KEYBINDS"]["sQuitKey"] if self._config else "<Escape>"
+		self._set_key_advanced("<F3>", use_config)
+		self._set_key_clear("<Alt-BackSpace>", use_config)
+		self._set_key_del_l("<Control-BackSpace>", use_config)
+		self._set_key_del_r("<Control-Delete>", use_config)
+		#self._set_key_del_term_r("<Shift-BackSpace>", use_config)
+		#self._set_key_del_term_l("<Shift-Delete>", use_config)
+		self._set_key_eval("<Enter>", use_config)
+		#self._set_key_help("<F1>", use_config)
+		#self._set_key_options("<F2>", use_config)
+		#self._set_key_redo("<Control-y>", use_config)
+		#self._set_key_undo("<Control-z>", use_config)
+		self._set_key_quit("<Escape>", use_config)
 
 		# debug
 		self._debug_mode = self._config["DEBUG"]["bDebugMode"] if self._config else False
@@ -457,18 +459,78 @@ class CalculatorApp(GuiApp):
 		validate_type(new_val, str)
 		self._history_path = self._resources_path / new_val
 
-	def _set_win_advanced_def(self, new_val: bool) -> None:
-		value = get_config_value(self._config, "WIN_FLAGS", "bStartAdvanced", new_val)
+	def _set_key_advanced(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sAdvancedKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_advanced = value
+
+	def _set_key_clear(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sClearKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_clear = value
+
+	def _set_key_del_l(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sDeleteAllLKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_del_l = value
+
+	def _set_key_del_r(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sDeleteAllRKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_del_r = value
+
+	def _set_key_del_term_l(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sDeleteTermLKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_del_term_l = value
+
+	def _set_key_del_term_r(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sDeleteTermRKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_del_term_r = value
+
+	def _set_key_eval(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sEvaluateKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_eval = value
+
+	def _set_key_help(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sHelpKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_help = value
+
+	def _set_key_options(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sOptionsKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_options = value
+
+	def _set_key_redo(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sRedoKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_redo = value
+
+	def _set_key_undo(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sUndoKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_undo = value
+
+	def _set_key_quit(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "KEYBINDS", "sQuitKey", new_val, use_config)
+		validate_type(new_val, str)
+		self._key_quit = value
+
+	def _set_win_advanced_def(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_FLAGS", "bStartAdvanced", new_val, use_config)
 		validate_type(new_val, bool)
 		self._win_advanced_def = value
 
-	def _set_win_force_focus(self, new_val: bool) -> None:
-		value = get_config_value(self._config, "DEBUG", "bForceFocus", new_val)
+	def _set_win_force_focus(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "DEBUG", "bForceFocus", new_val, use_config)
 		validate_type(new_val, bool)
 		self._win_force_focus = value
 
-	def _set_win_height_adv(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_ADV", "iDefaultHeight", new_val)
+	def _set_win_height_adv(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iDefaultHeight", new_val, use_config)
 		validate_type(value, int, 0)
 		try:
 			min_value = self._win_height_min_adv
@@ -480,13 +542,13 @@ class CalculatorApp(GuiApp):
 		else:
 			self._win_height_adv = value
 
-	def _set_win_height_min_adv(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_ADV", "iMinHeight", new_val)
+	def _set_win_height_min_adv(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iMinHeight", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_height_min_adv = value
 
-	def _set_win_width_adv(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_ADV", "iDefaultWidth", new_val)
+	def _set_win_width_adv(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iDefaultWidth", new_val, use_config)
 		validate_type(value, int, 0)
 		try:
 			min_value = self._win_width_min_adv
@@ -498,8 +560,8 @@ class CalculatorApp(GuiApp):
 		else:
 			self._win_width_adv = value
 
-	def _set_win_width_min_adv(self, new_val: int) -> None:
-		value = get_config_value(self._config, "WIN_ADV", "iMinWidth", new_val)
+	def _set_win_width_min_adv(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_ADV", "iMinWidth", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_width_min_adv = value
 
