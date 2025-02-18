@@ -208,9 +208,8 @@ class GuiApp(App):
 		except AttributeError:
 			min_value = None
 		if min_value is not None and value < min_value:
-			self._win_height_def = min_value
-		else:
-			self._win_height_def = value
+			value = min_value
+		self._win_height_def = value
 
 	def _set_win_height_min(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_BASIC", "iMinHeight", new_val, use_config)
@@ -239,9 +238,8 @@ class GuiApp(App):
 		except AttributeError:
 			min_value = None
 		if min_value is not None and value < min_value:
-			self._win_width_def = min_value
-		else:
-			self._win_width_def = value
+			value = min_value
+		self._win_width_def = value
 
 	def _set_win_width_min(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_BASIC", "iMinWidth", new_val, use_config)
@@ -388,29 +386,22 @@ class CalculatorApp(GuiApp):
 		self._set_win_advanced_def(False, use_config)
 		self._set_win_force_focus(False, use_config)
 
-		#self._set_win_restore_mod()
-		#self._set_win_restore_dimensions()
-		#self._set_win_restore_position()
-		#self._set_win_restore_pinned()
-		#self._set_win_restore_advanced()
-		#self._win_restore_mode = self._config["WIN_RESTORE"]["bRestoreMode"]
-		#self._win_restore_dimensions = self._config["WIN_RESTORE"]["bRestoreDimensions"]
-		#self._win_restore_position = self._config["WIN_RESTORE"]["bRestorePosition"]
-		#self._win_restore_pinned = self._config["WIN_RESTORE"]["bRestorePinned"]
-		#self._win_restore_advanced = self._config["WIN_RESTORE"]["bRestoreAdvanced"]
+		self._set_win_restore(False, use_config)
+		self._set_win_restore_adv(False, use_config)
+		self._set_win_restore_dim(False, use_config)
+		self._set_win_restore_pin(False, use_config)
+		self._set_win_restore_pos(False, use_config)
 
 		# window state
 		self._win_expanded = False
 
 		# calculator default values
-		self._dec_precision = self._config["CALCULATION"]["iDecimalPrecision"] if self._config else 100
-		self._dec_display = self._config["CALCULATION"]["iDecimalDisplay"] if self._config else 10
-		if self._dec_display > self._dec_precision:
-			self._dec_display = self._dec_precision
-		self._only_simplify = self._config["CALCULATION"]["bOnlySimplify"] if self._config else False
-		self._live_eval = self._config["CALCULATION"]["bLiveEval"] if self._config else True
-		self._live_eval_delay = self._config["CALCULATION"]["iTimeoutDelay"] if self._config else 1000
-		self._sanitize_input = self._config["DEBUG"]["bSanitizeInput"] if self._config else True
+		self._set_calc_dec_precision(100, use_config)
+		self._set_calc_dec_display(10, use_config)
+		self._set_calc_only_simplify(False, use_config)
+		self._set_calc_live_eval(True, use_config)
+		self._set_calc_live_eval_delay(1000, use_config)
+		self._set_calc_sanitize_input(True, use_config)
 		self._def_expression = ''
 		self._def_result = '0'
 		self._timeout_patience = 1
@@ -448,12 +439,54 @@ class CalculatorApp(GuiApp):
 		self._set_key_quit("<Escape>", use_config)
 
 		# debug
-		self._debug_mode = self._config["DEBUG"]["bDebugMode"] if self._config else False
+		self._set_debug_mode(False, use_config)
 		if self._debug_mode:
 			print(f"Settings: {self._config}")
 
 
 	# private methods
+	def _set_calc_dec_display(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "CALCULATION", "iDecimalDisplay", new_val, use_config)
+		validate_type(value, int, 0)
+		try:
+			max_value = self._calc_dec_precision
+			validate_type(max_value, int, 0)
+		except AttributeError:
+			max_value = None
+		if max_value is not None and value > max_value:
+			value = max_value
+		self._calc_dec_display = value
+
+	def _set_calc_dec_precision(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "CALCULATION", "iDecimalPrecision", new_val, use_config)
+		validate_type(value, int, 0)
+		self._calc_dec_precision = value
+
+	def _set_calc_live_eval(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "CALCULATION", "bLiveEval", new_val, use_config)
+		validate_type(new_val, bool)
+		self._calc_live_eval = value
+
+	def _set_calc_live_eval_delay(self, new_val: int, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "CALCULATION", "iTimeoutDelay", new_val, use_config)
+		validate_type(value, int, 0)
+		self._calc_live_eval_delay = value
+
+	def _set_calc_only_simplify(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "CALCULATION", "bOnlySimplify", new_val, use_config)
+		validate_type(new_val, bool)
+		self._only_simplify = value
+
+	def _set_calc_sanitize_input(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "DEBUG", "bSanitizeInput", new_val, use_config)
+		validate_type(new_val, bool)
+		self._sanitize_input = value
+
+	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "DEBUG", "bDebugMode", new_val, use_config)
+		validate_type(new_val, bool)
+		self._debug_mode = value
+
 	def _set_history_path(self, new_val: str) -> None:
 		validate_type(self._resources_path, Path)
 		validate_type(new_val, str)
@@ -538,14 +571,66 @@ class CalculatorApp(GuiApp):
 		except AttributeError:
 			min_value = None
 		if min_value is not None and value < min_value:
-			self._win_height_adv = min_value
-		else:
-			self._win_height_adv = value
+			value = min_value
+		self._win_height_adv = value
 
 	def _set_win_height_min_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iMinHeight", new_val, use_config)
 		validate_type(value, int, 0)
 		self._win_height_min_adv = value
+
+	def _set_win_restore(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_RESTORE", "bRestoreMode", new_val, use_config)
+		validate_type(new_val, bool)
+		self._win_restore = value
+
+	def _set_win_restore_adv(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_RESTORE", "bRestoreAdvanced", new_val, use_config)
+		validate_type(new_val, bool)
+		try:
+			parent_enabled = self._win_restore
+			validate_type(parent_enabled, bool)
+		except AttributeError:
+			parent_enabled = True
+		if not parent_enabled:
+			value = False
+		self._win_restore_adv = value
+
+	def _set_win_restore_dim(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_RESTORE", "bRestoreDimensions", new_val, use_config)
+		validate_type(new_val, bool)
+		try:
+			parent_enabled = self._win_restore
+			validate_type(parent_enabled, bool)
+		except AttributeError:
+			parent_enabled = True
+		if not parent_enabled:
+			value = False
+		self._win_restore_dim = value
+
+	def _set_win_restore_pin(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_RESTORE", "bRestorePinned", new_val, use_config)
+		validate_type(new_val, bool)
+		try:
+			parent_enabled = self._win_restore
+			validate_type(parent_enabled, bool)
+		except AttributeError:
+			parent_enabled = True
+		if not parent_enabled:
+			value = False
+		self._win_restore_pin = value
+
+	def _set_win_restore_pos(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, "WIN_RESTORE", "bRestorePosition", new_val, use_config)
+		validate_type(new_val, bool)
+		try:
+			parent_enabled = self._win_restore
+			validate_type(parent_enabled, bool)
+		except AttributeError:
+			parent_enabled = True
+		if not parent_enabled:
+			value = False
+		self._win_restore_pos = value
 
 	def _set_win_width_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iDefaultWidth", new_val, use_config)
@@ -556,9 +641,8 @@ class CalculatorApp(GuiApp):
 		except AttributeError:
 			min_value = None
 		if min_value is not None and value < min_value:
-			self._win_width_adv = min_value
-		else:
-			self._win_width_adv = value
+			value = min_value
+		self._win_width_adv = value
 
 	def _set_win_width_min_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iMinWidth", new_val, use_config)
