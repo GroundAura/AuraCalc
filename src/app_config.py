@@ -84,7 +84,7 @@ def read_config(
 		if not os.path.exists(file_path):
 			raise Exception(f"Config file not found: '{file_path}'.")
 		config.read(file_path)
-		print(f"INFO: Config file read successfully.")
+		print('INFO: Config file read successfully.')
 	except Exception as e:
 		raise Exception(f"ERROR: Error while trying to read config file: {e}")
 	try:

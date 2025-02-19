@@ -15,7 +15,7 @@ from app_class import CalculatorApp
 from app_debug import print_debug
 from app_evaluate import evaluate_expression, sanitize_input
 from app_keybinds import keybind_enabled
-from app_window import clear_io, close_window, display_result, toggle_advanced, focus_element, pin_window, update_window
+from app_window import clear_io, display_result, toggle_advanced, focus_element, pin_window
 
 
 
@@ -33,9 +33,9 @@ def delayed_display(app, output_element, message: str) -> None:
 	#if app.timeout_id is not None:
 	#	app.window.after_cancel(app.timeout_id)
 	#	app.timeout_id = None
-	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(output_element, message))
-	app.delayed_func(lambda: display_result(output_element, message))
-	display_result(output_element, app.calc_last_result)
+	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(app, output_element, message))
+	app.delayed_func(lambda: display_result(app, output_element, message))
+	display_result(app, output_element, app.calc_last_result)
 
 def evaluate_input(app, input_element, output_element, live_mode: bool = False) -> None:
 	"""
@@ -51,17 +51,17 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 	if app.timeout_id is not None:
 		app.window.after_cancel(app.timeout_id)
 		app.timeout_id = None
-	print_debug(f"Expr (initial):{' '*6}`{expression}`")
+	app.log_debug(f"Expr (initial):{' '*6}`{expression}`")
 	if not expression:
-		display_result(output_element, app.calc_def_result)
+		display_result(app, output_element, app.calc_def_result)
 		return
 	try:
-		expression = sanitize_input(expression)
-		result = evaluate_expression(expression)
-		display_result(output_element, result)
+		expression = sanitize_input(app, expression, sanitize=app._sanitize_input)
+		result = evaluate_expression(app, expression, dont_evaluate=app._only_simplify)
+		display_result(app, output_element, result)
 		return
 	except ZeroDivisionError:
-		display_result(output_element, 'Undefined (division by zero)')
+		display_result(app, output_element, 'Undefined (division by zero)')
 		return
 	except Exception as e:
 		if live_mode and app.timeout_patience > 0 and expression[-1] in app.calc_wait_chars:
@@ -71,14 +71,14 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 			delayed_display(app, output_element, f"ERROR: {e}")
 			return
 		else:
-			display_result(output_element, f"ERROR: {e}")
+			display_result(app, output_element, f"ERROR: {e}")
 			return
 	#except Exception as e:
 	#	if live_mode and app.timeout_patience > 1:
 	#		delayed_display(app, output_element, f"ERROR: {e}")
 	#		return
 	#	else:
-	#		display_result(output_element, f"ERROR: {e}")
+	#		display_result(app, output_element, f"ERROR: {e}")
 	#		return
 
 
@@ -172,7 +172,7 @@ def main():
 
 	## Create the File menu
 	#file_menu = tk.Menu(menu_bar, tearoff=0, activebackground='#106a43')
-	#file_menu.add_command(label='Exit', command=lambda: close_window(app.window))
+	#file_menu.add_command(label='Exit', command=app.close_window)
 	###file_menu.grid(row=0, column=0, padx=x_padding, pady=y_padding)
 
 	## Add the menus to the menu bar
@@ -196,20 +196,20 @@ def main():
 	result_display.configure(state='disabled')
 
 	# Pin Window ELement (CTkButton)
-	pin_button = ctk.CTkButton(layer, text='Pin', command=lambda: pin_window(app.window, pin_button), width=30)
+	pin_button = ctk.CTkButton(layer, text='Pin', command=lambda: pin_window(app, pin_button), width=30)
 	pin_button.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 	if app._win_pinned_def:
-		pin_window(app.window, pin_button)
+		pin_window(app, pin_button)
 
 	# Clear Entry/Result Element (CTkButton)
-	clear_button = ctk.CTkButton(layer, text='Clear', command=lambda: clear_io(entry_input, result_display), width=30)
+	clear_button = ctk.CTkButton(layer, text='Clear', command=lambda: clear_io(app, entry_input, result_display), width=30)
 	clear_button.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Advanced View Element (CTkButton)
-	advanced_button = ctk.CTkButton(layer, text='Expand', command=lambda: toggle_advanced(app.window, advanced_frame, advanced_button), width=30)
+	advanced_button = ctk.CTkButton(layer, text='Expand', command=lambda: toggle_advanced(app, advanced_frame, advanced_button), width=30)
 	advanced_button.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 	if app._win_advanced_def:
-		toggle_advanced(advanced_frame, advanced_button)
+		toggle_advanced(app, advanced_frame, advanced_button)
 
 
 
@@ -217,9 +217,9 @@ def main():
 
 	# Keybinds
 	if keybind_enabled(app._key_advanced):
-		app.window.bind(app._key_advanced, lambda event: toggle_advanced(app.window, advanced_frame, advanced_button))
+		app.window.bind(app._key_advanced, lambda event: toggle_advanced(app, advanced_frame, advanced_button))
 	if keybind_enabled(app._key_clear):
-		app.window.bind(app._key_clear, lambda event: clear_io(entry_input, result_display))
+		app.window.bind(app._key_clear, lambda event: clear_io(app, entry_input, result_display))
 	if keybind_enabled(app._key_del_l):
 		entry_input.bind(app._key_del_l, lambda event: entry_input.delete(0, ctk.INSERT))
 	if keybind_enabled(app._key_del_r):
@@ -235,14 +235,11 @@ def main():
 	#if keybind_enabled(app._key_options):
 	#	app.window.bind(app._key_options, lambda event: toggle_options(app.window, options_frame, options_button))
 	if keybind_enabled(app._key_quit):
-		app.window.bind(app._key_quit, lambda event: close_window(app.window))
+		app.window.bind(app._key_quit, lambda event: app.close_window())
 
 	# Key release
 	if app._calc_live_eval:
 		entry_input.bind('<KeyRelease>', lambda event: evaluate_input(app, entry_input, result_display, live_mode=True))
-
-	# Window close
-	app.window.protocol('WM_DELETE_WINDOW', lambda: close_window(app.window))
 
 
 

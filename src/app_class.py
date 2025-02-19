@@ -4,6 +4,7 @@
 
 # external
 import customtkinter as ctk
+from decimal import getcontext
 from pathlib import Path
 import sys
 
@@ -234,9 +235,9 @@ class GuiApp(App):
 			print(f"ERROR: Error while trying to set window icon: {e}")
 		#self._window.geometry(f"{self._win_width_def}x{self._win_height_def}+{self._win_x_pos_def}+{self._win_y_pos_def}")
 		self._window.protocol('WM_DELETE_WINDOW', self.close_window)
-		self.update_window(True)
-		if self._win_pinned_def:
-			self.toggle_pinned()
+		self.update_window(reset_pos=True)
+		#if self._win_pinned_def:
+		#	self.toggle_pinned()
 		#print('Initialized Window')
 
 
@@ -312,6 +313,8 @@ class GuiApp(App):
 
 	# public methods
 	def close_window(self) -> None:
+		self.log_debug(f"Closing {self.name}.")
+		self.log_debug('\n\n', timestamp=False, print_to_console=False) # add delimiter to end of log
 		self._window.destroy()
 
 	def focus_window(self) -> None:
@@ -324,6 +327,7 @@ class GuiApp(App):
 		self._window.iconify()
 
 	def open_window(self) -> None:
+		self.log_debug(f"Opening {self.name}.")
 		self._window.mainloop()
 
 	def print_info(self) -> None:
@@ -439,7 +443,7 @@ class CalculatorApp(GuiApp):
 		self._set_win_restore_pin(False, use_config)
 		self._set_win_restore_pos(False, use_config)
 
-		# window state
+		## window state
 		self._win_expanded = False
 
 		# calculator default values
@@ -502,6 +506,7 @@ class CalculatorApp(GuiApp):
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._calc_dec_precision = value
+		getcontext().prec = self._calc_dec_precision
 
 	def _set_calc_live_eval(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'CALCULATION', 'bLiveEval', new_val, use_config)
@@ -692,7 +697,71 @@ class CalculatorApp(GuiApp):
 			delay = custom_delay if custom_delay is not None else 1000
 		self._timeout_id = self.window.after(delay, func)
 
+	def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None:
+		self._screen_width, self._screen_height = self.screen_dimensions
+		#print(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
+		if reset_pos:
+			current_width = self._win_width_def
+			current_height = self._win_height_def
+		else:
+			current_width, current_height = self.window_dimensions
+		#print(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
+		if reset_pos:
+			if self._win_centered_def:
+				target_x_pos = (self._screen_width // 2) - (current_width // 2)
+				target_y_pos = (self._screen_height // 2) - (current_height // 2)
+			else:
+				target_x_pos = self._win_x_pos_def
+				target_y_pos = self._win_y_pos_def
+		else:
+			target_x_pos = self._window.winfo_x()
+			target_y_pos = self._window.winfo_y()
+		#print(f"Target Position: ({target_x_pos}, {target_y_pos})")
+		try:
+			expanded = True if self._win_expanded else False
+		except AttributeError:
+			expanded = False
+		if expanded:
+			if reset_width:
+				target_width = self._win_width_adv
+			else:
+				target_width = current_width if current_width > self._win_width_min_adv else self._win_width_min_adv
+				#target_width = current_width if current_width > self._win_width_adv else self._win_width_adv
+			if reset_height:
+				target_height = self._win_height_adv
+			else:
+				target_height = current_height if current_height > self._win_height_min_adv else self._win_height_min_adv
+				#target_height = current_height if current_height > self._win_height_adv else self._win_height_adv
+			self._window.minsize(self._win_width_min_adv, self._win_height_min_adv)
+		else:
+			if reset_width:
+				target_width = self._win_width_def
+			else:
+				target_width = current_width if current_width > self._win_width_min else self._win_width_min
+				#target_width = current_width if current_width > self._win_width_def else self._win_width_def
+				#target_width = current_width if current_width > self._win_width_adv else self._win_width_adv
+			if reset_height:
+				target_height = self._win_height_def
+			else:
+				target_height = current_height if current_height > self._win_height_min else self._win_height_min
+				#target_height = current_height if current_height > self._win_height_def else self._win_height_def
+			self._window.minsize(self._win_width_min, self._win_height_min)
+		self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
+		self._window.resizable(self._win_resize_width, self._win_resize_height)
+		self._win_width, self._win_height = self.window_dimensions
+		self._win_x_pos, self._win_y_pos = self.window_position
+		#self._window.update()
+		#print('Window updated.')
+
 	# properties
+	@property
+	def calc_dec_display(self) -> int:
+		return self._calc_dec_display
+
+	@property
+	def calc_dec_precicion(self) -> int:
+		return self._calc_dec_precision
+
 	@property
 	def calc_def_expr(self) -> str:
 		return self._calc_def_expr
@@ -708,10 +777,18 @@ class CalculatorApp(GuiApp):
 	@property
 	def calc_last_result(self) -> str:
 		return self._calc_last_result
+	@calc_last_result.setter
+	def calc_last_result(self, new_val: str) -> None:
+		validate_type(new_val, str)
+		self._calc_last_result = new_val
 
 	@property
 	def calc_wait_chars(self) -> str:
 		return self._calc_wait_chars
+
+	@property
+	def clipboard(self) -> str:
+		return self._window.clipboard_get()
 
 	@property
 	def timeout_id(self) -> int | None:
@@ -724,6 +801,22 @@ class CalculatorApp(GuiApp):
 	@property
 	def timeout_patience(self) -> int:
 		return self._timeout_patience
+
+	#@property
+	#def win_expanded(self) -> bool:
+	#	return self._win_expanded
+	#@win_expanded.setter
+	#def win_expanded(self, new_val: bool) -> None:
+	#	validate_type(new_val, bool)
+	#	self._win_expanded = new_val
+
+	@property
+	def win_resize_height(self) -> bool:
+		return self._win_resize_height
+	@win_resize_height.setter
+	def win_resize_height(self, new_val: bool) -> None:
+		validate_type(new_val, bool)
+		self._win_resize_height = new_val
 
 
 
