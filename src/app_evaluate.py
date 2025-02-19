@@ -184,7 +184,7 @@ def eval_custom_functions(expression: str) -> str:
 		"""
 		function_name = match.group(1).strip('(')
 		argument_str = match.group(2)
-		args = [f"\'{arg.strip()}\'" for arg in argument_str.split(',')]
+		args = [f"'{arg.strip()}'" for arg in argument_str.split(',')]
 		print_debug(f"Function requested: {function_name}, Arguments: {args}")
 		#if function_name in BUILTIN_FUNCTIONS:
 		#	return f"{function_name}({', '.join(args)})"
@@ -194,7 +194,7 @@ def eval_custom_functions(expression: str) -> str:
 			function_info = CUSTOM_FUNCTIONS[function_name]
 			print_debug(f"Matching function: '{function_name}': {function_info}")
 			function_to_call: str = f"{function_info['func']}({', '.join(args)})"
-			#function_to_call: str = f"{function_info['func']}({', '.join([f'\"{arg}\"' if 'd' in arg else arg for arg in args])})"
+			#function_to_call: str = f"{function_info['func']}({', '.join([f"'{arg}'" if 'd' in arg else arg for arg in args])})"
 			print_debug(f"Function to call: {function_to_call}")
 			#if function['args'] != len(args):
 			#	if function['args'] == 1:
@@ -263,7 +263,7 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 		str: The result of the expression.
 	"""
 	#continue_eval: bool = True
-	print_debug("Evaluating expression...")
+	print_debug('Evaluating expression...')
 	try:
 		# Remove leading zeros
 		expression = strip_leading_zeros(expression)
@@ -281,7 +281,7 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 		expression = sympify(expression)
 		print_debug(f"Expr (sympify):{' '*6}`{expression}`")
 		if str(expression) == 'zoo':
-			raise ZeroDivisionError("Division by zero")
+			raise ZeroDivisionError('Division by zero')
 		# Simplify
 		expression = simplify(expression)
 		print_debug(f"Expr (simplify):{' '*5}`{expression}`")
@@ -307,9 +307,9 @@ def evaluate_expression(expression: str, dont_evaluate: bool = app_globals.ONLY_
 			app_globals.LAST_RESULT = result
 			return result
 	except InvalidOperation:
-		raise InvalidOperation("Invalid number format")
+		raise InvalidOperation('Invalid number format')
 	except ZeroDivisionError:
-		raise ZeroDivisionError("Division by zero")
+		raise ZeroDivisionError('Division by zero')
 
 def format_expression(expression: str) -> str:
 	"""
@@ -375,7 +375,7 @@ def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize
 	"""
 	sanitized_expression = expression.lstrip('=').rstrip('=')
 	if sanitize and not allowed_chars.match(sanitized_expression):
-		raise ValueError("Invalid characters in expression")
+		raise ValueError('Invalid characters in expression')
 	print_debug(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
 	return sanitized_expression
 
@@ -396,7 +396,7 @@ def simplify_decimal(number: any, decimal_places: int = app_globals.DEC_DISPLAY)
 	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
 	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
 	if rounded_number.is_zero():
-		return "0"
+		return '0'
 	simplified_number = str(rounded_number).rstrip('0').rstrip('.')
 	return simplified_number
 
@@ -416,7 +416,7 @@ def simplify_decimal(number: any, decimal_places: int = app_globals.DEC_DISPLAY)
 #		else:
 #			return Decimal(float_value)
 #	else:
-#		raise ValueError("Input must be a float to be simplified.")
+#		raise ValueError('Input must be a float to be simplified.')
 
 #def split_terms(expression: str) -> list[str]:
 #	terms = expression.split()
@@ -439,7 +439,7 @@ def strip_leading_zeros(expression: str) -> str:
 
 ### MAIN ###
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	import math
 	print(math.sqrt(9))
 	print(math.log(9, 3))

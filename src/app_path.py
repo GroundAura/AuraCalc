@@ -28,7 +28,7 @@ def resource_path(relative_path: str | Path) -> Path:
 
 ### MAIN ###
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	pass
 
 

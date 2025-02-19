@@ -31,7 +31,7 @@ def roll_dice(dice_string: str) -> tuple[int, list]:
 	Generates a random number based on the dice string.
 
 	Args:
-		dice_string (str): The dice notation (e.g., `"3d6"`).
+		dice_string (str): The dice notation (e.g., `'3d6'`).
 
 	Returns:
 		int: The random number.
@@ -58,23 +58,23 @@ def quadratic_formula(a, b, c):
 	root2 = (-b - cmath.sqrt(discriminant)) / (2 * a)
 	return root1, root2
 
-def quad_zero(a, b, c, positive = "+"):
+def quad_zero(a, b, c, positive = '+'):
 	a = float(a)
 	b = float(b)
 	c = float(c)
 	root1, root2 = quadratic_formula(a, b, c)
-	if positive in ["True", "p", "+", "positive"]:
+	if positive in ['True', 'p', '+', 'positive']:
 		return root1
-	elif positive in ["False", "n", "-", "negative"]:
+	elif positive in ['False', 'n', '-', 'negative']:
 		return root2
 	else:
 		raise ValueError("Invalid positive argument. Use 'p' for positive, 'n' for negative.")
 
-if __name__ == "__main__":
-	#dice_input = "3d6"
+if __name__ == '__main__':
+	#dice_input = '3d6'
 	#total, rolls = roll_dice(dice_input)
 
-	dice_string = "3*d*6"
+	dice_string = '3*d*6'
 	expression = sympify(dice_string)
 	print(expression)
 

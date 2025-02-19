@@ -37,7 +37,7 @@ def load_history(keep_current_history: bool = False):
 	app_globals.HISTORY = loaded_history + app_globals.HISTORY
 
 def save_history():
-	data: str = ""
+	data: str = ''
 	for expression, result in app_globals.HISTORY:
 		data += f"{expression} |=| {result}\n"
 	with open(app_globals.HISTORY_FILE, 'w', encoding='utf-8') as f:
@@ -47,7 +47,7 @@ def save_history():
 
 ### MAIN ###
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	pass
 
 

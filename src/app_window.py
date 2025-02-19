@@ -22,13 +22,13 @@ def clear_io(input_element, output_element) -> None:
 		input_element: The element to clear the input from.
 		output_element: The element to clear the output from.
 	"""
-	input_element.delete("0", "end")
-	input_element.insert("0", app_globals.DEF_EXPRESSION)
+	input_element.delete('0', 'end')
+	input_element.insert('0', app_globals.DEF_EXPRESSION)
 	focus_element(input_element)
-	output_element.configure(state="normal")
-	output_element.delete("1.0", "end")
-	output_element.insert("end", app_globals.DEF_RESULT)
-	output_element.configure(state="disabled")
+	output_element.configure(state='normal')
+	output_element.delete('1.0', 'end')
+	output_element.insert('end', app_globals.DEF_RESULT)
+	output_element.configure(state='disabled')
 
 def close_window(window: ctk.CTk) -> None:
 	"""
@@ -39,7 +39,7 @@ def close_window(window: ctk.CTk) -> None:
 	"""
 	#save_history()
 	print_debug(f"Closing {app_globals.NAME}.")
-	print_debug("\n\n", timestamp=False, print_to_console=False)
+	print_debug('\n\n', timestamp=False, print_to_console=False)
 	window.destroy()
 
 def copy_text(window: ctk.CTk, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
@@ -52,9 +52,9 @@ def copy_text(window: ctk.CTk, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
 	window.clipboard_clear()
 	if isinstance(element, ctk.CTkEntry):
-		element.get(0, "end")
+		element.get(0, 'end')
 	elif isinstance(element, ctk.CTkText):
-		element.get("1.0", "end-1c")
+		element.get('1.0', 'end-1c')
 	window.clipboard_append(element.get())
 	#clipboard = window.clipboard_get()
 	window.update()
@@ -67,10 +67,10 @@ def display_result(output_element, message: str) -> None:
 		output_element: The element to display the result in.
 		message (str): The message to display in the output element.
 	"""
-	output_element.configure(state="normal")
-	output_element.delete("1.0", "end")
-	output_element.insert("end", f"{message}")
-	output_element.configure(state="disabled")
+	output_element.configure(state='normal')
+	output_element.delete('1.0', 'end')
+	output_element.insert('end', f"{message}")
+	output_element.configure(state='disabled')
 	print_debug(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
 
 def toggle_advanced(window: ctk.CTk, frame: ctk.CTkFrame, button: ctk.CTkButton) -> None:
@@ -84,15 +84,15 @@ def toggle_advanced(window: ctk.CTk, frame: ctk.CTkFrame, button: ctk.CTkButton)
 	"""
 	#global EXPANDED
 	if not app_globals.EXPANDED:
-		frame.grid(row=1, column=0, padx=0, pady=0, sticky="NSEW")
-		button.configure(text="Collapse")
+		frame.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
+		button.configure(text='Collapse')
 		app_globals.EXPANDED = True
 		app_globals.RESIZE_HEIGHT = True
 		update_window(window)
 	else:
 		#if frame.winfo_viewable():
 		frame.grid_forget()
-		button.configure(text="Expand")
+		button.configure(text='Expand')
 		app_globals.EXPANDED = False
 		app_globals.RESIZE_HEIGHT = False
 		update_window(window)
@@ -108,9 +108,9 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
 	element.focus_set()
 	if isinstance(element, ctk.CTkEntry):
-		element.select_range("0", "end")
+		element.select_range('0', 'end')
 	elif isinstance(element, ctk.CTkText):
-		element.tag_add("sel", "1.0", "end-1c")
+		element.tag_add('sel', '1.0', 'end-1c')
 
 def pin_window(window: ctk.CTk, button: ctk.CTkButton) -> None:
 	"""
@@ -122,11 +122,11 @@ def pin_window(window: ctk.CTk, button: ctk.CTkButton) -> None:
 	"""
 	if not app_globals.PINNED:
 		window.attributes('-topmost', True)
-		button.configure(text="Unpin")
+		button.configure(text='Unpin')
 		app_globals.PINNED = True
 	else:
 		window.attributes('-topmost', False)
-		button.configure(text="Pin")
+		button.configure(text='Pin')
 		app_globals.PINNED = False
 
 def update_window(window: ctk.CTk, def_pos: bool = False) -> None:

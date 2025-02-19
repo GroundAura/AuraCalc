@@ -61,11 +61,11 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 		display_result(output_element, result)
 		return
 	except ZeroDivisionError:
-		display_result(output_element, "Undefined (division by zero)")
+		display_result(output_element, 'Undefined (division by zero)')
 		return
 	except Exception as e:
 		if live_mode and app_globals.PATIENCE > 0 and expression[-1] in app_globals.WAIT_CHARS:
-			delayed_display(window, output_element, "ERROR: Incomplete expression")
+			delayed_display(window, output_element, 'ERROR: Incomplete expression')
 			return
 		elif live_mode and app_globals.PATIENCE > 1:
 			delayed_display(window, output_element, f"ERROR: {e}")
@@ -88,15 +88,15 @@ def evaluate_input(window, input_element, output_element, live_mode: bool = Fals
 def main():
 	### METADATA ###
 
-	meta_name: str = "AuraCalc"
-	meta_version: str = "0.3.0-alpha"
-	meta_author: str = "GroundAura"
+	meta_name: str = 'AuraCalc'
+	meta_version: str = '0.3.0-alpha'
+	meta_author: str = 'GroundAura'
 
-	resources_dir: str = "resources"
+	resources_dir: str = 'resources'
 	config_file: str = f"{meta_name}.ini"
-	history_file: str = "history.json"
-	icon_file: str = "icon.ico"
-	log_file: str = "debug.log"
+	history_file: str = 'history.json'
+	icon_file: str = 'icon.ico'
+	log_file: str = 'debug.log'
 
 
 
@@ -104,7 +104,7 @@ def main():
 
 	# Initialize window
 	print_debug(f"{meta_name} v{meta_version} by {meta_author}")
-	print_debug("Initializing...")
+	print_debug('Initializing...')
 	app = CalculatorApp(
 		name=meta_name,
 		version=meta_version,
@@ -119,9 +119,9 @@ def main():
 	root = app.window
 
 	# Configure theme
-	ctk.set_appearance_mode("dark")
-	ctk.set_default_color_theme("green")
-	#tk.ttk.Style().theme_use("clam")
+	ctk.set_appearance_mode('dark')
+	ctk.set_default_color_theme('green')
+	#tk.ttk.Style().theme_use('clam')
 
 	# Configure grid
 	root.grid_columnconfigure(0, weight=1)
@@ -146,7 +146,7 @@ def main():
 
 	# Basic calculator frame
 	basic_frame = ctk.CTkFrame(root)
-	basic_frame.grid(row=0, column=0, padx=0, pady=0, sticky="NSEW")
+	basic_frame.grid(row=0, column=0, padx=0, pady=0, sticky='NSEW')
 	#print_debug(basic_frame.winfo_pointerxy())
 	#print_debug(basic_frame.winfo_manager())
 	#print_debug(basic_frame.winfo_screen())
@@ -161,7 +161,7 @@ def main():
 
 	## Advanced calculator frame
 	advanced_frame = ctk.CTkFrame(root)
-	#advanced_frame.grid(row=1, column=0, padx=0, pady=0, sticky="NSEW")
+	#advanced_frame.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
 
 
 
@@ -171,12 +171,12 @@ def main():
 	#menu_bar = tk.Menu(root)
 
 	## Create the File menu
-	#file_menu = tk.Menu(menu_bar, tearoff=0, activebackground="#106a43")
-	#file_menu.add_command(label="Exit", command=lambda: close_window(root))
+	#file_menu = tk.Menu(menu_bar, tearoff=0, activebackground='#106a43')
+	#file_menu.add_command(label='Exit', command=lambda: close_window(root))
 	###file_menu.grid(row=0, column=0, padx=x_padding, pady=y_padding)
 
 	## Add the menus to the menu bar
-	#menu_bar.add_cascade(label="File", menu=file_menu)
+	#menu_bar.add_cascade(label='File', menu=file_menu)
 	#root.config(menu=menu_bar)
 
 
@@ -186,28 +186,28 @@ def main():
 
 	# Entry Input Element (CTkEntry)
 	entry_input = ctk.CTkEntry(layer)
-	entry_input.grid(row=2, column=0, columnspan=5, sticky="NEW", padx=x_padding, pady=y_padding)
+	entry_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
 	entry_input.insert(ctk.END, app_globals.DEF_EXPRESSION)
 
 	# Result Display Element (CTkTextbox)
 	result_display = ctk.CTkTextbox(layer, height=1)
-	result_display.grid(row=3, column=0, columnspan=5, sticky="NEW", padx=x_padding, pady=y_padding)
+	result_display.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
 	result_display.insert(ctk.END, app_globals.DEF_RESULT)
-	result_display.configure(state="disabled")
+	result_display.configure(state='disabled')
 
 	# Pin Window ELement (CTkButton)
-	pin_button = ctk.CTkButton(layer, text="Pin", command=lambda: pin_window(root, pin_button), width=30)
-	pin_button.grid(row=4, column=0, columnspan=1, sticky="NEW", padx=x_padding, pady=y_padding)
+	pin_button = ctk.CTkButton(layer, text='Pin', command=lambda: pin_window(root, pin_button), width=30)
+	pin_button.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 	if app_globals.START_PINNED:
 		pin_window(root, pin_button)
 
 	# Clear Entry/Result Element (CTkButton)
-	clear_button = ctk.CTkButton(layer, text="Clear", command=lambda: clear_io(entry_input, result_display), width=30)
-	clear_button.grid(row=4, column=1, columnspan=3, sticky="NEW", padx=x_padding, pady=y_padding)
+	clear_button = ctk.CTkButton(layer, text='Clear', command=lambda: clear_io(entry_input, result_display), width=30)
+	clear_button.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Advanced View Element (CTkButton)
-	advanced_button = ctk.CTkButton(layer, text="Expand", command=lambda: toggle_advanced(root, advanced_frame, advanced_button), width=30)
-	advanced_button.grid(row=4, column=4, columnspan=1, sticky="NEW", padx=x_padding, pady=y_padding)
+	advanced_button = ctk.CTkButton(layer, text='Expand', command=lambda: toggle_advanced(root, advanced_frame, advanced_button), width=30)
+	advanced_button.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 	if app_globals.START_ADVANCED:
 		toggle_advanced(advanced_frame, advanced_button)
 
@@ -225,9 +225,9 @@ def main():
 	if keybind_enabled(app_globals.DELETE_RIGHT_KEY):
 		entry_input.bind(app_globals.DELETE_RIGHT_KEY, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
 	#if keybind_enabled(app_globals.DELETE_TERM_LEFT_KEY):
-	#	entry_input.bind(app_globals.DELETE_TERM_LEFT_KEY, lambda event: delete_term(result_display, "L"))
+	#	entry_input.bind(app_globals.DELETE_TERM_LEFT_KEY, lambda event: delete_term(result_display, 'L'))
 	#if keybind_enabled(app_globals.DELETE_TERM_RIGHT_KEY):
-	#	entry_input.bind(app_globals.DELETE_TERM_RIGHT_KEY, lambda event: delete_term(result_display, "R"))
+	#	entry_input.bind(app_globals.DELETE_TERM_RIGHT_KEY, lambda event: delete_term(result_display, 'R'))
 	if keybind_enabled(app_globals.EVALUATE_KEY):
 		entry_input.bind(app_globals.EVALUATE_KEY, lambda event: evaluate_input(root, entry_input, result_display, live_mode=False))
 	#if keybind_enabled(app_globals.HELP_KEY):
@@ -239,10 +239,10 @@ def main():
 
 	# Key release
 	if app_globals.LIVE_EVAL:
-		entry_input.bind("<KeyRelease>", lambda event: evaluate_input(root, entry_input, result_display, live_mode=True))
+		entry_input.bind('<KeyRelease>', lambda event: evaluate_input(root, entry_input, result_display, live_mode=True))
 
 	# Window close
-	root.protocol("WM_DELETE_WINDOW", lambda: close_window(root))
+	root.protocol('WM_DELETE_WINDOW', lambda: close_window(root))
 
 
 
@@ -250,15 +250,15 @@ def main():
 
 	# Set focus
 	if app_globals.FORCE_FOCUS:
-		print_debug("Forcing window focus")
+		print_debug('Forcing window focus')
 		root.focus_force()
 	root.after(100, lambda: focus_element(entry_input))
 
 	# Start main loop
-	print_debug("Initialization complete!")
+	print_debug('Initialization complete!')
 	root.mainloop()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()
 
 

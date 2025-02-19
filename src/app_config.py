@@ -34,23 +34,23 @@ def config_to_dict(
 		section_dict: dict = {}
 		for option in config.options(section):
 			value: bool | dict[str, str] | float | int | list[str] | set | str | tuple[str] = config.get(section, option)
-			if option.startswith("s", 0, 1):
+			if option.startswith('s', 0, 1):
 				if option[1:].startswith(root_dir_key) or option.endswith(root_dir_key):
 					if value.startswith(root_dir_value):
 						value = root_path + value[len(root_dir_value):]
-			elif option.startswith("b", 0, 1):
+			elif option.startswith('b', 0, 1):
 				value = str_to_bool(value, case_sensitive=bool_case_sens, true_values=bool_true, false_values=bool_false)
-			elif option.startswith("i", 0, 1):
+			elif option.startswith('i', 0, 1):
 				value = str_to_int(value)
-			elif option.startswith("f", 0, 1):
+			elif option.startswith('f', 0, 1):
 				value = str_to_float(value)
-			elif option.startswith("l", 0, 1):
+			elif option.startswith('l', 0, 1):
 				value = str_to_list(value)
-			elif option.startswith("t", 0, 1):
+			elif option.startswith('t', 0, 1):
 				value = str_to_tuple(value)
-			elif option.startswith("d", 0, 1):
+			elif option.startswith('d', 0, 1):
 				value = str_to_dict(value)
-			elif option.startswith("o", 0, 1):
+			elif option.startswith('o', 0, 1):
 				value = str_to_set(value)
 			section_dict[option] = value
 		config_dict[section] = section_dict
@@ -67,14 +67,14 @@ def get_config_value(config: dict, cfg_section: str, cfg_key: str, def_val: any 
 def read_config(
 		file_path: str,
 		preserve_key_case: bool = False,
-		comment_prefixes: tuple[str] = (";", "#", "//"),
-		inline_comment_prefixes: tuple[str] = (";", "#", "//"),
-		root_dir_key: tuple[str] | str = ("PATH", "Path", "path"),
-		root_dir_value: str = "[ROOT]",
+		comment_prefixes: tuple[str] = (';', '#', '//'),
+		inline_comment_prefixes: tuple[str] = (';', '#', '//'),
+		root_dir_key: tuple[str] | str = ('PATH', 'Path', 'path'),
+		root_dir_value: str = '[ROOT]',
 		root_path: str | None = None,
 		bool_case_sens: bool = False,
-		bool_true: tuple[str] | str = ("TRUE", "True", "true", "T", "t", "1"),
-		bool_false: tuple[str] | str = ("FALSE", "False", "false", "F", "f", "0")
+		bool_true: tuple[str] | str = ('TRUE', 'True', 'true', 'T', 't', '1'),
+		bool_false: tuple[str] | str = ('FALSE', 'False', 'false', 'F', 'f', '0')
 		) -> dict[str, dict[str]]:
 	config = configparser.ConfigParser(comment_prefixes=comment_prefixes, inline_comment_prefixes=inline_comment_prefixes)
 	if preserve_key_case:
@@ -100,7 +100,7 @@ def read_config(
 def main():
 	pass
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 	main()
 
 
