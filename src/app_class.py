@@ -12,6 +12,7 @@ import sys
 from app_config import read_config, get_config_value
 from app_debug import print_debug
 from app_type import validate_type
+from app_window import clear_io, pin_window, toggle_advanced
 
 
 
@@ -229,6 +230,8 @@ class GuiApp(App):
 		validate_type(self._window, ctk.CTk)
 		validate_type(self._name, str)
 		self._window.title(self._name)
+		self._set_theme_mode('dark')
+		self._set_theme_color('green')
 		try:
 			self._set_window_icon()
 		except FileNotFoundError as e:
@@ -240,8 +243,23 @@ class GuiApp(App):
 		#	self.toggle_pinned()
 		#print('Initialized Window')
 
+		# window elements
+		self._win_frame_base = ctk.CTkFrame(self._window)
+
 
 	# private methods
+	def _set_theme_mode(self, new_val: str) -> None:
+		validate_type(new_val, str)
+		if new_val not in ('light', 'dark', 'system'):
+			raise ValueError(f"ERROR: Invalid theme mode: {new_val}. Must be 'light', 'dark', or 'system'")
+		self._theme_mode = new_val
+		ctk.set_appearance_mode(self._theme_mode)
+
+	def _set_theme_color(self, new_val: str) -> None:
+		validate_type(new_val, str)
+		self._theme_color = new_val
+		ctk.set_default_color_theme(self._theme_color)
+
 	def _set_win_centered_def(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'WIN_POS', 'bCenterWindow', new_val, use_config)
 		validate_type(new_val, bool)
@@ -390,6 +408,10 @@ class GuiApp(App):
 		return self._window.winfo_screenwidth(), self._window.winfo_screenheight()
 
 	@property
+	def win_frame_base(self) -> ctk.CTkFrame:
+		return self._win_frame_base
+
+	@property
 	def window(self) -> ctk.CTk:
 		return self._window
 
@@ -448,6 +470,15 @@ class CalculatorApp(GuiApp):
 
 		## window state
 		self._win_expanded = False
+
+		# window elements
+		validate_type(self._window, ctk.CTk)
+		self._win_frame_adv = ctk.CTkFrame(self._window)
+		self._win_btn_adv = ctk.CTkButton(self._win_frame_base, text='Expand', command=lambda: toggle_advanced(self, self.win_frame_adv, self._win_btn_adv))
+		self._win_btn_clear = ctk.CTkButton(self._win_frame_base, text='Clear', command=lambda: clear_io(self, self._win_txt_input, self._win_txt_result))
+		self._win_btn_pin = ctk.CTkButton(self._win_frame_base, text='Pin', command=lambda: pin_window(self, self._win_btn_pin))
+		self._win_txt_input = ctk.CTkEntry(self._win_frame_base)
+		self._win_txt_result = ctk.CTkTextbox(self._win_frame_base)
 
 		# calculator default values
 		self._set_calc_dec_precision(100, use_config)
@@ -812,6 +843,10 @@ class CalculatorApp(GuiApp):
 	#def win_expanded(self, new_val: bool) -> None:
 	#	validate_type(new_val, bool)
 	#	self._win_expanded = new_val
+
+	@property
+	def win_frame_adv(self) -> ctk.CTkFrame:
+		return self._win_frame_adv
 
 	@property
 	def win_resize_height(self) -> bool:

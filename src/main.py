@@ -109,8 +109,8 @@ def main():
 	#root = app.window
 
 	# Configure theme
-	ctk.set_appearance_mode('dark')
-	ctk.set_default_color_theme('green')
+	#ctk.set_appearance_mode('dark')
+	#ctk.set_default_color_theme('green')
 	#tk.ttk.Style().theme_use('clam')
 
 	# Configure grid
@@ -135,23 +135,23 @@ def main():
 	### FRAME SETUP ###
 
 	# Basic calculator frame
-	basic_frame = ctk.CTkFrame(app.window)
-	basic_frame.grid(row=0, column=0, padx=0, pady=0, sticky='NSEW')
-	#print_debug(basic_frame.winfo_pointerxy())
-	#print_debug(basic_frame.winfo_manager())
-	#print_debug(basic_frame.winfo_screen())
-	basic_frame.grid_columnconfigure(0, weight=1)
-	basic_frame.grid_columnconfigure(1, weight=1)
-	basic_frame.grid_columnconfigure(2, weight=1)
-	basic_frame.grid_columnconfigure(3, weight=1)
+	#base_frame = app.win_frame_base
+	app.win_frame_base.grid(row=0, column=0, padx=0, pady=0, sticky='NSEW')
+	#print_debug(app.win_frame_base.winfo_pointerxy())
+	#print_debug(app.win_frame_base.winfo_manager())
+	#print_debug(app.win_frame_base.winfo_screen())
+	app.win_frame_base.grid_columnconfigure(0, weight=1)
+	app.win_frame_base.grid_columnconfigure(1, weight=1)
+	app.win_frame_base.grid_columnconfigure(2, weight=1)
+	app.win_frame_base.grid_columnconfigure(3, weight=1)
 
-	basic_frame.grid_rowconfigure(0, weight=0)
-	basic_frame.grid_rowconfigure(1, weight=0)
-	basic_frame.grid_rowconfigure(2, weight=0)
+	app.win_frame_base.grid_rowconfigure(0, weight=0)
+	app.win_frame_base.grid_rowconfigure(1, weight=0)
+	app.win_frame_base.grid_rowconfigure(2, weight=0)
 
 	## Advanced calculator frame
-	advanced_frame = ctk.CTkFrame(app.window)
-	#advanced_frame.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
+	#advanced_frame = app.win_frame_adv
+	#app.win_frame_adv.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
 
 
 
@@ -172,41 +172,50 @@ def main():
 
 
 	### GUI ELEMENTS ###
-	layer = basic_frame
+	#layer = app.win_frame_base
 
 	# Entry Input Element (CTkEntry)
-	entry_input = ctk.CTkEntry(layer)
+	#entry_input = ctk.CTkEntry(layer)
+	entry_input = app._win_txt_input
 	entry_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
 	entry_input.insert(ctk.END, app.calc_def_expr)
 
 	# Result Display Element (CTkTextbox)
-	result_display = ctk.CTkTextbox(layer, height=1)
+	#result_display = ctk.CTkTextbox(layer, height=1)
+	result_display = app._win_txt_result
+	result_display.configure(height=1)
 	result_display.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
 	result_display.insert(ctk.END, app.calc_def_result)
 	result_display.configure(state='disabled')
 
 	# Pin Window ELement (CTkButton)
-	pin_button = ctk.CTkButton(layer, text='Pin', command=lambda: pin_window(app, pin_button), width=30)
+	#pin_button = ctk.CTkButton(layer, text='Pin', command=lambda: pin_window(app, pin_button), width=30)
+	pin_button = app._win_btn_pin
+	pin_button.configure(width=30)
 	pin_button.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 	if app._win_pinned_def:
 		pin_window(app, pin_button)
 
 	# Clear Entry/Result Element (CTkButton)
-	clear_button = ctk.CTkButton(layer, text='Clear', command=lambda: clear_io(app, entry_input, result_display), width=30)
+	#clear_button = ctk.CTkButton(layer, text='Clear', command=lambda: clear_io(app, entry_input, result_display), width=30)
+	clear_button = app._win_btn_clear
+	clear_button.configure(width=30)
 	clear_button.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Advanced View Element (CTkButton)
-	advanced_button = ctk.CTkButton(layer, text='Expand', command=lambda: toggle_advanced(app, advanced_frame, advanced_button), width=30)
+	#advanced_button = ctk.CTkButton(layer, text='Expand', command=lambda: toggle_advanced(app, app.win_frame_adv, advanced_button), width=30)
+	advanced_button = app._win_btn_adv
+	advanced_button.configure(width=30)
 	advanced_button.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 	if app._win_advanced_def:
-		toggle_advanced(app, advanced_frame, advanced_button)
+		toggle_advanced(app, app.win_frame_adv, advanced_button)
 
 
 
 	### EVENT HANDLING ###
 
 	# Keybinds
-	bind_event(app.window, app._key_advanced, lambda event: toggle_advanced(app, advanced_frame, advanced_button))
+	bind_event(app.window, app._key_advanced, lambda event: toggle_advanced(app, app.win_frame_adv, advanced_button))
 	bind_event(app.window, app._key_clear, lambda event: clear_io(app, entry_input, result_display))
 	#bind_event(app.window, app._key_help, lambda event: toggle_help(app.window, help_frame, help_button))
 	#bind_event(app.window, app._key_options, lambda event: toggle_options(app.window, options_frame, options_button))
