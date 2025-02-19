@@ -111,7 +111,20 @@ class App:
 
 
 	# public methods
-	def log_debug(self,
+	def print_info(self) -> None:
+		data = []
+		data.append(f"App Name: {self.name}")
+		data.append(f"App Version: {self.version}")
+		data.append(f"App Author: {self.author}")
+		data.append(f"Root Path: {self.root_path}")
+		data.append(f"Icon Path: {self._icon_path}")
+		data.append(f"Log Path: {self._log_path}")
+		if self._config_path is not None:
+			data.append(f"Config Path: {self._config_path}")
+		for line in data:
+			self.print_log(line)
+
+	def print_log(self,
 			message: str = '',
 			indent: int = 0,
 			timestamp: bool = True,
@@ -146,19 +159,6 @@ class App:
 			print_to_file=print_to_file,
 			debug_mode_only=debug_mode_only
 		)
-
-	def print_info(self) -> None:
-		data = []
-		data.append(f"App Name: {self.name}")
-		data.append(f"App Version: {self.version}")
-		data.append(f"App Author: {self.author}")
-		data.append(f"Root Path: {self.root_path}")
-		data.append(f"Icon Path: {self._icon_path}")
-		data.append(f"Log Path: {self._log_path}")
-		if self._config_path is not None:
-			data.append(f"Config Path: {self._config_path}")
-		for line in data:
-			print(line)
 
 
 	# properties
@@ -313,8 +313,8 @@ class GuiApp(App):
 
 	# public methods
 	def close_window(self) -> None:
-		self.log_debug(f"Closing {self.name}.")
-		self.log_debug('\n\n', timestamp=False, print_to_console=False) # add delimiter to end of log
+		self.print_log(f"Closing {self.name}.")
+		self.print_log('\n\n', timestamp=False, print_to_console=False) # add delimiter to end of log
 		self._window.destroy()
 
 	def focus_window(self) -> None:
@@ -327,7 +327,10 @@ class GuiApp(App):
 		self._window.iconify()
 
 	def open_window(self) -> None:
-		self.log_debug(f"Opening {self.name}.")
+		self.print_log(f"Opening {self.name}.")
+		if self._win_force_focus:
+			print_debug('Forcing window focus.')
+			self.focus_window()
 		self._window.mainloop()
 
 	def print_info(self) -> None:
@@ -337,7 +340,7 @@ class GuiApp(App):
 		data.append(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
 		data.append(f"Window Position (X, Y): ({self.window_position[0]}, {self.window_position[1]})")
 		for line in data:
-			print(line)
+			self.print_log(line)
 
 	#def restore_window(self) -> None:
 	#	self._window.attributes('-zoomed', False)
@@ -688,7 +691,7 @@ class CalculatorApp(GuiApp):
 		data = []
 		data.append(f"History File: {self._history_path}")
 		for line in data:
-			print(line)
+			self.print_log(line)
 
 	def delayed_func(self, func, custom_delay: int | None = None) -> None:
 		try:
@@ -820,9 +823,8 @@ class CalculatorApp(GuiApp):
 
 
 
-
-
 ### FUNCTIONS ###
+
 
 
 ### MAIN ###

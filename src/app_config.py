@@ -10,7 +10,6 @@ import os
 #from auralib import read_config
 
 # internal
-#import app_globals
 #from app_path import resource_path
 from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple, validate_type
 

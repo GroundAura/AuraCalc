@@ -14,7 +14,7 @@ import customtkinter as ctk
 from app_class import CalculatorApp
 from app_debug import print_debug
 from app_evaluate import evaluate_expression, sanitize_input
-from app_keybinds import keybind_enabled
+from app_keybinds import bind_event
 from app_window import clear_io, display_result, toggle_advanced, focus_element, pin_window
 
 
@@ -30,9 +30,6 @@ def delayed_display(app, output_element, message: str) -> None:
 		output_element: The element to display the result in.
 		message (str): The message to display in the output element.
 	"""
-	#if app.timeout_id is not None:
-	#	app.window.after_cancel(app.timeout_id)
-	#	app.timeout_id = None
 	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(app, output_element, message))
 	app.delayed_func(lambda: display_result(app, output_element, message))
 	display_result(app, output_element, app.calc_last_result)
@@ -51,7 +48,7 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 	if app.timeout_id is not None:
 		app.window.after_cancel(app.timeout_id)
 		app.timeout_id = None
-	app.log_debug(f"Expr (initial):{' '*6}`{expression}`")
+	app.print_log(f"Expr (initial):{' '*6}`{expression}`")
 	if not expression:
 		display_result(app, output_element, app.calc_def_result)
 		return
@@ -73,13 +70,6 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 		else:
 			display_result(app, output_element, f"ERROR: {e}")
 			return
-	#except Exception as e:
-	#	if live_mode and app.timeout_patience > 1:
-	#		delayed_display(app, output_element, f"ERROR: {e}")
-	#		return
-	#	else:
-	#		display_result(app, output_element, f"ERROR: {e}")
-	#		return
 
 
 
@@ -216,26 +206,17 @@ def main():
 	### EVENT HANDLING ###
 
 	# Keybinds
-	if keybind_enabled(app._key_advanced):
-		app.window.bind(app._key_advanced, lambda event: toggle_advanced(app, advanced_frame, advanced_button))
-	if keybind_enabled(app._key_clear):
-		app.window.bind(app._key_clear, lambda event: clear_io(app, entry_input, result_display))
-	if keybind_enabled(app._key_del_l):
-		entry_input.bind(app._key_del_l, lambda event: entry_input.delete(0, ctk.INSERT))
-	if keybind_enabled(app._key_del_r):
-		entry_input.bind(app._key_del_r, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
-	#if keybind_enabled(app._key_del_term_l):
-	#	entry_input.bind(app._key_del_term_l, lambda event: delete_term(result_display, 'L'))
-	#if keybind_enabled(app._key_del_term_r):
-	#	entry_input.bind(app._key_del_term_r, lambda event: delete_term(result_display, 'R'))
-	if keybind_enabled(app._key_eval):
-		entry_input.bind(app._key_eval, lambda event: evaluate_input(app, entry_input, result_display, live_mode=False))
-	#if keybind_enabled(app._key_help):
-	#	app.window.bind(app._key_help, lambda event: toggle_help(app.window, help_frame, help_button))
-	#if keybind_enabled(app._key_options):
-	#	app.window.bind(app._key_options, lambda event: toggle_options(app.window, options_frame, options_button))
-	if keybind_enabled(app._key_quit):
-		app.window.bind(app._key_quit, lambda event: app.close_window())
+	bind_event(app.window, app._key_advanced, lambda event: toggle_advanced(app, advanced_frame, advanced_button))
+	bind_event(app.window, app._key_clear, lambda event: clear_io(app, entry_input, result_display))
+	#bind_event(app.window, app._key_help, lambda event: toggle_help(app.window, help_frame, help_button))
+	#bind_event(app.window, app._key_options, lambda event: toggle_options(app.window, options_frame, options_button))
+	bind_event(app.window, app._key_quit, lambda event: app.close_window())
+
+	bind_event(entry_input, app._key_del_l, lambda event: entry_input.delete(0, ctk.INSERT))
+	bind_event(entry_input, app._key_del_r, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
+	#bind_event(entry_input, app._key_del_term_l, lambda event: delete_term(result_display, 'L'))
+	#bind_event(entry_input, app._key_del_term_r, lambda event: delete_term(result_display, 'R'))
+	bind_event(entry_input, app._key_eval, lambda event: evaluate_input(app, entry_input, result_display, live_mode=False))
 
 	# Key release
 	if app._calc_live_eval:
@@ -246,9 +227,9 @@ def main():
 	### FINAL INITIALIZATION ###
 
 	# Set focus
-	if app._win_force_focus:
-		print_debug('Forcing window focus')
-		app.focus_window()
+	#if app._win_force_focus:
+	#	print_debug('Forcing window focus')
+	#	app.focus_window()
 	app.window.after(100, lambda: focus_element(entry_input))
 
 	# Start main loop

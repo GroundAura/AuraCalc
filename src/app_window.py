@@ -56,7 +56,7 @@ def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	elif isinstance(element, ctk.CTkText):
 		element.get('1.0', 'end-1c')
 	app.window.clipboard_append(element.get())
-	app.log_debug(f"Text copied to clipboard: `{app.clipboard}`")
+	app.print_log(f"Text copied to clipboard: `{app.clipboard}`")
 	app.window.update()
 
 def display_result(app, output_element, message: str) -> None:
@@ -71,7 +71,7 @@ def display_result(app, output_element, message: str) -> None:
 	output_element.delete('1.0', 'end')
 	output_element.insert('end', f"{message}")
 	output_element.configure(state='disabled')
-	app.log_debug(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
+	app.print_log(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
 
 def toggle_advanced(app, frame: ctk.CTkFrame, button: ctk.CTkButton) -> None:
 	"""
@@ -96,8 +96,8 @@ def toggle_advanced(app, frame: ctk.CTkFrame, button: ctk.CTkButton) -> None:
 		app._win_expanded = False
 		app.win_resize_height = False
 		app.update_window(reset_width=True, reset_height=True)
-	#app.log_debug(f"Expanded = {app.win_expanded}")
-	#app.log_debug(f"Viewable = {frame.winfo_viewable()}")
+	#app.print_log(f"Expanded = {app.win_expanded}")
+	#app.print_log(f"Viewable = {frame.winfo_viewable()}")
 
 def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""

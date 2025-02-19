@@ -1,12 +1,12 @@
 ### IMPORTS ###
 
 # builtins
-import re
+#import re
 
 # external
 
 # internal
-import app_globals
+#import app_globals
 
 
 
@@ -34,9 +34,36 @@ import app_globals
 #}
 #keybind_pattern: re.Pattern = re.compile(r'^<([A-Za-z]+-)*(KeyPress|KeyRelease)-?[A-Za-z0-9]*>$')
 
+## Define valid modifier keys
+#VALID_MODIFIERS = {
+#	"Control", "Shift", "Alt", "Meta", "Command", "Option",
+#	"Mod1", "Mod2", "Mod3", "Mod4", "Mod5", "Lock"
+#}
+
+
+## Define valid main keys (letters, numbers, function keys, special keys)
+##VALID_KEYS = set('abcdefghijklmnopqrstuvwxyz0123456789') | {
+##	'Return', 'Escape', 'Tab', 'BackSpace', 'Delete',
+##	'Left', 'Right', 'Up', 'Down', 'Home', 'End', 'Insert',
+##	'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+##	'space', 'minus', 'equal', 'bracketleft', 'bracketright',
+##	'backslash', 'semicolon', 'apostrophe', 'comma', 'period', 'slash',
+##}
+#VALID_KEYS = set('abcdefghijklmnopqrstuvwxyz0123456789') | {
+#	'return', 'escape', 'tab', 'backspace', 'Delete',
+#	'Left', 'Right', 'Up', 'Down', 'Home', 'End', 'Insert',
+#	'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+#	'space', 'minus', 'equal', 'bracketleft', 'bracketright',
+#	'backslash', 'semicolon', 'apostrophe', 'comma', 'period', 'slash',
+#}
 
 
 ### FUNCTIONS ###
+
+def bind_event(widget, sequence: str, func) -> None:
+	if not sequence or sequence.lower().strip() in ('', '<>', 'none', '<none>'):
+		return
+	widget.bind(sequence, func)
 
 #def delete_term(element, direction: str) -> None:
 #	"""
@@ -54,19 +81,19 @@ import app_globals
 #		raise ValueError(f"Invalid direction: {direction}. Must be 'left', 'l', 'right', or 'r'.")
 #	...
 
-def keybind_enabled(keybind: str) -> bool:
-	"""
-	Checks if the keybind is enabled.
+#def keybind_enabled(keybind: str) -> bool:
+#	"""
+#	Checks if the keybind is enabled.
 
-	Args:
-		keybind (str): The keybind to check.
+#	Args:
+#		keybind (str): The keybind to check.
 
-	Returns:
-		bool: Whether the keybind is enabled.
-	"""
-	if keybind.lower().strip() in ('', '<>', 'none', '<none>'):
-		return False
-	return True
+#	Returns:
+#		bool: Whether the keybind is enabled.
+#	"""
+#	if keybind.lower().strip() in ('', '<>', 'none', '<none>'):
+#		return False
+#	return True
 
 #def valid_keybind(keybind: str) -> bool:
 #	"""
@@ -90,6 +117,40 @@ def keybind_enabled(keybind: str) -> bool:
 #		return True
 #	else:
 #		raise Exception(f"Invalid keybind: `{keybind}`")
+
+#def is_valid_tkinter_keybind(keybind):
+#	#"""Checks if a string is a valid Tkinter keybind."""
+#	## Regex for valid Tkinter keybind format: <Modifier-Key>
+#	#pattern = re.compile(r'^<(?:(?:Control|Shift|Alt|Meta|Command|Option)-)?(?:[A-Za-z0-9]+|Return|Escape|Tab|BackSpace|Delete|Left|Right|Up|Down|Home|End|Insert|F[1-9]|F1[0-2])>$')
+#	#return bool(pattern.match(keybind))
+
+#	"""Validates a Tkinter keybind string."""
+#	if not (keybind.startswith("<") and keybind.endswith(">")):
+#		return False  # Must be enclosed in <>
+	
+#	# Remove angle brackets
+#	keybind_content = keybind[1:-1]
+
+#	# Split keybind into parts (modifiers + key)
+#	parts = keybind_content.split("-")
+
+#	# Last part must be the main key
+#	main_key = parts[-1]
+#	modifiers = set(parts[:-1])  # All other parts are modifiers
+
+#	# Validate main key
+#	if main_key not in VALID_KEYS:
+#		return False
+
+#	## Validate modifiers (if any)
+#	#if not modifiers.issubset(VALID_MODIFIERS):
+#	#	return False
+#	# Check if all modifiers are valid or follow _L or _R pattern
+#	for modifier in modifiers:
+#		if modifier.rstrip('_L').rstrip('_R').lower() not in VALID_MODIFIERS:
+#			return False
+
+#	return True
 
 
 

@@ -15,7 +15,6 @@ from sympy import simplify, sympify, nsimplify
 
 # internal
 import app_globals
-from app_debug import print_debug
 from app_random import roll_dice, quad_zero
 
 
@@ -185,17 +184,17 @@ def eval_custom_functions(app, expression: str) -> str:
 		function_name = match.group(1).strip('(')
 		argument_str = match.group(2)
 		args = [f"'{arg.strip()}'" for arg in argument_str.split(',')]
-		app.log_debug(f"Function requested: {function_name}, Arguments: {args}")
+		app.print_log(f"Function requested: {function_name}, Arguments: {args}")
 		#if function_name in BUILTIN_FUNCTIONS:
 		#	return f"{function_name}({', '.join(args)})"
 		if function_name in BUILTIN_FUNCTIONS:
 			return f"{BUILTIN_FUNCTIONS[function_name]['func']}({', '.join(args)})"
 		elif function_name in CUSTOM_FUNCTIONS:
 			function_info = CUSTOM_FUNCTIONS[function_name]
-			app.log_debug(f"Matching function: '{function_name}': {function_info}")
+			app.print_log(f"Matching function: '{function_name}': {function_info}")
 			function_to_call: str = f"{function_info['func']}({', '.join(args)})"
 			#function_to_call: str = f"{function_info['func']}({', '.join([f"'{arg}'" if 'd' in arg else arg for arg in args])})"
-			app.log_debug(f"Function to call: {function_to_call}")
+			app.print_log(f"Function to call: {function_to_call}")
 			#if function['args'] != len(args):
 			#	if function['args'] == 1:
 			#		raise ValueError(f"{function_name}() expects 1 argument.")
@@ -204,12 +203,12 @@ def eval_custom_functions(app, expression: str) -> str:
 			if function_info['returns'] == 1:
 				result = eval(function_to_call)
 				result = str(result)
-				app.log_debug(f"Function result: '{result}' (type: {type(result)})")
+				app.print_log(f"Function result: '{result}' (type: {type(result)})")
 				return result
 			elif function_info['returns'] == 2:
 				result, _ = eval(function_to_call)
 				result = str(result)
-				app.log_debug(f"Function result: '{result}' (type: {type(result)})")
+				app.print_log(f"Function result: '{result}' (type: {type(result)})")
 				return result
 			else:
 				raise ValueError(f"{function_name}() returns {function_info['returns']} values. Only 1 or 2 values are supported.")
@@ -263,49 +262,49 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 		str: The result of the expression.
 	"""
 	#continue_eval: bool = True
-	app.log_debug('Evaluating expression...')
+	app.print_log('Evaluating expression...')
 	try:
 		# Remove leading zeros
 		expression = strip_leading_zeros(expression)
-		app.log_debug(f"Expr (strip_zeros):{' '*2}`{expression}`")
+		app.print_log(f"Expr (strip_zeros):{' '*2}`{expression}`")
 		# Handle implied exponentation
 		expression = implied_exp(expression)
-		app.log_debug(f"Expr (implied_exp):{' '*2}`{expression}`")
+		app.print_log(f"Expr (implied_exp):{' '*2}`{expression}`")
 		# Handle implied multiplication
 		expression = implied_mult(expression)
-		app.log_debug(f"Expr (implied_mult):{' '*1}`{expression}`")
+		app.print_log(f"Expr (implied_mult):{' '*1}`{expression}`")
 		# Handle custom functions
 		expression: str = eval_custom_functions(app, expression)
-		app.log_debug(f"Expr (eval_func):{' '*4}`{expression}`")
+		app.print_log(f"Expr (eval_func):{' '*4}`{expression}`")
 		# Simpify
 		expression = sympify(expression)
-		app.log_debug(f"Expr (sympify):{' '*6}`{expression}`")
+		app.print_log(f"Expr (sympify):{' '*6}`{expression}`")
 		if str(expression) == 'zoo':
 			raise ZeroDivisionError('Division by zero')
 		# Simplify
 		expression = simplify(expression)
-		#app.log_debug(type(expression))
-		app.log_debug(f"Expr (simplify):{' '*5}`{expression}`")
+		#app.print_log(type(expression))
+		app.print_log(f"Expr (simplify):{' '*5}`{expression}`")
 		expression = nsimplify(expression, rational=True)
-		app.log_debug(f"Expr (nsimplify):{' '*4}`{expression}`")
+		app.print_log(f"Expr (nsimplify):{' '*4}`{expression}`")
 		if dont_evaluate:
 			expression: str = format_expression(str(expression))
-			app.log_debug(f"Expr (format):{' '*7}`{expression}`")
+			app.print_log(f"Expr (format):{' '*7}`{expression}`")
 			app.calc_last_result = expression
 			return expression
 		else:
 			# Eval with Float
 			result = expression.evalf(app.calc_dec_precicion)
-			app.log_debug(f"Expr (evalf):{' '*8}`{result}`")
+			app.print_log(f"Expr (evalf):{' '*8}`{result}`")
 			if re.search(r'[a-zA-Z]', str(result)):
 				app.calc_last_result = str(result)
 				return str(result)
 			# Eval with Decimal
 			result: str = eval_with_decimal(result)
-			app.log_debug(f"Expr (eval_dec):{' '*5}`{result}`")
+			app.print_log(f"Expr (eval_dec):{' '*5}`{result}`")
 			# Simplify Decimal
 			result: str = simplify_decimal(result, app.calc_dec_display)
-			app.log_debug(f"Expr (simplify_dec):{' '*1}`{result}`")
+			app.print_log(f"Expr (simplify_dec):{' '*1}`{result}`")
 			# Return result
 			app.calc_last_result = result
 			return result
@@ -379,7 +378,7 @@ def sanitize_input(app, expression: str, allowed_chars: str = ALLOWED_CHARS, san
 	sanitized_expression = expression.lstrip('=').rstrip('=')
 	if sanitize and not allowed_chars.match(sanitized_expression):
 		raise ValueError('Invalid characters in expression')
-	app.log_debug(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
+	app.print_log(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
 	return sanitized_expression
 
 def simplify_decimal(number: any, decimal_places: int = 10) -> str:
