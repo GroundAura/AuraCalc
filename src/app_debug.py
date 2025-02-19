@@ -2,6 +2,7 @@
 
 # builtins
 from datetime import datetime
+from pathlib import Path
 
 # external
 
@@ -12,7 +13,7 @@ import app_globals
 
 ### FUNCTIONS ###
 
-def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, print_to_console: bool = True, print_to_file: bool = True, debug_mode_only: bool = True) -> None:
+def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, print_to_console: bool = True, print_to_file: bool = True, debug_mode_only: bool = True, log_path: Path = app_globals.LOG_FILE, debug_mode: bool = app_globals.DEBUG) -> None:
 	"""
 	Displays a debug message in the console and in the debug log file.
 
@@ -24,7 +25,7 @@ def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, prin
 		print_to_file (bool, optional): Whether to print the message to the debug log file. Defaults to `True`.
 		debug_mode_only (bool, optional): Whether to only print the message in debug mode. Defaults to `True`.
 	"""
-	if app_globals.DEBUG or not debug_mode_only:
+	if debug_mode or not debug_mode_only:
 		#message = str(message)
 		if timestamp or indent > 0:
 			if '\n' in message:
@@ -40,7 +41,7 @@ def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, prin
 		if print_to_console:
 			print(message)
 		if print_to_file:
-			with open(app_globals.LOG_FILE, 'a') as log_file:
+			with open(log_path, 'a') as log_file:
 				#print(message, file=log_file)
 				log_file.write(f"{message}\n")
 

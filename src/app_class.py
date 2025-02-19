@@ -9,6 +9,7 @@ import sys
 
 # internal
 from app_config import read_config, get_config_value
+from app_debug import print_debug
 from app_type import validate_type
 
 
@@ -42,6 +43,11 @@ class App:
 		# config
 		self._set_config(config_file, use_config)
 
+		# debug
+		self._set_debug_mode(False, use_config)
+		if self._debug_mode:
+			print(f"Settings: {self._config}")
+
 
 	# private methods
 	def _set_author(self, value: str) -> None:
@@ -60,6 +66,11 @@ class App:
 		else:
 			self._config_path = None
 			self._config = None
+
+	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
+		validate_type(new_val, bool)
+		self._debug_mode = value
 
 	def _set_icon_path(self, file_name: str) -> None:
 		validate_type(self._resources_path, Path)
@@ -99,16 +110,52 @@ class App:
 
 
 	# public methods
+	def log_debug(self,
+			message: str = '',
+			indent: int = 0,
+			timestamp: bool = True,
+			print_to_console: bool = True,
+			print_to_file: bool = True,
+			debug_mode_only: bool = True
+		) -> None:
+		try:
+			validate_type(self._log_path, Path)
+		except AttributeError:
+			raise AttributeError('Log path not set')
+		try:
+			validate_type(self._debug_mode, bool)
+		except AttributeError:
+			self._set_debug_mode(False)
+		try:
+			validate_type(message, str)
+		except TypeError:
+			message = str(message)
+		validate_type(indent, int)
+		validate_type(timestamp, bool)
+		validate_type(print_to_console, bool)
+		validate_type(print_to_file, bool)
+		validate_type(debug_mode_only, bool)
+		print_debug(
+			log_path=self._log_path,
+			debug_mode=self._debug_mode,
+			message=message,
+			indent=indent,
+			timestamp=timestamp,
+			print_to_console=print_to_console,
+			print_to_file=print_to_file,
+			debug_mode_only=debug_mode_only
+		)
+
 	def print_info(self) -> None:
 		data = []
-		data.append(f'App Name: {self.name}')
-		data.append(f'App Version: {self.version}')
-		data.append(f'App Author: {self.author}')
-		data.append(f'Root Path: {self.root_path}')
-		data.append(f'Icon Path: {self._icon_path}')
-		data.append(f'Log Path: {self._log_path}')
+		data.append(f"App Name: {self.name}")
+		data.append(f"App Version: {self.version}")
+		data.append(f"App Author: {self.author}")
+		data.append(f"Root Path: {self.root_path}")
+		data.append(f"Icon Path: {self._icon_path}")
+		data.append(f"Log Path: {self._log_path}")
 		if self._config_path is not None:
-			data.append(f'Config Path: {self._config_path}')
+			data.append(f"Config Path: {self._config_path}")
 		for line in data:
 			print(line)
 
@@ -282,9 +329,9 @@ class GuiApp(App):
 	def print_info(self) -> None:
 		App.print_info(self)
 		data = []
-		data.append(f'Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}')
-		data.append(f'Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}')
-		data.append(f'Window Position (X, Y): ({self.window_position[0]}, {self.window_position[1]})')
+		data.append(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
+		data.append(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
+		data.append(f"Window Position (X, Y): ({self.window_position[0]}, {self.window_position[1]})")
 		for line in data:
 			print(line)
 
@@ -301,13 +348,13 @@ class GuiApp(App):
 
 	def update_window(self, reset_pos: bool = False) -> None:
 		self._screen_width, self._screen_height = self.screen_dimensions
-		#print(f'Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}')
+		#print(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
 		if reset_pos:
 			current_width = self._win_width_def
 			current_height = self._win_height_def
 		else:
 			current_width, current_height = self.window_dimensions
-		#print(f'Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}')
+		#print(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
 		if reset_pos:
 			if self._win_centered_def:
 				target_x_pos = (self._screen_width // 2) - (current_width // 2)
@@ -318,7 +365,7 @@ class GuiApp(App):
 		else:
 			target_x_pos = self._window.winfo_x()
 			target_y_pos = self._window.winfo_y()
-		#print(f'Target Position: ({target_x_pos}, {target_y_pos})')
+		#print(f"Target Position: ({target_x_pos}, {target_y_pos})")
 		target_width = current_width if current_width > self._win_width_min else self._win_width_min
 		target_height = current_height if current_height > self._win_height_min else self._win_height_min
 		self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
@@ -438,11 +485,6 @@ class CalculatorApp(GuiApp):
 		#self._set_key_undo('<Control-z>', use_config)
 		self._set_key_quit('<Escape>', use_config)
 
-		# debug
-		self._set_debug_mode(False, use_config)
-		if self._debug_mode:
-			print(f"Settings: {self._config}")
-
 
 	# private methods
 	def _set_calc_dec_display(self, new_val: int, use_config: bool = False) -> None:
@@ -481,11 +523,6 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'DEBUG', 'bSanitizeInput', new_val, use_config)
 		validate_type(new_val, bool)
 		self._sanitize_input = value
-
-	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
-		value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
-		validate_type(new_val, bool)
-		self._debug_mode = value
 
 	def _set_history_path(self, new_val: str) -> None:
 		validate_type(self._resources_path, Path)
@@ -644,7 +681,7 @@ class CalculatorApp(GuiApp):
 	def print_info(self) -> None:
 		GuiApp.print_info(self)
 		data = []
-		data.append(f'History File: {self._history_path}')
+		data.append(f"History File: {self._history_path}")
 		for line in data:
 			print(line)
 
