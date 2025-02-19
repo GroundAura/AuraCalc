@@ -201,19 +201,18 @@ class GuiApp(App):
 
 	def _set_win_height_def(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_BASIC", "iDefaultHeight", new_val, use_config)
-		validate_type(value, int, 0)
 		try:
-			min_value = self._win_width_min
-			validate_type(min_value, int, 0)
+			value = self._win_height_min if value < self._win_height_min else value
 		except AttributeError:
-			min_value = None
-		if min_value is not None and value < min_value:
-			value = min_value
+			pass # ignore if self._win_height_min is not set
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_height_def = value
 
 	def _set_win_height_min(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_BASIC", "iMinHeight", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_height_min = value
 
 	def _set_win_pinned_def(self, new_val: bool, use_config: bool = False) -> None:
@@ -231,29 +230,30 @@ class GuiApp(App):
 
 	def _set_win_width_def(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_BASIC", "iDefaultWidth", new_val, use_config)
-		validate_type(value, int, 0)
 		try:
-			min_value = self._win_width_min
-			validate_type(min_value, int, 0)
+			value = self._win_width_min if value < self._win_width_min else value
 		except AttributeError:
-			min_value = None
-		if min_value is not None and value < min_value:
-			value = min_value
+			pass # ignore if self._win_width_min is not set
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_width_def = value
 
 	def _set_win_width_min(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_BASIC", "iMinWidth", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_width_min = value
 
 	def _set_win_x_pos_def(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_POS", "iXOffset", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_x_pos_def = value
 
 	def _set_win_y_pos_def(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_POS", "iYOffset", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_y_pos_def = value
 
 	def _set_window_icon(self) -> None:
@@ -447,19 +447,18 @@ class CalculatorApp(GuiApp):
 	# private methods
 	def _set_calc_dec_display(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "CALCULATION", "iDecimalDisplay", new_val, use_config)
-		validate_type(value, int, 0)
 		try:
-			max_value = self._calc_dec_precision
-			validate_type(max_value, int, 0)
+			value = self._calc_dec_precision if value > self._calc_dec_precision else value
 		except AttributeError:
-			max_value = None
-		if max_value is not None and value > max_value:
-			value = max_value
+			pass # ignore if self._calc_dec_precision is not set
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._calc_dec_display = value
 
 	def _set_calc_dec_precision(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "CALCULATION", "iDecimalPrecision", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._calc_dec_precision = value
 
 	def _set_calc_live_eval(self, new_val: bool, use_config: bool = False) -> None:
@@ -469,7 +468,8 @@ class CalculatorApp(GuiApp):
 
 	def _set_calc_live_eval_delay(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "CALCULATION", "iTimeoutDelay", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._calc_live_eval_delay = value
 
 	def _set_calc_only_simplify(self, new_val: bool, use_config: bool = False) -> None:
@@ -564,19 +564,18 @@ class CalculatorApp(GuiApp):
 
 	def _set_win_height_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iDefaultHeight", new_val, use_config)
-		validate_type(value, int, 0)
 		try:
-			min_value = self._win_height_min_adv
-			validate_type(min_value, int, 0)
+			value = self._win_height_min_adv if value < self._win_height_min_adv else value
 		except AttributeError:
-			min_value = None
-		if min_value is not None and value < min_value:
-			value = min_value
+			pass # ignore if self._win_height_min_adv is not set
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_height_adv = value
 
 	def _set_win_height_min_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iMinHeight", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_height_min_adv = value
 
 	def _set_win_restore(self, new_val: bool, use_config: bool = False) -> None:
@@ -586,67 +585,58 @@ class CalculatorApp(GuiApp):
 
 	def _set_win_restore_adv(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_RESTORE", "bRestoreAdvanced", new_val, use_config)
-		validate_type(new_val, bool)
 		try:
-			parent_enabled = self._win_restore
-			validate_type(parent_enabled, bool)
+			value = False if not self._win_restore else value
 		except AttributeError:
-			parent_enabled = True
-		if not parent_enabled:
-			value = False
+			pass # ignore if self._win_restore is not set
+			#value = False # disable if self._win_restore is not set
+		validate_type(new_val, bool)
 		self._win_restore_adv = value
 
 	def _set_win_restore_dim(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_RESTORE", "bRestoreDimensions", new_val, use_config)
-		validate_type(new_val, bool)
 		try:
-			parent_enabled = self._win_restore
-			validate_type(parent_enabled, bool)
+			value = False if not self._win_restore else value
 		except AttributeError:
-			parent_enabled = True
-		if not parent_enabled:
-			value = False
+			pass # ignore if self._win_restore is not set
+			#value = False # disable if self._win_restore is not set
+		validate_type(new_val, bool)
 		self._win_restore_dim = value
 
 	def _set_win_restore_pin(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_RESTORE", "bRestorePinned", new_val, use_config)
-		validate_type(new_val, bool)
 		try:
-			parent_enabled = self._win_restore
-			validate_type(parent_enabled, bool)
+			value = False if not self._win_restore else value
 		except AttributeError:
-			parent_enabled = True
-		if not parent_enabled:
-			value = False
+			pass # ignore if self._win_restore is not set
+			#value = False # disable if self._win_restore is not set
+		validate_type(new_val, bool)
 		self._win_restore_pin = value
 
 	def _set_win_restore_pos(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_RESTORE", "bRestorePosition", new_val, use_config)
-		validate_type(new_val, bool)
 		try:
-			parent_enabled = self._win_restore
-			validate_type(parent_enabled, bool)
+			value = False if not self._win_restore else value
 		except AttributeError:
-			parent_enabled = True
-		if not parent_enabled:
-			value = False
+			pass # ignore if self._win_restore is not set
+			#value = False # disable if self._win_restore is not set
+		validate_type(new_val, bool)
 		self._win_restore_pos = value
 
 	def _set_win_width_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iDefaultWidth", new_val, use_config)
-		validate_type(value, int, 0)
 		try:
-			min_value = self._win_width_min_adv
-			validate_type(min_value, int, 0)
+			value = self._win_width_min_adv if value < self._win_width_min_adv else value
 		except AttributeError:
-			min_value = None
-		if min_value is not None and value < min_value:
-			value = min_value
+			pass # ignore if self._win_width_min_adv is not set
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_width_adv = value
 
 	def _set_win_width_min_adv(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, "WIN_ADV", "iMinWidth", new_val, use_config)
-		validate_type(value, int, 0)
+		validate_type(value, int)
+		value = 0 if value < 0 else value
 		self._win_width_min_adv = value
 
 
