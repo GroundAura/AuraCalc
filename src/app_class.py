@@ -402,16 +402,16 @@ class CalculatorApp(GuiApp):
 		self._set_calc_live_eval(True, use_config)
 		self._set_calc_live_eval_delay(1000, use_config)
 		self._set_calc_sanitize_input(True, use_config)
-		self._def_expression = ''
-		self._def_result = '0'
+		self._calc_def_expr = ''
+		self._calc_def_result = '0'
 		self._timeout_patience = 1
 		self._calc_wait_chars = r'+-*/^%.([{_, '
 
 		# calculator state
-		self._calc_last_expression = self._def_expression
-		self._calc_last_result = self._def_result
-		self._calc_expressions = [self._def_expression]
-		self._calc_results = [self._def_result]
+		self._calc_last_expr = self._calc_def_expr
+		self._calc_last_result = self._calc_def_result
+		self._calc_expressions = [self._calc_def_expr]
+		self._calc_results = [self._calc_def_result]
 
 		# app state
 		self._timeout_id = None
@@ -648,7 +648,47 @@ class CalculatorApp(GuiApp):
 		for line in data:
 			print(line)
 
+	def delayed_func(self, func, custom_delay: int | None = None) -> None:
+		try:
+			delay = custom_delay if custom_delay is not None else self._calc_live_eval_delay
+		except AttributeError:
+			delay = custom_delay if custom_delay is not None else 1000
+		self._timeout_id = self.window.after(delay, func)
+
 	# properties
+	@property
+	def calc_def_expr(self) -> str:
+		return self._calc_def_expr
+
+	@property
+	def calc_def_result(self) -> str:
+		return self._calc_def_result
+
+	@property
+	def calc_last_expr(self) -> str:
+		return self._calc_last_expr
+
+	@property
+	def calc_last_result(self) -> str:
+		return self._calc_last_result
+
+	@property
+	def calc_wait_chars(self) -> str:
+		return self._calc_wait_chars
+
+	@property
+	def timeout_id(self) -> int | None:
+		return self._timeout_id
+	@timeout_id.setter
+	def timeout_id(self, new_val: int | None) -> None:
+		validate_type(new_val, int | None)
+		self._timeout_id = new_val
+
+	@property
+	def timeout_patience(self) -> int:
+		return self._timeout_patience
+
+
 
 
 
