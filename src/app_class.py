@@ -1,18 +1,17 @@
 ### IMPORTS ###
 
-# builtins
-
 # external
 import customtkinter as ctk
 from decimal import getcontext
 from pathlib import Path
-import sys
 
 # internal
 from app_config import read_config, get_config_value
-from app_debug import print_debug
+from app_logging import logging_print
 from app_evaluate import evaluate_input
+import app_globals
 from app_keybinds import bind_event
+from app_path import get_root_path
 from app_type import validate_type
 from app_window import clear_io, focus_element
 
@@ -39,7 +38,7 @@ class App:
 		self._set_author(author)
 
 		# paths
-		self._set_root_path()
+		self._root_path = get_root_path()
 		self._set_resources_path(resources_dir)
 		self._set_icon_path(icon_file)
 		self._set_log_path(log_file)
@@ -48,86 +47,11 @@ class App:
 		self._set_config(config_file, use_config)
 
 		# debug
-		self._set_debug_mode(False, use_config)
-		if self._debug_mode:
-			print(f"Settings: {self._config}")
+		self._set_debug_mode(app_globals.DEBUG_MODE, use_config)
 
 
 	# private methods
-	def _set_author(self, value: str) -> None:
-		validate_type(value, str)
-		self._author = value
-
-	def _set_config(self, file_name: str, use_config: bool = True) -> None:
-		if use_config:
-			validate_type(self._resources_path, Path)
-			validate_type(file_name, str)
-			self._config_path = self._resources_path / file_name
-			validate_type(self._config_path, Path)
-			if not self._config_path.exists():
-				raise FileNotFoundError(f"File `{self._config_path}` does not exist")
-			self._config = read_config(self._config_path, preserve_key_case=True)
-		else:
-			self._config_path = None
-			self._config = None
-
-	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
-		value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
-		validate_type(new_val, bool)
-		self._debug_mode = value
-
-	def _set_icon_path(self, file_name: str) -> None:
-		validate_type(self._resources_path, Path)
-		validate_type(file_name, str)
-		self._icon_path = self._resources_path / file_name
-
-	def _set_log_path(self, file_name: str) -> None:
-		validate_type(self._resources_path, Path)
-		validate_type(file_name, str)
-		self._log_path = self._resources_path / file_name
-
-	def _set_name(self, value: str) -> None:
-		validate_type(value, str)
-		self._name = value
-
-	def _set_resources_path(self, dir_name: str) -> None:
-		validate_type(self._root_path, Path)
-		if dir_name:
-			validate_type(dir_name, str)
-			self._resources_path = self._root_path / dir_name
-		else:
-			self._resources_path = self._root_path
-
-	def _set_root_path(self) -> None:
-		try:
-			# PyInstaller creates a temporary folder and stores the path in _MEIPASS
-			root_path = Path(sys.MEIPASS)
-			#return Path(sys.executable).parent
-		except AttributeError:
-			root_path = Path.cwd()
-		validate_type(root_path, Path)
-		self._root_path = root_path
-
-	def _set_version(self, value: str) -> None:
-		validate_type(value, str)
-		self._version = value
-
-
-	# public methods
-	def print_info(self) -> None:
-		data = []
-		data.append(f"App Name: {self.name}")
-		data.append(f"App Version: {self.version}")
-		data.append(f"App Author: {self.author}")
-		data.append(f"Root Path: {self.root_path}")
-		data.append(f"Icon Path: {self._icon_path}")
-		data.append(f"Log Path: {self._log_path}")
-		if self._config_path is not None:
-			data.append(f"Config Path: {self._config_path}")
-		for line in data:
-			self.print_log(line)
-
-	def print_log(self,
+	def _logging_print(self,
 			message: str = '',
 			indent: int = 0,
 			timestamp: bool = True,
@@ -152,9 +76,7 @@ class App:
 		validate_type(print_to_console, bool)
 		validate_type(print_to_file, bool)
 		validate_type(debug_mode_only, bool)
-		print_debug(
-			log_path=self._log_path,
-			debug_mode=self._debug_mode,
+		logging_print(
 			message=message,
 			indent=indent,
 			timestamp=timestamp,
@@ -162,6 +84,72 @@ class App:
 			print_to_file=print_to_file,
 			debug_mode_only=debug_mode_only
 		)
+
+	def _set_author(self, value: str) -> None:
+		validate_type(value, str)
+		self._author = value
+
+	def _set_config(self, file_name: str, use_config: bool = True) -> None:
+		if use_config:
+			validate_type(self._resources_path, Path)
+			validate_type(file_name, str)
+			self._config_path = self._resources_path / file_name
+			validate_type(self._config_path, Path)
+			if not self._config_path.exists():
+				raise FileNotFoundError(f"File `{self._config_path}` does not exist")
+			self._config = read_config(self._config_path, preserve_key_case=True)
+		else:
+			self._config_path = None
+			self._config = None
+
+	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
+		validate_type(new_val, bool)
+		self._debug_mode = value
+		app_globals.DEBUG_MODE = self._debug_mode
+		if self._debug_mode:
+			self._logging_print(f"Config Settings: `{self._config}`")
+
+	def _set_icon_path(self, file_name: str) -> None:
+		validate_type(self._resources_path, Path)
+		validate_type(file_name, str)
+		self._icon_path = self._resources_path / file_name
+
+	def _set_log_path(self, file_name: str) -> None:
+		validate_type(self._resources_path, Path)
+		validate_type(file_name, str)
+		self._log_path = self._resources_path / file_name
+
+	def _set_name(self, value: str) -> None:
+		validate_type(value, str)
+		self._name = value
+
+	def _set_resources_path(self, dir_name: str) -> None:
+		validate_type(self._root_path, Path)
+		if dir_name:
+			validate_type(dir_name, str)
+			self._resources_path = self._root_path / dir_name
+		else:
+			self._resources_path = self._root_path
+
+	def _set_version(self, value: str) -> None:
+		validate_type(value, str)
+		self._version = value
+
+
+	# public methods
+	def print_info(self) -> None:
+		data = []
+		data.append(f"App Name: {self.name}")
+		data.append(f"App Version: {self.version}")
+		data.append(f"App Author: {self.author}")
+		data.append(f"Root Path: {self.root_path}")
+		data.append(f"Icon Path: {self._icon_path}")
+		data.append(f"Log Path: {self._log_path}")
+		if self._config_path is not None:
+			data.append(f"Config Path: {self._config_path}")
+		for line in data:
+			self._logging_print(line)
 
 
 	# properties
@@ -365,8 +353,8 @@ class GuiApp(App):
 
 	# public methods
 	def close_window(self) -> None:
-		self.print_log(f"Closing {self.name}.")
-		self.print_log('\n\n', timestamp=False, print_to_console=False) # add delimiter to end of log
+		self._logging_print(f"Closing {self.name}.")
+		self._logging_print('\n\n', timestamp=False, print_to_console=False) # add delimiter to end of log
 		self._window.destroy()
 
 	def focus_window(self) -> None:
@@ -379,9 +367,9 @@ class GuiApp(App):
 		self._window.iconify()
 
 	def open_window(self) -> None:
-		self.print_log(f"Opening {self.name}.")
+		self._logging_print(f"Opening {self.name}.")
 		if self._win_force_focus:
-			print_debug('Forcing window focus.')
+			logging_print('Forcing window focus.')
 			self.focus_window()
 		self._window.mainloop()
 
@@ -392,7 +380,7 @@ class GuiApp(App):
 		data.append(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
 		data.append(f"Window Position (X, Y): ({self.window_position[0]}, {self.window_position[1]})")
 		for line in data:
-			self.print_log(line)
+			self._logging_print(line)
 
 	#def restore_window(self) -> None:
 	#	self._window.attributes('-zoomed', False)
@@ -812,9 +800,9 @@ class CalculatorApp(GuiApp):
 		self._timeout_id = self.window.after(delay, func)
 
 	def open_window(self) -> None: # override
-		self.print_log(f"Opening {self.name}.")
+		self._logging_print(f"Opening {self.name}.")
 		if self._win_force_focus:
-			print_debug('Forcing window focus.')
+			logging_print('Forcing window focus.')
 			self.focus_window()
 		self.window.after(100, lambda: focus_element(self._win_txt_input))
 		self._window.mainloop()
@@ -824,7 +812,7 @@ class CalculatorApp(GuiApp):
 		data = []
 		data.append(f"History File: {self._history_path}")
 		for line in data:
-			self.print_log(line)
+			self._logging_print(line)
 
 	def toggle_advanced(self) -> None:
 		if not self._win_expanded:
@@ -834,7 +822,7 @@ class CalculatorApp(GuiApp):
 			self._win_expanded = True
 			self.win_resize_height = True
 			self.update_window(reset_width=False, reset_height=False)
-			self.print_log(f"Expanded = {self._win_expanded}")
+			self._logging_print(f"Expanded = {self._win_expanded}")
 		else:
 			#self._win_frame_adv.grid_forget()
 			self._hide_element(self._win_frame_adv)
@@ -842,7 +830,7 @@ class CalculatorApp(GuiApp):
 			self._win_expanded = False
 			self.win_resize_height = False
 			self.update_window(reset_width=True, reset_height=True)
-			self.print_log(f"Expanded = {self._win_expanded}")
+			self._logging_print(f"Expanded = {self._win_expanded}")
 		#self.print_log(f"Expanded = {self._win_expanded}")
 		#self.print_log(f"Viewable = {self._win_frame_adv.winfo_viewable()}")
 
@@ -989,18 +977,9 @@ class CalculatorApp(GuiApp):
 
 
 
-### FUNCTIONS ###
-
-
-
-### MAIN ###
-
-def main():
-	pass
+### TESTING ###
 
 def _test():
-	pass
-
 	#app = App('Test', '0.0.1', 'GroundAura')
 	#app = GuiApp('Test App', '0.0.1', 'GroundAura')
 	app = CalculatorApp('Test App', '0.0.1', 'GroundAura', win_centered=True, config_file='AuraCalc.ini', use_config=False)
@@ -1014,5 +993,6 @@ def _test():
 
 
 if __name__ == '__main__':
-	#main()
 	_test()
+
+

@@ -12,45 +12,28 @@ import customtkinter as ctk
 
 # internal
 from app_class import CalculatorApp
-from app_debug import print_debug
-
-
-
-### FUNCTIONS ###
+from app_globals import META_NAME, META_VERSION, META_AUTHOR, DIR_RESOURCES, FILE_HISTORY, FILE_ICON, FILE_LOG, FILE_CONFIG
+from app_logging import logging_print
 
 
 
 ### MAIN ###
 
 def main():
-	### METADATA ###
-
-	meta_name: str = 'AuraCalc'
-	meta_version: str = '0.3.0-alpha'
-	meta_author: str = 'GroundAura'
-
-	resources_dir: str = 'resources'
-	config_file: str = f"{meta_name}.ini"
-	history_file: str = 'history.json'
-	icon_file: str = 'icon.ico'
-	log_file: str = 'debug.log'
-
-
-
 	### WINDOW SETUP ###
 
 	# Initialize window
-	print_debug(f"{meta_name} v{meta_version} by {meta_author}")
-	print_debug('Initializing...')
+	logging_print(f"{META_NAME} v{META_VERSION} by {META_AUTHOR}")
+	logging_print('Initializing...')
 	app = CalculatorApp(
-		name = meta_name,
-		version = meta_version,
-		author = meta_author,
-		resources_dir = resources_dir,
-		history_file = history_file,
-		icon_file = icon_file,
-		log_file = log_file,
-		config_file = config_file,
+		name = META_NAME,
+		version = META_VERSION,
+		author = META_AUTHOR,
+		resources_dir = DIR_RESOURCES,
+		history_file = FILE_HISTORY,
+		icon_file = FILE_ICON,
+		log_file = FILE_LOG,
+		config_file = FILE_CONFIG,
 		use_config = True,
 		win_layout = 'grid'
 	)
@@ -83,9 +66,9 @@ def main():
 
 	# Basic calculator frame
 	app.win_frame_base.grid(row=0, column=0, padx=0, pady=0, sticky='NSEW')
-	#app.print_log(app.win_frame_base.winfo_pointerxy())
-	#app.print_log(app.win_frame_base.winfo_manager())
-	#app.print_log(app.win_frame_base.winfo_screen())
+	#logging_print(app.win_frame_base.winfo_pointerxy())
+	#logging_print(app.win_frame_base.winfo_manager())
+	#logging_print(app.win_frame_base.winfo_screen())
 	app.win_frame_base.grid_columnconfigure(0, weight=1)
 	app.win_frame_base.grid_columnconfigure(1, weight=1)
 	app.win_frame_base.grid_columnconfigure(2, weight=1)
@@ -145,7 +128,7 @@ def main():
 	### FINAL INITIALIZATION ###
 
 	# Start main loop
-	app.print_log('Initialization complete!')
+	logging_print('Initialization complete!')
 	app.open_window()
 
 if __name__ == '__main__':

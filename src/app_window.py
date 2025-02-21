@@ -1,11 +1,10 @@
 ### IMPORTS ###
 
-# builtins
-
 # external
 import customtkinter as ctk
 
 # internal
+from app_logging import logging_print
 
 
 
@@ -41,7 +40,7 @@ def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	elif isinstance(element, ctk.CTkText):
 		element.get('1.0', 'end-1c')
 	app.window.clipboard_append(element.get())
-	app.print_log(f"Text copied to clipboard: `{app.clipboard}`")
+	logging_print(f"Text copied to clipboard: `{app.clipboard}`")
 	app.window.update()
 
 def delayed_display(app, output_element, message: str) -> None:
@@ -69,7 +68,7 @@ def display_result(app, output_element, message: str) -> None:
 	output_element.delete('1.0', 'end')
 	output_element.insert('end', f"{message}")
 	output_element.configure(state='disabled')
-	app.print_log(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
+	logging_print(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
 
 def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
@@ -83,5 +82,15 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 		element.select_range('0', 'end')
 	elif isinstance(element, ctk.CTkText):
 		element.tag_add('sel', '1.0', 'end-1c')
+
+
+
+### TESTING ###
+
+def _test():
+	pass
+
+if __name__ == '__main__':
+	_test()
 
 

@@ -10,8 +10,7 @@ import re
 from sympy import sympify
 
 # internal
-#import app_globals
-from app_debug import print_debug
+from app_logging import logging_print
 
 
 
@@ -41,7 +40,7 @@ def roll_dice(dice_string: str) -> tuple[int, list]:
 		num_dice, num_sides = map(int, dice_string.lower().split('d'))
 		rolls = [random.randint(1, num_sides) for _ in range(num_dice)]
 		total = sum(rolls)
-		print_debug(f"Rolling {dice_string}\n Total: {total}\n Rolls: {rolls}")
+		logging_print(f"Rolling {dice_string}\n Total: {total}\n Rolls: {rolls}")
 		return total, rolls
 	except ValueError:
 		#return 0, []
@@ -70,12 +69,19 @@ def quad_zero(a, b, c, positive = '+'):
 	else:
 		raise ValueError("Invalid positive argument. Use 'p' for positive, 'n' for negative.")
 
-if __name__ == '__main__':
+
+
+### TESTING ###
+
+def _test():
 	#dice_input = '3d6'
 	#total, rolls = roll_dice(dice_input)
 
 	dice_string = '3*d*6'
 	expression = sympify(dice_string)
 	print(expression)
+
+if __name__ == '__main__':
+	_test()
 
 

@@ -4,16 +4,21 @@
 from datetime import datetime
 from pathlib import Path
 
-# external
-
 # internal
-import app_globals
+from app_path import get_full_path
+from main import DEBUG_MODE, DIR_RESOURCES, FILE_LOG
+
+
+
+### CONSTANTS ###
+
+PATH_LOG = get_full_path(DIR_RESOURCES, FILE_LOG)
 
 
 
 ### FUNCTIONS ###
 
-def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, print_to_console: bool = True, print_to_file: bool = True, debug_mode_only: bool = True, log_path: Path = app_globals.LOG_FILE, debug_mode: bool = app_globals.DEBUG) -> None:
+def logging_print(message: str = '', indent: int = 0, timestamp: bool = True, print_to_console: bool = True, print_to_file: bool = True, debug_mode_only: bool = True, log_path: Path = PATH_LOG, debug_mode: bool = DEBUG_MODE) -> None:
 	"""
 	Displays a debug message in the console and in the debug log file.
 
@@ -31,7 +36,7 @@ def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, prin
 			if '\n' in message:
 				lines = message.split('\n')
 				for line in lines:
-					print_debug(line, indent=indent, timestamp=timestamp, print_to_console=print_to_console, print_to_file=print_to_file, debug_mode_only=debug_mode_only)
+					logging_print(line, indent=indent, timestamp=timestamp, print_to_console=print_to_console, print_to_file=print_to_file, debug_mode_only=debug_mode_only)
 				return
 		if indent > 0:
 			#message = ' ' * indent + message
@@ -47,9 +52,12 @@ def print_debug(message: str = '', indent: int = 0, timestamp: bool = True, prin
 
 
 
-### MAIN ###
+### TESTING ###
+
+def _test():
+	pass
 
 if __name__ == '__main__':
-	pass
+	_test()
 
 

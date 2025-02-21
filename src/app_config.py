@@ -2,16 +2,11 @@
 
 # builtins
 import configparser
-#from os import path as os_path
 import os
-#from pathlib import Path
-
-# external
-#from auralib import read_config
 
 # internal
-#from app_path import resource_path
-from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple, validate_type
+from app_logging import logging_print
+from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple
 
 
 
@@ -78,12 +73,12 @@ def read_config(
 	config = configparser.ConfigParser(comment_prefixes=comment_prefixes, inline_comment_prefixes=inline_comment_prefixes)
 	if preserve_key_case:
 		config.optionxform = lambda option: option
-	print(f"INFO: Trying to read config file from: '{file_path}'.")
+	logging_print(f"Trying to read config file from: '{file_path}'.")
 	try:
 		if not os.path.exists(file_path):
 			raise Exception(f"Config file not found: '{file_path}'.")
 		config.read(file_path)
-		print('INFO: Config file read successfully.')
+		logging_print('Config file read successfully.')
 	except Exception as e:
 		raise Exception(f"ERROR: Error while trying to read config file: {e}")
 	try:
@@ -94,12 +89,12 @@ def read_config(
 
 
 
-### MAIN ###
+### TESTING ###
 
-def main():
+def _test():
 	pass
 
 if __name__ == '__main__':
-	main()
+	_test()
 
 

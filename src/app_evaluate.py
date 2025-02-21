@@ -2,7 +2,7 @@
 
 # builtins
 #import cmath
-from decimal import Decimal, getcontext, InvalidOperation, ROUND_HALF_UP
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 #import fractions
 #import math
 #import numbers
@@ -14,13 +14,13 @@ import re
 from sympy import simplify, sympify, nsimplify
 
 # internal
-import app_globals
 from app_random import roll_dice, quad_zero
+from app_logging import logging_print
 from app_window import delayed_display, display_result
 
 
 
-### GLOBAL VARIABLES ###
+### CONSTANTS ###
 
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	#r'^(?:\d+|?(?:pi|e|inf)|(?:root\(|sqrt\(|ln\(|log\(log10\(|log2\(|log1p\(|sin\(|cos\(|tan\(|csc\(|sec\(|cot\(|fabs\(|exp\(|exp2\(|expm1\(|gcd\(|factorial\(|trunc\(|ceil\(|floor\(|hex\(|bin\(|oct\()\s*|\+\-\*/\^%().!, ]+)+$'
@@ -153,8 +153,7 @@ OPERATIONS: dict[str, any] = {
 	'**': lambda x, y: x ** y
 }
 KNOWN_FUNCTIONS: tuple[str] = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
-#print_debug(KNOWN_FUNCTIONS)
-getcontext().prec = app_globals.DEC_PRECISION
+#logging_print(KNOWN_FUNCTIONS)
 
 
 
@@ -185,17 +184,17 @@ def eval_custom_functions(app, expression: str) -> str:
 		function_name = match.group(1).strip('(')
 		argument_str = match.group(2)
 		args = [f"'{arg.strip()}'" for arg in argument_str.split(',')]
-		app.print_log(f"Function requested: {function_name}, Arguments: {args}")
+		logging_print(f"Function requested: {function_name}, Arguments: {args}")
 		#if function_name in BUILTIN_FUNCTIONS:
 		#	return f"{function_name}({', '.join(args)})"
 		if function_name in BUILTIN_FUNCTIONS:
 			return f"{BUILTIN_FUNCTIONS[function_name]['func']}({', '.join(args)})"
 		elif function_name in CUSTOM_FUNCTIONS:
 			function_info = CUSTOM_FUNCTIONS[function_name]
-			app.print_log(f"Matching function: '{function_name}': {function_info}")
+			logging_print(f"Matching function: '{function_name}': {function_info}")
 			function_to_call: str = f"{function_info['func']}({', '.join(args)})"
 			#function_to_call: str = f"{function_info['func']}({', '.join([f"'{arg}'" if 'd' in arg else arg for arg in args])})"
-			app.print_log(f"Function to call: {function_to_call}")
+			logging_print(f"Function to call: {function_to_call}")
 			#if function['args'] != len(args):
 			#	if function['args'] == 1:
 			#		raise ValueError(f"{function_name}() expects 1 argument.")
@@ -204,12 +203,12 @@ def eval_custom_functions(app, expression: str) -> str:
 			if function_info['returns'] == 1:
 				result = eval(function_to_call)
 				result = str(result)
-				app.print_log(f"Function result: '{result}' (type: {type(result)})")
+				logging_print(f"Function result: '{result}' (type: {type(result)})")
 				return result
 			elif function_info['returns'] == 2:
 				result, _ = eval(function_to_call)
 				result = str(result)
-				app.print_log(f"Function result: '{result}' (type: {type(result)})")
+				logging_print(f"Function result: '{result}' (type: {type(result)})")
 				return result
 			else:
 				raise ValueError(f"{function_name}() returns {function_info['returns']} values. Only 1 or 2 values are supported.")
@@ -263,49 +262,49 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 		str: The result of the expression.
 	"""
 	#continue_eval: bool = True
-	app.print_log('Evaluating expression...')
+	logging_print('Evaluating expression...')
 	try:
 		# Remove leading zeros
 		expression = strip_leading_zeros(expression)
-		app.print_log(f"Expr (strip_zeros):{' '*2}`{expression}`")
+		logging_print(f"Expr (strip_zeros):{' '*2}`{expression}`")
 		# Handle implied exponentation
 		expression = implied_exp(expression)
-		app.print_log(f"Expr (implied_exp):{' '*2}`{expression}`")
+		logging_print(f"Expr (implied_exp):{' '*2}`{expression}`")
 		# Handle implied multiplication
 		expression = implied_mult(expression)
-		app.print_log(f"Expr (implied_mult):{' '*1}`{expression}`")
+		logging_print(f"Expr (implied_mult):{' '*1}`{expression}`")
 		# Handle custom functions
 		expression: str = eval_custom_functions(app, expression)
-		app.print_log(f"Expr (eval_func):{' '*4}`{expression}`")
+		logging_print(f"Expr (eval_func):{' '*4}`{expression}`")
 		# Simpify
 		expression = sympify(expression)
-		app.print_log(f"Expr (sympify):{' '*6}`{expression}`")
+		logging_print(f"Expr (sympify):{' '*6}`{expression}`")
 		if str(expression) == 'zoo':
 			raise ZeroDivisionError('Division by zero')
 		# Simplify
 		expression = simplify(expression)
-		#app.print_log(type(expression))
-		app.print_log(f"Expr (simplify):{' '*5}`{expression}`")
+		#logging_print(type(expression))
+		logging_print(f"Expr (simplify):{' '*5}`{expression}`")
 		expression = nsimplify(expression, rational=True)
-		app.print_log(f"Expr (nsimplify):{' '*4}`{expression}`")
+		logging_print(f"Expr (nsimplify):{' '*4}`{expression}`")
 		if dont_evaluate:
 			expression: str = format_expression(str(expression))
-			app.print_log(f"Expr (format):{' '*7}`{expression}`")
+			logging_print(f"Expr (format):{' '*7}`{expression}`")
 			app.calc_last_result = expression
 			return expression
 		else:
 			# Eval with Float
 			result = expression.evalf(app.calc_dec_precicion)
-			app.print_log(f"Expr (evalf):{' '*8}`{result}`")
+			logging_print(f"Expr (evalf):{' '*8}`{result}`")
 			if re.search(r'[a-zA-Z]', str(result)):
 				app.calc_last_result = str(result)
 				return str(result)
 			# Eval with Decimal
 			result: str = eval_with_decimal(result)
-			app.print_log(f"Expr (eval_dec):{' '*5}`{result}`")
+			logging_print(f"Expr (eval_dec):{' '*5}`{result}`")
 			# Simplify Decimal
 			result: str = simplify_decimal(result, app.calc_dec_display)
-			app.print_log(f"Expr (simplify_dec):{' '*1}`{result}`")
+			logging_print(f"Expr (simplify_dec):{' '*1}`{result}`")
 			# Return result
 			app.calc_last_result = result
 			return result
@@ -328,7 +327,7 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 	if app.timeout_id is not None:
 		app.window.after_cancel(app.timeout_id)
 		app.timeout_id = None
-	app.print_log(f"Expr (initial):{' '*6}`{expression}`")
+	logging_print(f"Expr (initial):{' '*6}`{expression}`")
 	if not expression:
 		display_result(app, output_element, app.calc_def_result)
 		return
@@ -383,7 +382,7 @@ def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTION
 		r'|(?<=[a-zA-Z])(?=\d)'                       # Case 8: variable followed by a number, e.g., x2 -> x*2
 		r'|(?<=[a-zA-Z])(?=\()'                       # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
 	)
-	#print_debug(pattern)
+	#logging_print(pattern)
 	modified_expression = re.sub(pattern, '*', expression)                                         # Add '*' in all matched cases
 	modified_expression = re.sub(r'(' + functions_pattern + r')\*\(', r'\1(', modified_expression) # Remove '*' between functions and '('
 	modified_expression = re.sub(r'(?<=roll\()(\d+)\*d\*(\d+)', r'\1d\2', modified_expression)     # Remove '*' between numbers and 'd' in the roll() function
@@ -416,7 +415,7 @@ def sanitize_input(app, expression: str, allowed_chars: str = ALLOWED_CHARS, san
 	sanitized_expression = expression.lstrip('=').rstrip('=')
 	if sanitize and not allowed_chars.match(sanitized_expression):
 		raise ValueError('Invalid characters in expression')
-	app.print_log(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
+	logging_print(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
 	return sanitized_expression
 
 def simplify_decimal(number: any, decimal_places: int = 10) -> str:
@@ -432,7 +431,7 @@ def simplify_decimal(number: any, decimal_places: int = 10) -> str:
 	"""
 	if not isinstance(number, Decimal):
 		number = Decimal(str(number))
-	#print_debug(value)
+	#logging_print(value)
 	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
 	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
 	if rounded_number.is_zero():
@@ -477,9 +476,9 @@ def strip_leading_zeros(expression: str) -> str:
 
 
 
-### MAIN ###
+### TESTING ###
 
-if __name__ == '__main__':
+def _test():
 	import math
 	print(math.sqrt(9))
 	print(math.log(9, 3))
@@ -500,5 +499,8 @@ if __name__ == '__main__':
 	#print(math.isqrt(9))
 	print(math.atanh(9))
 	#print(math.)
+
+if __name__ == '__main__':
+	_test()
 
 

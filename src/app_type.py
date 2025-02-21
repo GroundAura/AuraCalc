@@ -1,13 +1,3 @@
-### IMPORTS ###
-
-# builtins
-
-# external
-
-# internal
-
-
-
 ### FUNCTIONS ###
 def get_type(data: any) -> str:
 	try:
@@ -69,7 +59,7 @@ def str_to_dict(string: str) -> dict:
 		else:
 			raise Exception('Failed to convert str to dict.')
 	except Exception as e:
-		print(f"Error while trying to convert string '{string}' to a list:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to a list:\n  {e}")
 
 def str_to_float(string: str) -> float:
 	try:
@@ -79,7 +69,7 @@ def str_to_float(string: str) -> float:
 		else:
 			raise Exception('Failed to convert str to float.')
 	except Exception as e:
-		print(f"Error while trying to convert string '{string}' to a float:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to a float:\n  {e}")
 
 def str_to_int(string: str) -> int:
 	try:
@@ -89,7 +79,7 @@ def str_to_int(string: str) -> int:
 		else:
 			raise Exception('Failed to convert str to int.')
 	except Exception as e:
-		print(f"Error while trying to convert string '{string}' to an integer:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to an integer:\n  {e}")
 
 def str_to_list(string: str) -> list:
 	try:
@@ -100,7 +90,7 @@ def str_to_list(string: str) -> list:
 		else:
 			raise Exception('Failed to convert str to list.')
 	except Exception as e:
-		print(f"Error while trying to convert string '{string}' to a list:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to a list:\n  {e}")
 
 def str_to_set(string: str) -> set:
 	try:
@@ -111,7 +101,7 @@ def str_to_set(string: str) -> set:
 		else:
 			raise Exception('Failed to convert str to set.')
 	except Exception as e:
-		print(f"Error while trying to convert string '{string}' to a set:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to a set:\n  {e}")
 
 def str_to_tuple(string: str) -> tuple:
 	try:
@@ -122,14 +112,18 @@ def str_to_tuple(string: str) -> tuple:
 		else:
 			raise Exception('Failed to convert str to tuple.')
 	except Exception as e:
-		print(f"Error while trying to convert string '{string}' to a tuple:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to a tuple:\n  {e}")
 
 def validate_type(value, valid_type: type) -> bool:
 	if not isinstance(value, valid_type):
-		raise TypeError(f"Expected type `{valid_type.__name__}`, got `{type(value).__name__}`")
+		raise TypeError(f"Expected type '{valid_type.__name__}', got '{type(value).__name__}'")
 	return True
 
-def test() -> None:
+
+
+### TESTING ###
+
+def _test() -> None:
 	try:
 	# get_type()
 		data = 123
@@ -199,4 +193,6 @@ def test() -> None:
 		exit()
 
 if __name__ == '__main__':
-	test()
+	_test()
+
+
