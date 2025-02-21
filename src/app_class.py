@@ -9,7 +9,8 @@ from pathlib import Path
 from app_config import read_config, get_config_value
 from app_logging import logging_print
 from app_evaluate import evaluate_input
-import app_globals
+#import app_globals
+from app_globals import CONFIG, FORCE_DEBUG, PATH_CONFIG, USE_CONFIG
 from app_keybinds import bind_event
 from app_path import get_root_path
 from app_type import validate_type
@@ -29,7 +30,7 @@ class App:
 			icon_file: str = 'icon.ico',
 			log_file: str = 'debug.log',
 			config_file: str = 'config.ini',
-			use_config: bool = False
+			use_config: bool = USE_CONFIG
 		) -> None:
 
 		# metadata
@@ -47,7 +48,8 @@ class App:
 		self._set_config(config_file, use_config)
 
 		# debug
-		self._set_debug_mode(app_globals.DEBUG_MODE, use_config)
+		self._set_debug_mode(FORCE_DEBUG, use_config)
+		#self._set_debug_mode(app_globals.DEBUG_MODE, use_config)
 
 
 	# private methods
@@ -59,14 +61,14 @@ class App:
 			print_to_file: bool = True,
 			debug_mode_only: bool = True
 		) -> None:
-		try:
-			validate_type(self._log_path, Path)
-		except AttributeError:
-			raise AttributeError('Log path not set')
-		try:
-			validate_type(self._debug_mode, bool)
-		except AttributeError:
-			self._set_debug_mode(False)
+		#try:
+		#	validate_type(self._log_path, Path)
+		#except AttributeError:
+		#	raise AttributeError('Log path not set')
+		#try:
+		#	validate_type(self._debug_mode, bool)
+		#except AttributeError:
+		#	self._set_debug_mode(app_globals.DEBUG_MODE)
 		try:
 			validate_type(message, str)
 		except TypeError:
@@ -91,24 +93,30 @@ class App:
 
 	def _set_config(self, file_name: str, use_config: bool = True) -> None:
 		if use_config:
-			validate_type(self._resources_path, Path)
-			validate_type(file_name, str)
-			self._config_path = self._resources_path / file_name
-			validate_type(self._config_path, Path)
-			if not self._config_path.exists():
-				raise FileNotFoundError(f"File `{self._config_path}` does not exist")
-			self._config = read_config(self._config_path, preserve_key_case=True)
+			if CONFIG and PATH_CONFIG:
+				self._config_path = PATH_CONFIG
+				self._config = CONFIG
+			else:
+				validate_type(self._resources_path, Path)
+				validate_type(file_name, str)
+				self._config_path = self._resources_path / file_name
+				validate_type(self._config_path, Path)
+				if not self._config_path.exists():
+					raise FileNotFoundError(f"File `{self._config_path}` does not exist")
+				self._config = read_config(self._config_path, preserve_key_case=True)
 		else:
 			self._config_path = None
 			self._config = None
 
 	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
+		#print(self._config['DEBUG']['bDebugMode'])
 		validate_type(new_val, bool)
 		self._debug_mode = value
-		app_globals.DEBUG_MODE = self._debug_mode
+		#app_globals.DEBUG_MODE = self._debug_mode
+		#print(self._debug_mode, app_globals.DEBUG_MODE)
 		if self._debug_mode:
-			self._logging_print(f"Config Settings: `{self._config}`")
+			self._logging_print(f"Config Settings: {self._config}")
 
 	def _set_icon_path(self, file_name: str) -> None:
 		validate_type(self._resources_path, Path)
@@ -181,7 +189,7 @@ class GuiApp(App):
 			icon_file: str = 'icon.ico',
 			log_file: str = 'debug.log',
 			config_file: str = 'config.ini',
-			use_config: bool = False,
+			use_config: bool = USE_CONFIG,
 			win_width: int = 800,
 			win_height: int = 600,
 			win_width_min: int = 400,
@@ -251,11 +259,13 @@ class GuiApp(App):
 		sequence = sequence.lstrip('<').rstrip('>')
 		#sequence = sequence[1:-1]
 		if '-' in sequence:
-			keys = sequence.split('-')
-			key = keys[-1]
+			#keys = sequence.split('-')
+			#key = keys[-1]
+			return
 		else:
 			key = sequence
-		self._bound_keys.add(key)
+			self._bound_keys.add(key)
+		#self._bound_keys.add(key)
 
 	def _set_key_quit(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sQuitKey', new_val, use_config)
@@ -458,7 +468,7 @@ class CalculatorApp(GuiApp):
 			icon_file: str = 'icon.ico',
 			log_file: str = 'debug.log',
 			config_file: str = 'config.ini',
-			use_config: bool = True,
+			use_config: bool = USE_CONFIG,
 			win_width: int = 250,
 			win_height: int = 110,
 			win_width_min: int = 250,
@@ -801,6 +811,7 @@ class CalculatorApp(GuiApp):
 
 	def open_window(self) -> None: # override
 		self._logging_print(f"Opening {self.name}.")
+		#self._logging_print()
 		if self._win_force_focus:
 			logging_print('Forcing window focus.')
 			self.focus_window()
@@ -822,7 +833,6 @@ class CalculatorApp(GuiApp):
 			self._win_expanded = True
 			self.win_resize_height = True
 			self.update_window(reset_width=False, reset_height=False)
-			self._logging_print(f"Expanded = {self._win_expanded}")
 		else:
 			#self._win_frame_adv.grid_forget()
 			self._hide_element(self._win_frame_adv)
@@ -830,9 +840,8 @@ class CalculatorApp(GuiApp):
 			self._win_expanded = False
 			self.win_resize_height = False
 			self.update_window(reset_width=True, reset_height=True)
-			self._logging_print(f"Expanded = {self._win_expanded}")
-		#self.print_log(f"Expanded = {self._win_expanded}")
-		#self.print_log(f"Viewable = {self._win_frame_adv.winfo_viewable()}")
+		self._logging_print(f"Advanced = {self._win_expanded}")
+		#self._logging_print(f"Viewable = {self._win_frame_adv.winfo_viewable()}")
 
 	def toggle_pinned(self) -> None: # override
 		if not self._win_pinned:
@@ -849,6 +858,7 @@ class CalculatorApp(GuiApp):
 				self._win_btn_pin.configure(text='Pin')
 			except AttributeError:
 				pass
+		self._logging_print(f"Pinned = {self._win_pinned}")
 
 	def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None: # override
 		self._screen_width, self._screen_height = self.screen_dimensions

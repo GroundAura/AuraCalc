@@ -5,7 +5,7 @@ import configparser
 import os
 
 # internal
-from app_logging import logging_print
+#from app_logging import logging_print
 from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple
 
 
@@ -73,12 +73,12 @@ def read_config(
 	config = configparser.ConfigParser(comment_prefixes=comment_prefixes, inline_comment_prefixes=inline_comment_prefixes)
 	if preserve_key_case:
 		config.optionxform = lambda option: option
-	logging_print(f"Trying to read config file from: '{file_path}'.")
+	print(f"Trying to read config file from: '{file_path}'.")
 	try:
 		if not os.path.exists(file_path):
 			raise Exception(f"Config file not found: '{file_path}'.")
 		config.read(file_path)
-		logging_print('Config file read successfully.')
+		print('Config file read successfully.')
 	except Exception as e:
 		raise Exception(f"ERROR: Error while trying to read config file: {e}")
 	try:

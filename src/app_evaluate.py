@@ -262,7 +262,7 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 		str: The result of the expression.
 	"""
 	#continue_eval: bool = True
-	logging_print('Evaluating expression...')
+	#logging_print('Evaluating expression...')
 	try:
 		# Remove leading zeros
 		expression = strip_leading_zeros(expression)
@@ -279,7 +279,7 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 		# Simpify
 		expression = sympify(expression)
 		logging_print(f"Expr (sympify):{' '*6}`{expression}`")
-		if str(expression) == 'zoo':
+		if str(expression) in ('nan', 'zoo'):
 			raise ZeroDivisionError('Division by zero')
 		# Simplify
 		expression = simplify(expression)
@@ -324,20 +324,23 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 		live_mode (bool, optional): Whether to update the result in real-time. Defaults to `False`.
 	"""
 	expression = input_element.get()
+	logging_print(f"Expression:{' '*10}`{expression}`")
+	logging_print(f"Evaluating...")
+	#logging_print(f"Expr (initial):{' '*6}`{expression}`")
+	#logging_print(f"Evaluating Expr:{' '*5}`{expression}`")
 	if app.timeout_id is not None:
 		app.window.after_cancel(app.timeout_id)
 		app.timeout_id = None
-	logging_print(f"Expr (initial):{' '*6}`{expression}`")
 	if not expression:
-		display_result(app, output_element, app.calc_def_result)
+		display_result(output_element, app.calc_def_result)
 		return
 	try:
 		expression = sanitize_input(app, expression, sanitize=app._sanitize_input)
 		result = evaluate_expression(app, expression, dont_evaluate=app._only_simplify)
-		display_result(app, output_element, result)
+		display_result(output_element, result)
 		return
 	except ZeroDivisionError:
-		display_result(app, output_element, 'Undefined (division by zero)')
+		display_result(output_element, 'Undefined (division by zero)')
 		return
 	except Exception as e:
 		if live_mode and app.timeout_patience > 0 and expression[-1] in app.calc_wait_chars:
@@ -347,7 +350,7 @@ def evaluate_input(app, input_element, output_element, live_mode: bool = False) 
 			delayed_display(app, output_element, f"ERROR: {e}")
 			return
 		else:
-			display_result(app, output_element, f"ERROR: {e}")
+			display_result(output_element, f"ERROR: {e}")
 			return
 
 def format_expression(expression: str) -> str:

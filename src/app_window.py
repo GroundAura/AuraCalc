@@ -53,10 +53,10 @@ def delayed_display(app, output_element, message: str) -> None:
 		message (str): The message to display in the output element.
 	"""
 	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(app, output_element, message))
-	app.delayed_func(lambda: display_result(app, output_element, message))
-	display_result(app, output_element, app.calc_last_result)
+	app.delayed_func(lambda: display_result(output_element, message))
+	display_result(output_element, app.calc_last_result, logging=False)
 
-def display_result(app, output_element, message: str) -> None:
+def display_result(output_element, message: str, logging: bool = True) -> None:
 	"""
 	Displays the result in the output element.
 
@@ -68,7 +68,9 @@ def display_result(app, output_element, message: str) -> None:
 	output_element.delete('1.0', 'end')
 	output_element.insert('end', f"{message}")
 	output_element.configure(state='disabled')
-	logging_print(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
+	if logging:
+		#logging_print(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
+		logging_print(f"Result:{' '*14}`{message.replace('\n', '  ')}`")
 
 def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
