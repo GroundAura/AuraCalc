@@ -11,8 +11,10 @@ import sys
 # internal
 from app_config import read_config, get_config_value
 from app_debug import print_debug
+from app_evaluate import evaluate_input
+from app_keybinds import bind_event
 from app_type import validate_type
-from app_window import clear_io, pin_window, toggle_advanced
+from app_window import clear_io, focus_element
 
 
 
@@ -201,7 +203,8 @@ class GuiApp(App):
 			win_centered: bool = False,
 			win_pinned: bool = False,
 			win_resize_width: bool = True,
-			win_resize_height: bool = True
+			win_resize_height: bool = True,
+			win_layout: str = 'grid'
 		) -> None:
 		# parent constructor
 		App.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config)
@@ -232,26 +235,51 @@ class GuiApp(App):
 		self._window.title(self._name)
 		self._set_theme_mode('dark')
 		self._set_theme_color('green')
+		self._set_win_layout(win_layout)
 		try:
 			self._set_window_icon()
 		except FileNotFoundError as e:
 			print(f"ERROR: Error while trying to set window icon: {e}")
 		#self._window.geometry(f"{self._win_width_def}x{self._win_height_def}+{self._win_x_pos_def}+{self._win_y_pos_def}")
-		self._window.protocol('WM_DELETE_WINDOW', self.close_window)
 		self.update_window(reset_pos=True)
-		#if self._win_pinned_def:
-		#	self.toggle_pinned()
+		if self._win_pinned_def:
+			self.toggle_pinned()
 		#print('Initialized Window')
 
 		# window elements
 		self._win_frame_base = ctk.CTkFrame(self._window)
 
+		# event bindings
+		self._bound_keys = set()
+		self._set_key_quit('<Escape>', use_config)
+		self._window.protocol('WM_DELETE_WINDOW', self.close_window)
+
 
 	# private methods
+	def _add_bound_key(self, sequence: str) -> None:
+		validate_type(sequence, str)
+		if sequence[0] != '<' or sequence[-1] != '>':
+			raise ValueError(f"ERROR: Invalid key sequence: '{sequence}'. Must be in the format '<sequence>'")
+		sequence = sequence.lstrip('<').rstrip('>')
+		#sequence = sequence[1:-1]
+		if '-' in sequence:
+			keys = sequence.split('-')
+			key = keys[-1]
+		else:
+			key = sequence
+		self._bound_keys.add(key)
+
+	def _set_key_quit(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'KEYBINDS', 'sQuitKey', new_val, use_config)
+		validate_type(new_val, str)
+		self._key_quit = value
+		bind_event(self._window, self._key_quit, command=self.close_window)
+		self._add_bound_key(self._key_quit)
+
 	def _set_theme_mode(self, new_val: str) -> None:
 		validate_type(new_val, str)
 		if new_val not in ('light', 'dark', 'system'):
-			raise ValueError(f"ERROR: Invalid theme mode: {new_val}. Must be 'light', 'dark', or 'system'")
+			raise ValueError(f"ERROR: Invalid theme mode: '{new_val}'. Must be 'light', 'dark', or 'system'")
 		self._theme_mode = new_val
 		ctk.set_appearance_mode(self._theme_mode)
 
@@ -280,6 +308,12 @@ class GuiApp(App):
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._win_height_min = value
+
+	def _set_win_layout(self, new_val: str) -> None:
+		validate_type(new_val, str)
+		if new_val not in ('grid', 'pack'):
+			raise ValueError(f"Invalid layout: '{new_val}'. Must be 'grid' or 'pack'")
+		self._win_layout = new_val
 
 	def _set_win_pinned_def(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'WIN_FLAGS', 'bStartPinned', new_val, use_config)
@@ -351,7 +385,7 @@ class GuiApp(App):
 			self.focus_window()
 		self._window.mainloop()
 
-	def print_info(self) -> None:
+	def print_info(self) -> None: # override
 		App.print_info(self)
 		data = []
 		data.append(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
@@ -446,10 +480,11 @@ class CalculatorApp(GuiApp):
 			win_centered: bool = True,
 			win_pinned: bool = False,
 			win_resize_width: bool = True,
-			win_resize_height: bool = False
+			win_resize_height: bool = False,
+			win_layout: str = 'grid'
 		) -> None:
 		# parent constructor
-		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_resize_width, win_resize_height)
+		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_resize_width, win_resize_height, win_layout)
 
 		# paths
 		self._set_history_path(history_file)
@@ -470,15 +505,22 @@ class CalculatorApp(GuiApp):
 
 		## window state
 		self._win_expanded = False
+		pinned_text = 'Unpin' if self._win_pinned else 'Pin'
 
 		# window elements
 		validate_type(self._window, ctk.CTk)
 		self._win_frame_adv = ctk.CTkFrame(self._window)
-		self._win_btn_adv = ctk.CTkButton(self._win_frame_base, text='Expand', command=lambda: toggle_advanced(self, self.win_frame_adv, self._win_btn_adv))
+		#self._win_frame_help = ctk.CTkFrame(self._window)
+		#self._win_frame_opt = ctk.CTkFrame(self._window)
+		self._win_btn_adv = ctk.CTkButton(self._win_frame_base, text='Expand', command=self.toggle_advanced)
 		self._win_btn_clear = ctk.CTkButton(self._win_frame_base, text='Clear', command=lambda: clear_io(self, self._win_txt_input, self._win_txt_result))
-		self._win_btn_pin = ctk.CTkButton(self._win_frame_base, text='Pin', command=lambda: pin_window(self, self._win_btn_pin))
+		self._win_btn_pin = ctk.CTkButton(self._win_frame_base, text=pinned_text, command=self.toggle_pinned)
 		self._win_txt_input = ctk.CTkEntry(self._win_frame_base)
 		self._win_txt_result = ctk.CTkTextbox(self._win_frame_base)
+
+		# window
+		if self._win_advanced_def:
+			self.toggle_advanced()
 
 		# calculator default values
 		self._set_calc_dec_precision(100, use_config)
@@ -509,22 +551,54 @@ class CalculatorApp(GuiApp):
 			'position': self.window_position
 		}
 
-		# keybinds
+		# event bindings
 		self._set_key_advanced('<F3>', use_config)
 		self._set_key_clear('<Alt-BackSpace>', use_config)
 		self._set_key_del_l('<Control-BackSpace>', use_config)
 		self._set_key_del_r('<Control-Delete>', use_config)
-		#self._set_key_del_term_r('<Shift-BackSpace>', use_config)
 		#self._set_key_del_term_l('<Shift-Delete>', use_config)
-		self._set_key_eval('<Enter>', use_config)
+		#bind_event(self._window, self._key_del_term_l, command=lambda: self._del_txt_term(self._win_txt_input, 'left'))
+		#self._set_key_del_term_r('<Shift-BackSpace>', use_config)
+		#bind_event(self._window, self._key_del_term_r, command=lambda: self._del_txt_term(self._win_txt_input, 'right'))
+		self._set_key_eval('<Return>', use_config)
 		#self._set_key_help('<F1>', use_config)
+		#bind_event(self._window, self._key_help, command=self.show_help)
 		#self._set_key_options('<F2>', use_config)
+		#bind_event(self._window, self._key_options, command=self.show_options)
 		#self._set_key_redo('<Control-y>', use_config)
+		#bind_event(self._window, self._key_options, command=self.undo_txt)
 		#self._set_key_undo('<Control-z>', use_config)
-		self._set_key_quit('<Escape>', use_config)
-
+		#bind_event(self._window, self._key_options, command=self.redo_txt)
+		if self._calc_live_eval:
+			bind_event(self._win_txt_input, '<KeyRelease>', excluded_seq=self._bound_keys, command=lambda: evaluate_input(self, self._win_txt_input, self._win_txt_result, live_mode=True))
+		self.window.bind('<FocusIn>', lambda event: focus_element(self._win_txt_input))
 
 	# private methods
+	#def _del_txt(self, element, begin, end) -> None:
+	#	element.delete(begin, end)
+
+	def _del_txt_cursor(self, element, direction) -> None:
+		if direction.lower() in ('left', 'l', '<'):
+			if type(element) == ctk.CTkEntry:
+				element.delete('0', 'insert')
+			elif type(element) == ctk.CTkTextbox:
+				element.delete('1.0', 'insert', 'end')
+		elif direction.lower() in ('right', 'r', '>'):
+			if type(element) == ctk.CTkEntry:
+				element.delete('insert', 'end')
+			elif type(element) == ctk.CTkTextbox:
+				element.delete('insert', 'end-1c')
+		else:
+			raise ValueError(f"Invalid direction: {direction}. Must be 'left', 'l', '<', 'right', 'r', '>'")
+
+	def _hide_element(self, element: str) -> None:
+		if self._win_layout == 'grid':
+			element.grid_remove()
+		elif self._win_layout == 'pack':
+			element.pack_forget()
+		else:
+			raise ValueError(f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'")
+
 	def _set_calc_dec_display(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'CALCULATION', 'iDecimalDisplay', new_val, use_config)
 		try:
@@ -572,21 +646,29 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sAdvancedKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_advanced = value
+		bind_event(self._window, self._key_advanced, command=self.toggle_advanced)
+		self._add_bound_key(self._key_advanced)
 
 	def _set_key_clear(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sClearKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_clear = value
+		bind_event(self._window, self._key_clear, command=lambda: clear_io(self, self._win_txt_input, self._win_txt_result))
+		self._add_bound_key(self._key_clear)
 
 	def _set_key_del_l(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sDeleteAllLKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_del_l = value
+		bind_event(self._window, self._key_del_l, command=lambda: self._del_txt_cursor(self._win_txt_input, 'left'))
+		self._add_bound_key(self._key_del_l)
 
 	def _set_key_del_r(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sDeleteAllRKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_del_r = value
+		bind_event(self._window, self._key_del_r, command=lambda: self._del_txt_cursor(self._win_txt_input, 'right'))
+		self._add_bound_key(self._key_del_r)
 
 	def _set_key_del_term_l(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sDeleteTermLKey', new_val, use_config)
@@ -602,6 +684,8 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sEvaluateKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_eval = value
+		bind_event(self._win_txt_input, self._key_eval, command=lambda: evaluate_input(self, self._win_txt_input, self._win_txt_result, live_mode=False))
+		self._add_bound_key(self._key_eval)
 
 	def _set_key_help(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sHelpKey', new_val, use_config)
@@ -622,11 +706,6 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sUndoKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_undo = value
-
-	def _set_key_quit(self, new_val: str, use_config: bool = False) -> None:
-		value = get_config_value(self._config, 'KEYBINDS', 'sQuitKey', new_val, use_config)
-		validate_type(new_val, str)
-		self._key_quit = value
 
 	def _set_win_advanced_def(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'WIN_FLAGS', 'bStartAdvanced', new_val, use_config)
@@ -715,15 +794,16 @@ class CalculatorApp(GuiApp):
 		value = 0 if value < 0 else value
 		self._win_width_min_adv = value
 
+	def _show_element(self, element: str) -> None:
+		if self._win_layout == 'grid':
+			element.grid()
+		elif self._win_layout == 'pack':
+			element.pack()
+		else:
+			raise ValueError(f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'")
+
 
 	# public methods
-	def print_info(self) -> None:
-		GuiApp.print_info(self)
-		data = []
-		data.append(f"History File: {self._history_path}")
-		for line in data:
-			self.print_log(line)
-
 	def delayed_func(self, func, custom_delay: int | None = None) -> None:
 		try:
 			delay = custom_delay if custom_delay is not None else self._calc_live_eval_delay
@@ -731,7 +811,58 @@ class CalculatorApp(GuiApp):
 			delay = custom_delay if custom_delay is not None else 1000
 		self._timeout_id = self.window.after(delay, func)
 
-	def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None:
+	def open_window(self) -> None: # override
+		self.print_log(f"Opening {self.name}.")
+		if self._win_force_focus:
+			print_debug('Forcing window focus.')
+			self.focus_window()
+		self.window.after(100, lambda: focus_element(self._win_txt_input))
+		self._window.mainloop()
+
+	def print_info(self) -> None: # override
+		GuiApp.print_info(self)
+		data = []
+		data.append(f"History File: {self._history_path}")
+		for line in data:
+			self.print_log(line)
+
+	def toggle_advanced(self) -> None:
+		if not self._win_expanded:
+			#self._win_frame_adv.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
+			self._show_element(self._win_frame_adv)
+			self._win_btn_adv.configure(text='Collapse')
+			self._win_expanded = True
+			self.win_resize_height = True
+			self.update_window(reset_width=False, reset_height=False)
+			self.print_log(f"Expanded = {self._win_expanded}")
+		else:
+			#self._win_frame_adv.grid_forget()
+			self._hide_element(self._win_frame_adv)
+			self._win_btn_adv.configure(text='Expand')
+			self._win_expanded = False
+			self.win_resize_height = False
+			self.update_window(reset_width=True, reset_height=True)
+			self.print_log(f"Expanded = {self._win_expanded}")
+		#self.print_log(f"Expanded = {self._win_expanded}")
+		#self.print_log(f"Viewable = {self._win_frame_adv.winfo_viewable()}")
+
+	def toggle_pinned(self) -> None: # override
+		if not self._win_pinned:
+			self._window.attributes('-topmost', True)
+			self._win_pinned = True
+			try:
+				self._win_btn_pin.configure(text='Unpin')
+			except AttributeError:
+				pass
+		else:
+			self._window.attributes('-topmost', False)
+			self._win_pinned = False
+			try:
+				self._win_btn_pin.configure(text='Pin')
+			except AttributeError:
+				pass
+
+	def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None: # override
 		self._screen_width, self._screen_height = self.screen_dimensions
 		#print(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
 		if reset_pos:

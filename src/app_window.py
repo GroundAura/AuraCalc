@@ -6,9 +6,6 @@
 import customtkinter as ctk
 
 # internal
-#import app_globals
-from app_debug import print_debug
-#from app_history import save_history
 
 
 
@@ -30,18 +27,6 @@ def clear_io(app, input_element, output_element) -> None:
 	output_element.insert('end', app._calc_def_result)
 	output_element.configure(state='disabled')
 
-#def close_window(window: ctk.CTk) -> None:
-#	"""
-#	Closes the window.
-
-#	Args:
-#		window (ctk.CTk): The window to close.
-#	"""
-#	#save_history()
-#	print_debug(f"Closing {app_globals.NAME}.")
-#	print_debug('\n\n', timestamp=False, print_to_console=False)
-#	window.destroy()
-
 def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
 	Copies the text in the element to the clipboard.
@@ -59,6 +44,19 @@ def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	app.print_log(f"Text copied to clipboard: `{app.clipboard}`")
 	app.window.update()
 
+def delayed_display(app, output_element, message: str) -> None:
+	"""
+	Displays the result in the the output element after a delay.
+
+	Args:
+		app: The application instance.
+		output_element: The element to display the result in.
+		message (str): The message to display in the output element.
+	"""
+	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(app, output_element, message))
+	app.delayed_func(lambda: display_result(app, output_element, message))
+	display_result(app, output_element, app.calc_last_result)
+
 def display_result(app, output_element, message: str) -> None:
 	"""
 	Displays the result in the output element.
@@ -73,32 +71,6 @@ def display_result(app, output_element, message: str) -> None:
 	output_element.configure(state='disabled')
 	app.print_log(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
 
-def toggle_advanced(app, frame: ctk.CTkFrame, button: ctk.CTkButton) -> None:
-	"""
-	Opens the options window.
-
-	Args:
-		window (ctk.CTk): The window to expand the frame in.
-		frame (ctk.CTkFrame): The frame to expand.
-		button (ctk.CTkButton): The button to update the text of.
-	"""
-	#global EXPANDED
-	if not app._win_expanded:
-		frame.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
-		button.configure(text='Collapse')
-		app._win_expanded = True
-		app.win_resize_height = True
-		app.update_window(reset_width=False, reset_height=False)
-	else:
-		#if frame.winfo_viewable():
-		frame.grid_forget()
-		button.configure(text='Expand')
-		app._win_expanded = False
-		app.win_resize_height = False
-		app.update_window(reset_width=True, reset_height=True)
-	#app.print_log(f"Expanded = {app.win_expanded}")
-	#app.print_log(f"Viewable = {frame.winfo_viewable()}")
-
 def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
 	Sets cursur focus to a given element.
@@ -111,66 +83,5 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 		element.select_range('0', 'end')
 	elif isinstance(element, ctk.CTkText):
 		element.tag_add('sel', '1.0', 'end-1c')
-
-def pin_window(app, button: ctk.CTkButton) -> None:
-	"""
-	Pins or un-pins the window relative to other windows.
-
-	Args:
-		window (ctk.CTk): The window to pin.
-		button (ctk.CTkButton): The button to update the text of.
-	"""
-	if not app._win_pinned:
-		app.toggle_pinned()
-		button.configure(text='Unpin')
-	else:
-		app.toggle_pinned()
-		button.configure(text='Pin')
-
-#def update_window(window: ctk.CTk, def_pos: bool = False) -> None:
-#	"""
-#	Updates the window's size, position, and related attributes.
-
-#	Args:
-#		window (ctk.CTk): The window to update.
-#		def_pos (bool, optional): Whether to set the window to the default position. Defaults to `False`.
-#	"""
-#	app_globals.SCREEN_HEIGHT = window.winfo_screenheight()
-#	app_globals.SCREEN_WIDTH = window.winfo_screenwidth()
-#	#app_globals.X_POS = (window.winfo_screenwidth() // 2) - (app_globals.WIDTH // 2)
-#	#app_globals.Y_POS = (window.winfo_screenheight() // 2) - (app_globals.HEIGHT // 2)
-#	#window.geometry(f"{app_globals.WIDTH}x{app_globals.HEIGHT}+{app_globals.X_POS}+{app_globals.Y_POS}")
-#	app_globals.CUR_HEIGHT = window.winfo_height()
-#	app_globals.CUR_WIDTH = window.winfo_width()
-#	app_globals.CUR_X_POS = window.winfo_x() if window.winfo_x() else app_globals.DEF_X_POS
-#	app_globals.CUR_Y_POS = window.winfo_y() if window.winfo_y() else app_globals.DEF_Y_POS
-#	#if not app_globals.CUR_X_POS or not app_globals.CUR_Y_POS:
-#	#	target_x_pos: int = app_globals.DEF_X_POS
-#	#	target_y_pos: int = app_globals.DEF_Y_POS
-#	if def_pos:
-#		if app_globals.DEF_CENTERED:
-#			target_x_pos: int = (app_globals.SCREEN_WIDTH // 2) - (app_globals.CUR_WIDTH // 2)
-#			target_y_pos: int = (app_globals.SCREEN_HEIGHT // 2) - (app_globals.CUR_HEIGHT // 2)
-#		else:
-#			target_x_pos: int = app_globals.DEF_X_POS
-#			target_y_pos: int = app_globals.DEF_Y_POS
-#	else:
-#		target_x_pos: int = app_globals.CUR_X_POS
-#		target_y_pos: int = app_globals.CUR_Y_POS
-#	window.resizable(width=app_globals.RESIZE_WIDTH, height=app_globals.RESIZE_HEIGHT)
-#	if app_globals.EXPANDED:
-#		window.minsize(app_globals.ADV_MIN_WIDTH, app_globals.ADV_MIN_HEIGHT)
-#		target_width: int = app_globals.CUR_WIDTH if app_globals.CUR_WIDTH > app_globals.ADV_DEF_WIDTH else app_globals.ADV_DEF_WIDTH
-#		window.geometry(f"{target_width}x{app_globals.ADV_DEF_HEIGHT}+{target_x_pos}+{target_y_pos}")
-#	else:
-#		window.minsize(app_globals.BASE_MIN_WIDTH, app_globals.BASE_MIN_HEIGHT)
-#		target_width: int = app_globals.CUR_WIDTH if app_globals.CUR_WIDTH > app_globals.ADV_DEF_WIDTH else app_globals.ADV_DEF_WIDTH
-#		window.geometry(f"{app_globals.BASE_DEF_WIDTH}x{app_globals.BASE_DEF_HEIGHT}+{target_x_pos}+{target_y_pos}")
-#	#app_globals.SCREEN_HEIGHT = window.winfo_screenheight()
-#	#app_globals.SCREEN_WIDTH = window.winfo_screenwidth()
-#	app_globals.CUR_HEIGHT = window.winfo_height()
-#	app_globals.CUR_WIDTH = window.winfo_width()
-#	app_globals.CUR_X_POS = window.winfo_x()
-#	app_globals.CUR_Y_POS = window.winfo_y()
 
 

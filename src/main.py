@@ -13,63 +13,10 @@ import customtkinter as ctk
 # internal
 from app_class import CalculatorApp
 from app_debug import print_debug
-from app_evaluate import evaluate_expression, sanitize_input
-from app_keybinds import bind_event
-from app_window import clear_io, display_result, toggle_advanced, focus_element, pin_window
 
 
 
 ### FUNCTIONS ###
-
-def delayed_display(app, output_element, message: str) -> None:
-	"""
-	Displays the result in the the output element after a delay.
-
-	Args:
-		app: The application instance.
-		output_element: The element to display the result in.
-		message (str): The message to display in the output element.
-	"""
-	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(app, output_element, message))
-	app.delayed_func(lambda: display_result(app, output_element, message))
-	display_result(app, output_element, app.calc_last_result)
-
-def evaluate_input(app, input_element, output_element, live_mode: bool = False) -> None:
-	"""
-	Evaluates or simplifies the expression in the input element and displays the result in the output element.
-
-	Args:
-		app: The application instance.
-		input_element: The element to get the expression to evaluate from.
-		output_element: The element to display the result in.
-		live_mode (bool, optional): Whether to update the result in real-time. Defaults to `False`.
-	"""
-	expression = input_element.get()
-	if app.timeout_id is not None:
-		app.window.after_cancel(app.timeout_id)
-		app.timeout_id = None
-	app.print_log(f"Expr (initial):{' '*6}`{expression}`")
-	if not expression:
-		display_result(app, output_element, app.calc_def_result)
-		return
-	try:
-		expression = sanitize_input(app, expression, sanitize=app._sanitize_input)
-		result = evaluate_expression(app, expression, dont_evaluate=app._only_simplify)
-		display_result(app, output_element, result)
-		return
-	except ZeroDivisionError:
-		display_result(app, output_element, 'Undefined (division by zero)')
-		return
-	except Exception as e:
-		if live_mode and app.timeout_patience > 0 and expression[-1] in app.calc_wait_chars:
-			delayed_display(app, output_element, 'ERROR: Incomplete expression')
-			return
-		elif live_mode and app.timeout_patience > 1:
-			delayed_display(app, output_element, f"ERROR: {e}")
-			return
-		else:
-			display_result(app, output_element, f"ERROR: {e}")
-			return
 
 
 
@@ -96,21 +43,21 @@ def main():
 	print_debug(f"{meta_name} v{meta_version} by {meta_author}")
 	print_debug('Initializing...')
 	app = CalculatorApp(
-		name=meta_name,
-		version=meta_version,
-		author=meta_author,
+		name = meta_name,
+		version = meta_version,
+		author = meta_author,
 		resources_dir = resources_dir,
 		history_file = history_file,
 		icon_file = icon_file,
 		log_file = log_file,
 		config_file = config_file,
 		use_config = True,
+		win_layout = 'grid'
 	)
-	#root = app.window
 
 	# Configure theme
-	#ctk.set_appearance_mode('dark')
-	#ctk.set_default_color_theme('green')
+	#app._set_theme_mode('dark')
+	#app._set_theme_color('green')
 	#tk.ttk.Style().theme_use('clam')
 
 	# Configure grid
@@ -125,7 +72,7 @@ def main():
 
 	# Configure padding
 	x_padding = 2
-
+	
 	y_padding = 3
 	#y_pad_try = window_height / 2 - 25
 	#y_padding = y_pad_try if y_pad_try > 5 and window_height > 100 else 5
@@ -135,11 +82,10 @@ def main():
 	### FRAME SETUP ###
 
 	# Basic calculator frame
-	#base_frame = app.win_frame_base
 	app.win_frame_base.grid(row=0, column=0, padx=0, pady=0, sticky='NSEW')
-	#print_debug(app.win_frame_base.winfo_pointerxy())
-	#print_debug(app.win_frame_base.winfo_manager())
-	#print_debug(app.win_frame_base.winfo_screen())
+	#app.print_log(app.win_frame_base.winfo_pointerxy())
+	#app.print_log(app.win_frame_base.winfo_manager())
+	#app.print_log(app.win_frame_base.winfo_screen())
 	app.win_frame_base.grid_columnconfigure(0, weight=1)
 	app.win_frame_base.grid_columnconfigure(1, weight=1)
 	app.win_frame_base.grid_columnconfigure(2, weight=1)
@@ -150,8 +96,8 @@ def main():
 	app.win_frame_base.grid_rowconfigure(2, weight=0)
 
 	## Advanced calculator frame
-	#advanced_frame = app.win_frame_adv
-	#app.win_frame_adv.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
+	app.win_frame_adv.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
+	app.win_frame_adv.grid_remove()
 
 
 
@@ -172,77 +118,34 @@ def main():
 
 
 	### GUI ELEMENTS ###
-	#layer = app.win_frame_base
 
 	# Entry Input Element (CTkEntry)
-	#entry_input = ctk.CTkEntry(layer)
-	entry_input = app._win_txt_input
-	entry_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
-	entry_input.insert(ctk.END, app.calc_def_expr)
+	app._win_txt_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._win_txt_input.insert(ctk.END, app.calc_def_expr)
 
 	# Result Display Element (CTkTextbox)
-	#result_display = ctk.CTkTextbox(layer, height=1)
-	result_display = app._win_txt_result
-	result_display.configure(height=1)
-	result_display.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
-	result_display.insert(ctk.END, app.calc_def_result)
-	result_display.configure(state='disabled')
+	app._win_txt_result.configure(height=1)
+	app._win_txt_result.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._win_txt_result.insert(ctk.END, app.calc_def_result)
+	app._win_txt_result.configure(state='disabled')
 
 	# Pin Window ELement (CTkButton)
-	#pin_button = ctk.CTkButton(layer, text='Pin', command=lambda: pin_window(app, pin_button), width=30)
-	pin_button = app._win_btn_pin
-	pin_button.configure(width=30)
-	pin_button.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
-	if app._win_pinned_def:
-		pin_window(app, pin_button)
+	app._win_btn_pin.configure(width=30)
+	app._win_btn_pin.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Clear Entry/Result Element (CTkButton)
-	#clear_button = ctk.CTkButton(layer, text='Clear', command=lambda: clear_io(app, entry_input, result_display), width=30)
-	clear_button = app._win_btn_clear
-	clear_button.configure(width=30)
-	clear_button.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._win_btn_clear.configure(width=30)
+	app._win_btn_clear.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Advanced View Element (CTkButton)
-	#advanced_button = ctk.CTkButton(layer, text='Expand', command=lambda: toggle_advanced(app, app.win_frame_adv, advanced_button), width=30)
-	advanced_button = app._win_btn_adv
-	advanced_button.configure(width=30)
-	advanced_button.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
-	if app._win_advanced_def:
-		toggle_advanced(app, app.win_frame_adv, advanced_button)
-
-
-
-	### EVENT HANDLING ###
-
-	# Keybinds
-	bind_event(app.window, app._key_advanced, lambda event: toggle_advanced(app, app.win_frame_adv, advanced_button))
-	bind_event(app.window, app._key_clear, lambda event: clear_io(app, entry_input, result_display))
-	#bind_event(app.window, app._key_help, lambda event: toggle_help(app.window, help_frame, help_button))
-	#bind_event(app.window, app._key_options, lambda event: toggle_options(app.window, options_frame, options_button))
-	bind_event(app.window, app._key_quit, lambda event: app.close_window())
-
-	bind_event(entry_input, app._key_del_l, lambda event: entry_input.delete(0, ctk.INSERT))
-	bind_event(entry_input, app._key_del_r, lambda event: entry_input.delete(ctk.INSERT, ctk.END))
-	#bind_event(entry_input, app._key_del_term_l, lambda event: delete_term(result_display, 'L'))
-	#bind_event(entry_input, app._key_del_term_r, lambda event: delete_term(result_display, 'R'))
-	bind_event(entry_input, app._key_eval, lambda event: evaluate_input(app, entry_input, result_display, live_mode=False))
-
-	# Key release
-	if app._calc_live_eval:
-		entry_input.bind('<KeyRelease>', lambda event: evaluate_input(app, entry_input, result_display, live_mode=True))
-
+	app._win_btn_adv.configure(width=30)
+	app._win_btn_adv.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 
 
 	### FINAL INITIALIZATION ###
 
-	# Set focus
-	#if app._win_force_focus:
-	#	print_debug('Forcing window focus')
-	#	app.focus_window()
-	app.window.after(100, lambda: focus_element(entry_input))
-
 	# Start main loop
-	print_debug('Initialization complete!')
+	app.print_log('Initialization complete!')
 	app.open_window()
 
 if __name__ == '__main__':

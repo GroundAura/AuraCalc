@@ -6,7 +6,7 @@
 # external
 
 # internal
-#import app_globals
+from app_type import validate_type
 
 
 
@@ -60,10 +60,39 @@
 
 ### FUNCTIONS ###
 
-def bind_event(widget, sequence: str, func) -> None:
+#def bind_event(widget, sequence: str, excluded_sequences: list[str] | tuple[str], func) -> None:
+#	if not sequence or sequence.lower().strip() in ('', '<>', 'none', '<none>'):
+#		return
+#	if type(widget) in (list, tuple):
+#		for w in widget:
+#			if type(sequence) in (list, tuple):
+#				for seq in sequence:
+#					#validate_type(func, function)
+#					w.bind(seq, func)
+#			elif type(sequence) == str:
+#				#validate_type(func, function)
+#				w.bind(sequence, func)
+#	else:
+#		validate_type(sequence, str)
+#		#validate_type(func, function)
+#		widget.bind(sequence, func)
+
+def bind_event(widget, sequence: str, excluded_seq: str | list[str] | set[str] | tuple[str] = None, pass_event: bool = False, command = lambda: None, *args, **kwargs) -> None:
 	if not sequence or sequence.lower().strip() in ('', '<>', 'none', '<none>'):
 		return
-	widget.bind(sequence, func)
+	validate_type(sequence, str)
+	#validate_type(command, function)
+	if excluded_seq and excluded_seq is not None:
+		print('a')
+		#widget.bind(valid_seq, lambda event: on_event(event, excluded_seq, command))
+		widget.bind(sequence, lambda event: on_event(event, excluded_seq, command, *args, **kwargs))
+	elif pass_event:
+		print('b')
+		widget.bind(sequence, lambda event: command(event, *args, **kwargs))
+	else:
+		print('c')
+		#widget.bind(valid_seq, lambda event: command)
+		widget.bind(sequence, lambda event: command(*args, **kwargs))
 
 #def delete_term(element, direction: str) -> None:
 #	"""
@@ -94,6 +123,33 @@ def bind_event(widget, sequence: str, func) -> None:
 #	if keybind.lower().strip() in ('', '<>', 'none', '<none>'):
 #		return False
 #	return True
+
+def on_event(event, excluded_keys: str | list[str] | set[str] | tuple[str], func, *args, **kwargs) -> None:
+	#print(excluded_keys)
+	#print(event)
+	#print(type(event))
+	#print(event.keysym)
+	if not excluded_keys or excluded_keys is None:
+		func(*args, **kwargs)
+		return
+	if type(excluded_keys) in (list, set, tuple):
+		if event.keysym in excluded_keys:
+			#print('excluded')
+			return
+		else:
+			func(*args, **kwargs)
+			return
+	elif type(excluded_keys) == str:
+		if event.keysym == excluded_keys:
+			#print('excluded')
+			return
+		else:
+			func(*args, **kwargs)
+			return
+	else:
+		raise ValueError(f"Invalid type for excluded_seq: {type(excluded_keys)}. Must be list, tuple, or str.")
+	#func(*args, **kwargs)
+	#func()
 
 #def valid_keybind(keybind: str) -> bool:
 #	"""

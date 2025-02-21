@@ -16,6 +16,7 @@ from sympy import simplify, sympify, nsimplify
 # internal
 import app_globals
 from app_random import roll_dice, quad_zero
+from app_window import delayed_display, display_result
 
 
 
@@ -312,6 +313,43 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 		raise InvalidOperation('Invalid number format')
 	except ZeroDivisionError:
 		raise ZeroDivisionError('Division by zero')
+
+def evaluate_input(app, input_element, output_element, live_mode: bool = False) -> None:
+	"""
+	Evaluates or simplifies the expression in the input element and displays the result in the output element.
+
+	Args:
+		app: The application instance.
+		input_element: The element to get the expression to evaluate from.
+		output_element: The element to display the result in.
+		live_mode (bool, optional): Whether to update the result in real-time. Defaults to `False`.
+	"""
+	expression = input_element.get()
+	if app.timeout_id is not None:
+		app.window.after_cancel(app.timeout_id)
+		app.timeout_id = None
+	app.print_log(f"Expr (initial):{' '*6}`{expression}`")
+	if not expression:
+		display_result(app, output_element, app.calc_def_result)
+		return
+	try:
+		expression = sanitize_input(app, expression, sanitize=app._sanitize_input)
+		result = evaluate_expression(app, expression, dont_evaluate=app._only_simplify)
+		display_result(app, output_element, result)
+		return
+	except ZeroDivisionError:
+		display_result(app, output_element, 'Undefined (division by zero)')
+		return
+	except Exception as e:
+		if live_mode and app.timeout_patience > 0 and expression[-1] in app.calc_wait_chars:
+			delayed_display(app, output_element, 'ERROR: Incomplete expression')
+			return
+		elif live_mode and app.timeout_patience > 1:
+			delayed_display(app, output_element, f"ERROR: {e}")
+			return
+		else:
+			display_result(app, output_element, f"ERROR: {e}")
+			return
 
 def format_expression(expression: str) -> str:
 	"""
