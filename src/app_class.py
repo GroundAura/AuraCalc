@@ -8,7 +8,7 @@ from pathlib import Path
 # internal
 from app_config import read_config, get_config_value
 from app_logging import logging_print
-from app_evaluate import evaluate_input
+from app_evaluate import sanitize_input, evaluate_expression
 #import app_globals
 from app_globals import CONFIG, FORCE_DEBUG, PATH_CONFIG, USE_CONFIG
 from app_keybinds import bind_event
@@ -568,7 +568,7 @@ class CalculatorApp(GuiApp):
 		#self._set_key_undo('<Control-z>', use_config)
 		#bind_event(self._window, self._key_options, command=self.redo_txt)
 		if self._calc_live_eval:
-			bind_event(self._win_txt_input, '<KeyRelease>', excluded_seq=self._bound_keys, command=lambda: evaluate_input(self, self._win_txt_input, self._win_txt_result, live_mode=True))
+			bind_event(self._win_txt_input, '<KeyRelease>', excluded_seq=self._bound_keys, command=lambda: self.evaluate(live_mode=True))
 		self.window.bind('<FocusIn>', lambda event: focus_element(self._win_txt_input))
 
 	# private methods
@@ -682,7 +682,7 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sEvaluateKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_eval = value
-		bind_event(self._win_txt_input, self._key_eval, command=lambda: evaluate_input(self, self._win_txt_input, self._win_txt_result, live_mode=False))
+		bind_event(self._win_txt_input, self._key_eval, command=self.evaluate)
 		self._add_bound_key(self._key_eval)
 
 	def _set_key_help(self, new_val: str, use_config: bool = False) -> None:
@@ -809,13 +809,71 @@ class CalculatorApp(GuiApp):
 			delay = custom_delay if custom_delay is not None else 1000
 		self._timeout_id = self.window.after(delay, func)
 
+	def display_result(self, message: object, logging: bool = True, delay: bool = False) -> None:
+		if delay:
+			self._timeout_id = self._window.after(self._calc_live_eval_delay, self.display_result, message, logging, False)
+			return
+		message = str(message)
+		#message = message.replace('\n', '\\n')
+		self._win_txt_result.configure(state='normal')
+		self._win_txt_result.delete('1.0', 'end')
+		self._win_txt_result.insert('1.0', message)
+		self._win_txt_result.configure(state='disabled')
+		if logging:
+			self._logging_print(f"Result:{' '*14}`{message.replace('\n', '\\n')}`")
+			#self._logging_print(f"Result:{' '*14}`{message}`")
+
+	def evaluate(self, live_mode: bool = False) -> None:
+		# get input
+		input_expr = self._win_txt_input.get()
+		self._logging_print(f"Expression:{' '*10}`{input_expr.replace('\n', '\\n')}`")
+		# handle live mode
+		if self._timeout_id is not None:
+			self._window.after_cancel(self._timeout_id)
+			self._timeout_id = None
+		# check if the expression is valid
+		try:
+			expr = sanitize_input(input_expr, sanitize=self._sanitize_input)
+			if not expr:
+				self.display_result(self._calc_def_result)
+				return
+		except ValueError as e:
+			self.display_result(f"ERROR: {e}")
+			return
+		# evaluate the expression
+		try:
+			self._logging_print(f"Evaluating...")
+			result = evaluate_expression(self, expr, dont_evaluate=self._only_simplify)
+			self.display_result(result)
+			return
+		except ZeroDivisionError as e:
+			#self.display_result('Undefined (division by zero)')
+			#self.display_result(f"Undefined: {e}")
+			#self.display_result(f"Undefined")
+			self.display_result(e)
+			return
+		except Exception as e:
+			if live_mode and self._timeout_patience > 0 and expr and expr[-1] in self._calc_wait_chars:
+				#self.display_result(self._calc_last_result, logging=False) # temporarily show last result
+				self.display_result('ERROR: Incomplete expression', delay=True) # then show error
+				return
+			elif live_mode and self._timeout_patience > 1:
+				#self.display_result(self._calc_last_result, logging=False) # temporarily show last result
+				self.display_result(f"ERROR: {e}", delay=True) # then show error
+				return
+			else:
+				self.display_result(f"ERROR: {e}")
+				return
+
+
+
 	def open_window(self) -> None: # override
 		self._logging_print(f"Opening {self.name}.")
 		#self._logging_print()
 		if self._win_force_focus:
-			logging_print('Forcing window focus.')
+			self._logging_print('Forcing window focus.')
 			self.focus_window()
-		self.window.after(100, lambda: focus_element(self._win_txt_input))
+		self._window.after(100, lambda: focus_element(self._win_txt_input))
 		self._window.mainloop()
 
 	def print_info(self) -> None: # override

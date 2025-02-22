@@ -9,9 +9,10 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 #import random
 import re
 #import statistics
+from string import whitespace as WHITESPACE
 
 # external
-from sympy import simplify, sympify, nsimplify
+from sympy import simplify, sympify, nsimplify, S, SympifyError
 
 # internal
 from app_random import roll_dice, quad_zero
@@ -145,21 +146,21 @@ CUSTOM_FUNCTIONS: dict[str, dict[str, any]] = {
 	'quadratic_formula': {'func': 'quad_zero', 'args': 4, 'returns': 1},
 	#'average': {'func': 'statistics.mean', 'args': 1},
 }
-OPERATIONS: dict[str, any] = {
-	'+': lambda x, y: x + y,
-	'-': lambda x, y: x - y,
-	'*': lambda x, y: x * y,
-	'/': lambda x, y: x / y,
-	'**': lambda x, y: x ** y
-}
 KNOWN_FUNCTIONS: tuple[str] = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
 #logging_print(KNOWN_FUNCTIONS)
+#OPERATIONS: dict[str, any] = {
+#	'+': lambda x, y: x + y,
+#	'-': lambda x, y: x - y,
+#	'*': lambda x, y: x * y,
+#	'/': lambda x, y: x / y,
+#	'**': lambda x, y: x ** y
+#}
 
 
 
 ### FUNCTIONS ###
 
-def eval_custom_functions(app, expression: str) -> str:
+def eval_custom_functions(expression: str) -> str:
 	"""
 	Evaluates custom functions in an expression.
 
@@ -221,34 +222,34 @@ def eval_custom_functions(app, expression: str) -> str:
 	processed_expression: str = pattern.sub(replacer, expression)
 	return processed_expression
 
-def eval_with_decimal(expression: any) -> str:
-	"""
-	Recursively evaluate sympy expressions using Decimal for high precision.
+#def eval_with_decimal(expression: any) -> str:
+#	"""
+#	Recursively evaluate sympy expressions using Decimal for high precision.
 
-	Args:
-		expression (any): The expression to evaluate.
+#	Args:
+#		expression (any): The expression to evaluate.
 
-	Returns:
-		str: The result of the expression.
-	"""
-	if expression.is_Number:
-		# Convert sympy numbers to Decimal
-		return Decimal(str(expression))
+#	Returns:
+#		str: The result of the expression.
+#	"""
+#	if expression.is_Number:
+#		# Convert sympy numbers to Decimal
+#		return Decimal(str(expression))
 	
-	elif expression.is_Add or expression.is_Mul or expression.is_Pow:
-		# If it's an addition, multiplication, or power, evaluate the arguments
-		args = [eval_with_decimal(arg) for arg in expression.args]
-		operator = str(expression.func)
-		return OPERATIONS[operator](*args)
+#	elif expression.is_Add or expression.is_Mul or expression.is_Pow:
+#		# If it's an addition, multiplication, or power, evaluate the arguments
+#		args = [eval_with_decimal(arg) for arg in expression.args]
+#		operator = str(expression.func)
+#		return OPERATIONS[operator](*args)
 
-	# Handle division separately
-	elif expression.is_Div:
-		args = [eval_with_decimal(arg) for arg in expression.args]
-		return args[0] / args[1]
+#	# Handle division separately
+#	elif expression.is_Div:
+#		args = [eval_with_decimal(arg) for arg in expression.args]
+#		return args[0] / args[1]
 
-	# If the expression doesn't fit the above, simplify it directly
-	else:
-		return Decimal(str(expression))
+#	# If the expression doesn't fit the above, simplify it directly
+#	else:
+#		return Decimal(str(expression))
 
 def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> str:
 	"""
@@ -256,7 +257,7 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 
 	Args:
 		expression (str): The expression to evaluate.
-		dont_evaluate (bool, optional): Whether to only simplify the expression. Defaults to `app_globals.ONLY_SIMPLIFY`.
+		dont_evaluate (bool, optional): Whether to only simplify the expression. Defaults to `False`.
 
 	Returns:
 		str: The result of the expression.
@@ -266,92 +267,102 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 	try:
 		# Remove leading zeros
 		expression = strip_leading_zeros(expression)
-		logging_print(f"Expr (strip_zeros):{' '*2}`{expression}`")
+		logging_print(f"Expr (strip_zeros):{' '*2}`{expression}` - type: {type(expression)}")
 		# Handle implied exponentation
 		expression = implied_exp(expression)
-		logging_print(f"Expr (implied_exp):{' '*2}`{expression}`")
+		logging_print(f"Expr (implied_exp):{' '*2}`{expression}` - type: {type(expression)}")
 		# Handle implied multiplication
 		expression = implied_mult(expression)
-		logging_print(f"Expr (implied_mult):{' '*1}`{expression}`")
+		logging_print(f"Expr (implied_mult):{' '*1}`{expression}` - type: {type(expression)}")
 		# Handle custom functions
-		expression: str = eval_custom_functions(app, expression)
-		logging_print(f"Expr (eval_func):{' '*4}`{expression}`")
+		expression: str = eval_custom_functions(expression)
+		logging_print(f"Expr (eval_func):{' '*4}`{expression}` - type: {type(expression)}")
 		# Simpify
 		expression = sympify(expression)
-		logging_print(f"Expr (sympify):{' '*6}`{expression}`")
-		if str(expression) in ('nan', 'zoo'):
-			raise ZeroDivisionError('Division by zero')
+		logging_print(f"Expr (sympify):{' '*6}`{expression}` - type: {type(expression)}")
+		if expression.has(S.NaN):
+			raise ZeroDivisionError('Division by Zero (NaN)')
+		elif expression.has(S.ComplexInfinity):
+			raise ZeroDivisionError('Division by Zero (ComplexInfinity)')
 		# Simplify
 		expression = simplify(expression)
-		#logging_print(type(expression))
-		logging_print(f"Expr (simplify):{' '*5}`{expression}`")
+		logging_print(f"Expr (simplify):{' '*5}`{expression}` - type: {type(expression)}")
 		expression = nsimplify(expression, rational=True)
-		logging_print(f"Expr (nsimplify):{' '*4}`{expression}`")
+		logging_print(f"Expr (nsimplify):{' '*4}`{expression}` - type: {type(expression)}")
 		if dont_evaluate:
 			expression: str = format_expression(str(expression))
-			logging_print(f"Expr (format):{' '*7}`{expression}`")
+			logging_print(f"Expr (format):{' '*7}`{expression}` - type: {type(expression)}")
 			app.calc_last_result = expression
 			return expression
 		else:
 			# Eval with Float
 			result = expression.evalf(app.calc_dec_precicion)
-			logging_print(f"Expr (evalf):{' '*8}`{result}`")
+			logging_print(f"Expr (evalf):{' '*8}`{result}` - type: {type(result)}")
 			if re.search(r'[a-zA-Z]', str(result)):
 				app.calc_last_result = str(result)
 				return str(result)
-			# Eval with Decimal
-			result: str = eval_with_decimal(result)
-			logging_print(f"Expr (eval_dec):{' '*5}`{result}`")
+			## Eval with Decimal
+			#result: str = eval_with_decimal(result)
+			#logging_print(f"Expr (eval_dec):{' '*5}`{result}` - type: {type(result)}")
 			# Simplify Decimal
 			result: str = simplify_decimal(result, app.calc_dec_display)
-			logging_print(f"Expr (simplify_dec):{' '*1}`{result}`")
+			logging_print(f"Expr (simplify_dec):{' '*1}`{result}` - type: {type(result)}")
 			# Return result
 			app.calc_last_result = result
 			return result
 	except InvalidOperation:
 		raise InvalidOperation('Invalid number format')
-	except ZeroDivisionError:
-		raise ZeroDivisionError('Division by zero')
+	#except SympifyError as e:
+	#	#logging_print(f"{type(e)} - {str(e).replace('\n', '\\n')}")
+	#	#c = e.__cause__
+	#	#logging_print(f"{type(c)} - {str(c).replace('\n', '\\n')}")
+	#	#if isinstance(e.__cause__, SyntaxError):
+	#	#	logging_print('Invalid expression')
+	#	#	raise SyntaxError('Invalid expression')
+	#	if 'SyntaxError' in str(e):
+	#		raise SyntaxError('Invalid expression')
+	#	else:
+	#		raise e
 
-def evaluate_input(app, input_element, output_element, live_mode: bool = False) -> None:
-	"""
-	Evaluates or simplifies the expression in the input element and displays the result in the output element.
+#def evaluate_input(app, input_element, output_element, live_mode: bool = False) -> None:
+#	"""
+#	Evaluates or simplifies the expression in the input element and displays the result in the output element.
 
-	Args:
-		app: The application instance.
-		input_element: The element to get the expression to evaluate from.
-		output_element: The element to display the result in.
-		live_mode (bool, optional): Whether to update the result in real-time. Defaults to `False`.
-	"""
-	expression = input_element.get()
-	logging_print(f"Expression:{' '*10}`{expression}`")
-	logging_print(f"Evaluating...")
-	#logging_print(f"Expr (initial):{' '*6}`{expression}`")
-	#logging_print(f"Evaluating Expr:{' '*5}`{expression}`")
-	if app.timeout_id is not None:
-		app.window.after_cancel(app.timeout_id)
-		app.timeout_id = None
-	if not expression:
-		display_result(output_element, app.calc_def_result)
-		return
-	try:
-		expression = sanitize_input(app, expression, sanitize=app._sanitize_input)
-		result = evaluate_expression(app, expression, dont_evaluate=app._only_simplify)
-		display_result(output_element, result)
-		return
-	except ZeroDivisionError:
-		display_result(output_element, 'Undefined (division by zero)')
-		return
-	except Exception as e:
-		if live_mode and app.timeout_patience > 0 and expression[-1] in app.calc_wait_chars:
-			delayed_display(app, output_element, 'ERROR: Incomplete expression')
-			return
-		elif live_mode and app.timeout_patience > 1:
-			delayed_display(app, output_element, f"ERROR: {e}")
-			return
-		else:
-			display_result(output_element, f"ERROR: {e}")
-			return
+#	Args:
+#		app: The application instance.
+#		input_element: The element to get the expression to evaluate from.
+#		output_element: The element to display the result in.
+#		live_mode (bool, optional): Whether to update the result in real-time. Defaults to `False`.
+#	"""
+#	expression = input_element.get()
+#	logging_print(f"Expression:{' '*10}`{expression}`")
+#	logging_print(f"Evaluating...")
+#	#logging_print(f"Expr (initial):{' '*6}`{expression}`")
+#	#logging_print(f"Evaluating Expr:{' '*5}`{expression}`")
+#	if app.timeout_id is not None:
+#		app.window.after_cancel(app.timeout_id)
+#		app.timeout_id = None
+#	if not expression:
+#		display_result(output_element, app.calc_def_result)
+#		return
+#	try:
+#		expression = sanitize_input(app, expression, sanitize=app._sanitize_input)
+#		result = evaluate_expression(app, expression, dont_evaluate=app._only_simplify)
+#		display_result(output_element, result)
+#		return
+#	except ZeroDivisionError:
+#		display_result(output_element, 'Undefined (division by zero)')
+#		return
+#	except Exception as e:
+#		if live_mode and app.timeout_patience > 0 and expression[-1] in app.calc_wait_chars:
+#			delayed_display(app, output_element, 'ERROR: Incomplete expression')
+#			return
+#		elif live_mode and app.timeout_patience > 1:
+#			delayed_display(app, output_element, f"ERROR: {e}")
+#			return
+#		else:
+#			display_result(output_element, f"ERROR: {e}")
+#			return
 
 def format_expression(expression: str) -> str:
 	"""
@@ -361,6 +372,18 @@ def format_expression(expression: str) -> str:
 	expression = re.sub(r'(?<=\d)\*([a-zA-Z])', r'\1', expression) # Remove '*' between a number and variable, e.g., 2*x -> 2x
 	expression = re.sub(r'([a-zA-Z])\*\(', r'\1\(', expression) # Remove '*' between a variable and opening parenthesis, e.g., x*(3) -> x(3)
 	return expression
+
+def implied_exp(expression: str) -> str:
+	"""
+	Evaluates whether an expression contains implied exponentation and adds explicit exponentation if necessary.
+
+	Args:
+		expression (str): The expression to evaluate.
+
+	Returns:
+		str: The processed expression.
+	"""
+	return expression.replace('^', '**')
 
 def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTIONS) -> str:
 	"""
@@ -386,40 +409,32 @@ def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTION
 		r'|(?<=[a-zA-Z])(?=\()'                       # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
 	)
 	#logging_print(pattern)
+	# add '*' to cases
 	modified_expression = re.sub(pattern, '*', expression)                                         # Add '*' in all matched cases
+	# exceptions
 	modified_expression = re.sub(r'(' + functions_pattern + r')\*\(', r'\1(', modified_expression) # Remove '*' between functions and '('
 	modified_expression = re.sub(r'(?<=roll\()(\d+)\*d\*(\d+)', r'\1d\2', modified_expression)     # Remove '*' between numbers and 'd' in the roll() function
 	return modified_expression
 
-def implied_exp(expression: str) -> str:
-	"""
-	Evaluates whether an expression contains implied exponentation and adds explicit exponentation if necessary.
-
-	Args:
-		expression (str): The expression to evaluate.
-
-	Returns:
-		str: The processed expression.
-	"""
-	return expression.replace('^', '**')
-
-def sanitize_input(app, expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool = True) -> str:
+def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool = True) -> str:
 	"""
 	Sanitize an expression by removing invalid sequences of characters if possible, or raising an exception if not.
 
 	Args:
 		expression (str): The expression to sanitize.
 		allowed_chars (str, optional): The allowed characters. Defaults to `ALLOWED_CHARS`.
-		sanitize (bool, optional): Whether to sanitize the expression. Defaults to `app_globals.SANITIZE`.
+		sanitize (bool, optional): Whether to sanitize the expression. Defaults to `True`.
 
 	Returns:
 		str: The sanitized expression.
 	"""
-	sanitized_expression = expression.lstrip('=').rstrip('=')
-	if sanitize and not allowed_chars.match(sanitized_expression):
+	#logging_print(repr(WHITESPACE + '='))
+	stripped_expr = expression.strip(WHITESPACE + '=')
+	logging_print(f"Expr (stripped):{' '*5}`{stripped_expr}`")
+	if sanitize and stripped_expr and not allowed_chars.match(stripped_expr):
 		raise ValueError('Invalid characters in expression')
-	logging_print(f"Expr (sanitized):{' '*4}`{sanitized_expression}`")
-	return sanitized_expression
+	logging_print(f"Expr (sanitized):{' '*4}`{stripped_expr}`")
+	return stripped_expr
 
 def simplify_decimal(number: any, decimal_places: int = 10) -> str:
 	"""
