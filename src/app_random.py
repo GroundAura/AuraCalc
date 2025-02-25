@@ -25,7 +25,7 @@ def parse_dice_expression(expression: str) -> str:
 			tokens[i] = str(result)
 	return str(''.join(tokens))
 
-def roll_dice(dice_string: str) -> tuple[int, list]:
+def roll_dice(dice_string: str, return_total: bool = True, return_rolls: bool = False):
 	"""
 	Generates a random number based on the dice string.
 
@@ -41,7 +41,12 @@ def roll_dice(dice_string: str) -> tuple[int, list]:
 		rolls = [random.randint(1, num_sides) for _ in range(num_dice)]
 		total = sum(rolls)
 		logging_print(f"Rolling {dice_string}\n Total: {total}\n Rolls: {rolls}")
-		return total, rolls
+		if return_total and return_rolls:
+			return total, rolls
+		elif return_total:
+			return total
+		elif return_rolls:
+			return rolls
 	except ValueError:
 		#return 0, []
 		raise ValueError("Invalid dice notation. Use 'XdY' format, e.g., '3d6'.")

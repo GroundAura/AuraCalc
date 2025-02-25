@@ -11,6 +11,13 @@
 			"args": ["src/main.py"]
 		},
 		{
+			"label": "Test App (MyPy)",
+			"group": "build",
+			"type": "shell",
+			"command": "mypy",
+			"args": ["src/main.py"]
+		},
+		{
 			"label": "Launch App (EXE)",
 			"group": "build",
 			"type": "shell",

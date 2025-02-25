@@ -1,22 +1,26 @@
 ### IMPORTS ###
 
 # builtins
-#import cmath
+import cmath
+from collections.abc import Callable, Sequence
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 #import fractions
-#import math
+import math
 #import numbers
 #import random
 import re
-#import statistics
-from string import whitespace as WHITESPACE
+import statistics
+from string import ascii_letters as ASCII_LETTERS, whitespace as WHITESPACE
+from typing import Any
 
 # external
 from sympy import simplify, sympify, nsimplify, S, SympifyError
+import sympy
 
 # internal
 from app_random import roll_dice, quad_zero
 from app_logging import logging_print
+from app_type import function_exists
 from app_window import delayed_display, display_result
 
 
@@ -55,7 +59,8 @@ ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	r'|[\+\-\*/\^%().!, ]+'
 	r')+$'
 )
-BUILTIN_FUNCTIONS: dict[str, dict[str, any]] = {
+
+BUILTIN_FUNCTIONS: dict[str, dict[str, Any]] = {
 	'exp': {'func': 'exp', 'args': 1},
 	'pow': {'func': 'pow', 'args': 2},
 	'cbrt': {'func': 'cbrt', 'args': 1},
@@ -139,7 +144,7 @@ BUILTIN_FUNCTIONS: dict[str, dict[str, any]] = {
 	'RootOf': {'func': 'RootOf'},
 	'rootof': {'func': 'RootOf'},
 }
-CUSTOM_FUNCTIONS: dict[str, dict[str, any]] = {
+CUSTOM_FUNCTIONS: dict[str, dict[str, Any]] = {
 	'roll': {'func': 'roll_dice', 'args': 1, 'returns': 2},
 	'quad': {'func': 'quad_zero', 'args': 4, 'returns': 1},
 	'quadratic': {'func': 'quad_zero', 'args': 4, 'returns': 1},
@@ -148,6 +153,7 @@ CUSTOM_FUNCTIONS: dict[str, dict[str, any]] = {
 }
 KNOWN_FUNCTIONS: tuple[str] = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
 #logging_print(KNOWN_FUNCTIONS)
+
 #OPERATIONS: dict[str, any] = {
 #	'+': lambda x, y: x + y,
 #	'-': lambda x, y: x - y,
@@ -156,9 +162,191 @@ KNOWN_FUNCTIONS: tuple[str] = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
 #	'**': lambda x, y: x ** y
 #}
 
+FUNCTIONS_BUILTIN: dict[str, Callable] = {
+	'int': int,                 # int(x)
+	'float': float              # float(x)
+}
+FUNCTIONS_CUSTOM: dict[str, Callable] = {
+	'roll': roll_dice,              # roll_dice(dice_string)
+	'roll_dice': roll_dice,         # roll_dice(dice_string)
+	'quad': quad_zero,              # quad_zero(a, b, c, positive = '+')
+	'quadratic': quad_zero,         # quad_zero(a, b, c, positive = '+')
+	'quadratic_formula': quad_zero  # quad_zero(a, b, c, positive = '+')
+}
+FUNCTIONS_CMATH: dict[str, Callable] = {
+	# Conversions to and from polar coordinates
+	'phase': cmath.phase,        # cmath.phase(x)
+	'polar': cmath.polar,        # cmath.polar(x)
+	'rect': cmath.rect,          # cmath.rect(r, phi)
+	# Power and logarithmic functions
+	'exp': cmath.exp,            # cmath.exp(x)
+	'log': cmath.log,            # cmath.log(x[, base])
+	'log10': cmath.log10,        # cmath.log10(x)
+	'sqrt': cmath.sqrt,          # cmath.sqrt(x)
+	# Trigonometric functions
+	'acos': cmath.acos,          # cmath.acos(x)
+	'asin': cmath.asin,          # cmath.asin(x)
+	'atan': cmath.atan,          # cmath.atan(x)
+	'cos': cmath.cos,            # cmath.cos(x)
+	'sin': cmath.sin,            # cmath.sin(x)
+	'tan': cmath.tan,            # cmath.tan(x)
+	# Hyperbolic functions
+	'acosh': cmath.acosh,        # cmath.acosh(x)
+	'asinh': cmath.asinh,        # cmath.asinh(x)
+	'atanh': cmath.atanh,        # cmath.atanh(x)
+	'cosh': cmath.cosh,          # cmath.cosh(x)
+	'sinh': cmath.sinh,          # cmath.sinh(x)
+	'tanh': cmath.tanh,          # cmath.tanh(x)
+	# Classification functions
+	'isfinite': cmath.isfinite,  # cmath.isfinite(x)
+	'isinf': cmath.isinf,        # cmath.isinf(x)
+	'isnan': cmath.isnan,        # cmath.isnan(x)
+	'isclose': cmath.isclose    # cmath.isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0)
+}
+FUNCTIONS_MATH: dict[str, Callable] = {
+	# Number-theoretic functions
+	'comb': math.comb,           # math.comb(n, k)
+	'factorial': math.factorial, # math.factorial(n)
+	'gcd': math.gcd,             # math.gcd(*integers)
+	'isqrt': math.isqrt,         # math.isqrt(n)
+	'lcm': math.lcm,             # math.lcm(*integers)
+	'perm': math.perm,           # math.perm(n, k)
+	# Floating point arithmetic
+	'ceil': math.ceil,           # math.ceil(x)
+	'fabs': math.fabs,           # math.fabs(x)
+	'floor': math.floor,         # math.floor(x)
+	#'fma': math.fma,             # math.fma(x, y, z)
+	'fmod': math.fmod,           # math.fmod(x, y)
+	'modf': math.modf,           # math.modf(x)
+	'remainder': math.remainder, # math.remainder(x, y)
+	'trunc': math.trunc,         # math.trunc(x)
+	# Floating point manipulation functions
+	'copysign': math.copysign,   # math.copysign(x, y)
+	'frexp': math.frexp,         # math.frexp(x)
+	'isclose': math.isclose,     # math.isclose(a, b, rel_tol, abs_tol)
+	'isfinite': math.isfinite,   # math.isfinite(x)
+	'isinf': math.isinf,         # math.isinf(x)
+	'isnan': math.isnan,         # math.isnan(x)
+	'ldexp': math.ldexp,         # math.ldexp(x, i)
+	'nextafter': math.nextafter, # math.nextafter(x, y, steps)
+	'ulp': math.ulp,             # math.ulp(x)
+	# Power, exponential and logarithmic functions
+	'cbrt': math.cbrt,           # math.cbrt(x)
+	'exp': math.exp,             # math.exp(x)
+	'exp2': math.exp2,           # math.exp2(x)
+	'expm1': math.expm1,         # math.expm1(x)
+	'log': math.log,             # math.log(x, base)
+	'log1p': math.log1p,         # math.log1p(x)
+	'log2': math.log2,           # math.log2(x)
+	'log10': math.log10,         # math.log10(x)
+	'pow': math.pow,             # math.pow(x, y)
+	'sqrt': math.sqrt,           # math.sqrt(x)
+	# Summation and product functions
+	'dist': math.dist,           # math.dist(p, q)
+	'fsum': math.fsum,           # math.fsum(iterable)
+	'hypot': math.hypot,         # math.hypot(*coordinates)
+	'prod': math.prod,           # math.prod(iterable, start)
+	'sumprod': math.sumprod,     # math.sumprod(p, q)
+	# Angular conversion
+	'degrees': math.degrees,     # math.degrees(x)
+	'radians': math.radians,     # math.radians(x)
+	# Trigonometric functions
+	'acos': math.acos,           # math.acos(x)
+	'asin': math.asin,           # math.asin(x)
+	'atan': math.atan,           # math.atan(x)
+	'atan2': math.atan2,         # math.atan2(y, x)
+	'cos': math.cos,             # math.cos(x)
+	'sin': math.sin,             # math.sin(x)
+	'tan': math.tan,             # math.tan(x)
+	# Hyperbolic functions
+	'acosh': math.acosh,         # math.acosh(x)
+	'asinh': math.asinh,         # math.asinh(x)
+	'atanh': math.atanh,         # math.atanh(x)
+	'cosh': math.cosh,           # math.cosh(x)
+	'sinh': math.sinh,           # math.sinh(x)
+	'tanh': math.tanh,           # math.tanh(x)
+	# Special functions
+	'erf': math.erf,             # math.erf(x)
+	'erfc': math.erfc,           # math.erfc(x)
+	'gamma': math.gamma,         # math.gamma(x)
+	'lgamma': math.lgamma,       # math.lgamma(x)
+}
+FUNCTIONS_SYMPY: dict[str, Callable] = {
+
+}
+FUNCTIONS_STATISTICS: dict[str, Callable] = {
+	
+}
+FUNCTIONS_ALL: dict[str, Callable] = {
+	**FUNCTIONS_BUILTIN,
+	**FUNCTIONS_CUSTOM,
+	**FUNCTIONS_CMATH,
+	**FUNCTIONS_MATH,
+	**FUNCTIONS_SYMPY
+}
+#logging_print(f"FUNCTIONS_ALL: {FUNCTIONS_ALL}")
+
+VALID_FUNCTIONS: set[str] = set()
+for key in FUNCTIONS_ALL.keys():
+	if isinstance(key, Sequence) and type(key) is not str:
+		for k in key:
+			VALID_FUNCTIONS.add(k)
+	else:
+		VALID_FUNCTIONS.add(key)
+
+CONSTANTS_CMATH: dict[str, Any] = {
+	'pi': cmath.pi,
+	'e': cmath.e,
+	'tau': cmath.tau,
+	'inf': cmath.inf,
+	'infj': cmath.infj,
+	'nan': cmath.nan,
+	'nanj': cmath.nanj
+}
+CONSTANTS_MATH: dict[str, Any] = {
+	'pi': math.pi,
+	'e': math.e,
+	'tau': math.tau,
+	'inf': math.inf,
+	'nan': math.nan
+}
+CONSTANTS_SYMPY: dict[str, Any] = {
+	
+}
+CONSTANTS_ALL: dict[str, Any] = {
+	**CONSTANTS_CMATH,
+	**CONSTANTS_MATH,
+	**CONSTANTS_SYMPY
+}
+
+VALID_CONSTANTS: set[str] = set()
+for key in CONSTANTS_ALL.keys():
+	if isinstance(key, Sequence):
+		for k in key:
+			VALID_CONSTANTS.add(k)
+	else:
+		VALID_CONSTANTS.add(key)
+
 
 
 ### FUNCTIONS ###
+def compact_expr(expr: str) -> str:
+	"""
+	Removes any unnecessary characters from an expression, just as whitespace or leading zeros.
+
+	Args:
+		expr (str): The expression to process.
+
+	Returns:
+		str: The processed expression.
+	"""
+	# Remove whitespace
+	for char in WHITESPACE:
+		expr = expr.replace(char, '')
+	# Remove leading zeros
+# ***TO DO***: ensure there's no decimal points before the zero before removing leading zeros
+	expr = re.sub(r'\b0+(\d+)', r'\1', expr)
+	return expr
 
 def eval_custom_functions(expression: str) -> str:
 	"""
@@ -170,9 +358,8 @@ def eval_custom_functions(expression: str) -> str:
 	Returns:
 		str: The processed expression.
 	"""
-	#pattern = re.compile(r'(\b\w+\()([^)]+)\)')
-	pattern: re.Pattern = re.compile(r'(\b\w+)\(([^)]*)\)')
-	def replacer(match) -> str:
+	func_pattern: re.Pattern = re.compile(r'(\b\w+)\(([^)]*)\)')
+	def func_replacer(match) -> str:
 		"""
 		Replaces a function call with its result.
 
@@ -180,46 +367,81 @@ def eval_custom_functions(expression: str) -> str:
 			match: The match object.
 
 		Returns:
-			str: The result of the function call.
+			str: The result of the function call or the original expression.
 		"""
-		function_name = match.group(1).strip('(')
-		argument_str = match.group(2)
-		args = [f"'{arg.strip()}'" for arg in argument_str.split(',')]
-		logging_print(f"Function requested: {function_name}, Arguments: {args}")
-		#if function_name in BUILTIN_FUNCTIONS:
-		#	return f"{function_name}({', '.join(args)})"
-		if function_name in BUILTIN_FUNCTIONS:
-			return f"{BUILTIN_FUNCTIONS[function_name]['func']}({', '.join(args)})"
-		elif function_name in CUSTOM_FUNCTIONS:
-			function_info = CUSTOM_FUNCTIONS[function_name]
-			logging_print(f"Matching function: '{function_name}': {function_info}")
-			function_to_call: str = f"{function_info['func']}({', '.join(args)})"
-			#function_to_call: str = f"{function_info['func']}({', '.join([f"'{arg}'" if 'd' in arg else arg for arg in args])})"
-			logging_print(f"Function to call: {function_to_call}")
-			#if function['args'] != len(args):
-			#	if function['args'] == 1:
-			#		raise ValueError(f"{function_name}() expects 1 argument.")
-			#	else:
-			#		raise ValueError(f"{function_name}() expects {function['args']} arguments.")
-			if function_info['returns'] == 1:
-				result = eval(function_to_call)
-				result = str(result)
-				logging_print(f"Function result: '{result}' (type: {type(result)})")
-				return result
-			elif function_info['returns'] == 2:
-				result, _ = eval(function_to_call)
-				result = str(result)
-				logging_print(f"Function result: '{result}' (type: {type(result)})")
-				return result
+		func_name: str = match.group(1).strip('(')
+		arg_str: str = match.group(2)
+		#args: list = [f"'{arg.strip()}'" for arg in arg_str.split(',')]
+		args_list: list = [arg.strip() for arg in arg_str.split(',')]
+		logging_print(f"Function requested: '{func_name}', Arguments: {args_list}")
+		#logging_print(f"Valid functions: {VALID_FUNCTIONS}")
+		#logging_print(func_name in globals())
+		#logging_print(callable(globals()[func_name]))
+		if func_name in VALID_FUNCTIONS:
+			func: Callable = FUNCTIONS_ALL[func_name]
+			#logging_print(f"Matching function: '{func_name}': {func.__module__}.{func.__name__}")
+			args: list = []
+			for arg in args_list:
+				if func is roll_dice and args_list.index(arg) == 0:
+					args.append(arg)
+				elif func is quad_zero and args_list.index(arg) == 4:
+					args.append(arg)
+				else:
+					args.append(float(arg))
+			#logging_print(f"Calling function: `{func.__module__}.{func.__name__}({', '.join(map(str, args))})`")
+			result = func(*args)
+			logging_print(f"Calling function: `{func.__module__}.{func.__name__}({', '.join(map(str, args))})`, Result: `{result}`")
+			if result is True:
+				return '1'
+			elif result is False:
+				return '0'
 			else:
-				raise ValueError(f"{function_name}() returns {function_info['returns']} values. Only 1 or 2 values are supported.")
-		#elif function_name == 'roll':
-		#	if len(args) != 1:
-		#		raise ValueError(f"{function_name} expects exactly 1 argument.")
-		#	result, _ = roll_dice(args[0])
-		#	return result
-		#raise ValueError(f"Unknown function: {function_name}()")
-	processed_expression: str = pattern.sub(replacer, expression)
+				return str(result)
+		elif function_exists(func_name):
+			logging_print(f"Function '{func_name}' not valid. Adding explicit multiplication to ensure no errors.")
+			#return '*'.join(match.group(0))
+			return match.group(0).replace(func_name, '*'.join(func_name))
+		else:
+			logging_print(f"Function '{func_name}' not found. Assuming it's not a function.")
+			return match.group(0)
+		##if function_name in BUILTIN_FUNCTIONS:
+		##	return f"{function_name}({', '.join(args)})"
+		#if func_name in BUILTIN_FUNCTIONS:
+		#	return f"{BUILTIN_FUNCTIONS[func_name]['func']}({', '.join(args)})"
+		#elif func_name in CUSTOM_FUNCTIONS:
+		#	function_info = CUSTOM_FUNCTIONS[func_name]
+		#	logging_print(f"Matching function: '{func_name}': {function_info}")
+		#	function_to_call: str = f"{function_info['func']}({', '.join(args)})"
+		#	#function_to_call: str = f"{function_info['func']}({', '.join([f"'{arg}'" if 'd' in arg else arg for arg in args])})"
+		#	logging_print(f"Function to call: {function_to_call}")
+		#	#if function['args'] != len(args):
+		#	#	if function['args'] == 1:
+		#	#		raise ValueError(f"{function_name}() expects 1 argument.")
+		#	#	else:
+		#	#		raise ValueError(f"{function_name}() expects {function['args']} arguments.")
+		#	if function_info['returns'] == 1:
+		#		result = eval(function_to_call)
+		#		result = str(result)
+		#		logging_print(f"Function result: '{result}' (type: {type(result)})")
+		#		return result
+		#	elif function_info['returns'] == 2:
+		#		result, _ = eval(function_to_call)
+		#		result = str(result)
+		#		logging_print(f"Function result: '{result}' (type: {type(result)})")
+		#		return result
+		#	else:
+		#		raise ValueError(f"{func_name}() returns {function_info['returns']} values. Only 1 or 2 values are supported.")
+		##elif function_name == 'roll':
+		##	if len(args) != 1:
+		##		raise ValueError(f"{function_name} expects exactly 1 argument.")
+		##	result, _ = roll_dice(args[0])
+		##	return result
+		##raise ValueError(f"Unknown function: {function_name}()")
+	#const_pattern: re.Pattern = re.compile(r'(\b\w+)')
+	#def const_replacer(match) -> str:
+	#	pass
+	processed_expression: str = func_pattern.sub(func_replacer, expression)
+	#processed_expression: str = const_pattern.sub(const_replacer, processed_expression)
 	return processed_expression
 
 #def eval_with_decimal(expression: any) -> str:
@@ -251,7 +473,7 @@ def eval_custom_functions(expression: str) -> str:
 #	else:
 #		return Decimal(str(expression))
 
-def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> str:
+def evaluate_expression(app, expr: str, dont_approximate: bool = False) -> str:
 	"""
 	Evaluates an expression.
 
@@ -265,51 +487,60 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 	#continue_eval: bool = True
 	#logging_print('Evaluating expression...')
 	try:
-		# Remove leading zeros
-		expression = strip_leading_zeros(expression)
-		logging_print(f"Expr (strip_zeros):{' '*2}`{expression}` - type: {type(expression)}")
-		# Handle implied exponentation
-		expression = implied_exp(expression)
-		logging_print(f"Expr (implied_exp):{' '*2}`{expression}` - type: {type(expression)}")
-		# Handle implied multiplication
-		expression = implied_mult(expression)
-		logging_print(f"Expr (implied_mult):{' '*1}`{expression}` - type: {type(expression)}")
 		# Handle custom functions
-		expression: str = eval_custom_functions(expression)
-		logging_print(f"Expr (eval_func):{' '*4}`{expression}` - type: {type(expression)}")
-		# Simpify
-		expression = sympify(expression)
-		logging_print(f"Expr (sympify):{' '*6}`{expression}` - type: {type(expression)}")
-		if expression.has(S.NaN):
+		expr: str = eval_custom_functions(expr)
+		logging_print(f"Expr (eval_func):{' '*4}`{expr}` - type: {type(expr)}")
+		# Remove unnecessary characters
+		expr = compact_expr(expr)
+		logging_print(f"Expr (compacted):{' '*4}`{expr}` - type: {type(expr)}")
+		# Handle implied exponentation
+		expr = implied_exp(expr)
+		logging_print(f"Expr (implied_exp):{' '*2}`{expr}` - type: {type(expr)}")
+		# Handle implied multiplication
+		expr = implied_mult(expr)
+		logging_print(f"Expr (implied_mult):{' '*1}`{expr}` - type: {type(expr)}")
+		# Convert to sympy object
+		expr = sympify(expr)
+		logging_print(f"Expr (sympify):{' '*6}`{expr}` - type: {type(expr)}")
+		if expr.has(S.NaN):
 			raise ZeroDivisionError('Division by Zero (NaN)')
-		elif expression.has(S.ComplexInfinity):
+		elif expr.has(S.ComplexInfinity):
 			raise ZeroDivisionError('Division by Zero (ComplexInfinity)')
-		# Simplify
-		expression = simplify(expression)
-		logging_print(f"Expr (simplify):{' '*5}`{expression}` - type: {type(expression)}")
-		expression = nsimplify(expression, rational=True)
-		logging_print(f"Expr (nsimplify):{' '*4}`{expression}` - type: {type(expression)}")
-		if dont_evaluate:
-			expression: str = format_expression(str(expression))
-			logging_print(f"Expr (format):{' '*7}`{expression}` - type: {type(expression)}")
-			app.calc_last_result = expression
-			return expression
-		else:
-			# Eval with Float
-			result = expression.evalf(app.calc_dec_precicion)
-			logging_print(f"Expr (evalf):{' '*8}`{result}` - type: {type(result)}")
-			if re.search(r'[a-zA-Z]', str(result)):
-				app.calc_last_result = str(result)
-				return str(result)
-			## Eval with Decimal
-			#result: str = eval_with_decimal(result)
-			#logging_print(f"Expr (eval_dec):{' '*5}`{result}` - type: {type(result)}")
-			# Simplify Decimal
-			result: str = simplify_decimal(result, app.calc_dec_display)
-			logging_print(f"Expr (simplify_dec):{' '*1}`{result}` - type: {type(result)}")
-			# Return result
-			app.calc_last_result = result
-			return result
+		# Simplify expression
+		expr = simplify(expr)
+		logging_print(f"Expr (simplify):{' '*5}`{expr}` - type: {type(expr)}")
+		#dont_approximate = False
+		if not dont_approximate:
+			# Convert floats to rationals
+			expr = nsimplify(expr, rational=True)
+			logging_print(f"Expr (nsimplify):{' '*4}`{expr}` - type: {type(expr)}")
+			# Approximate expression
+			expr = expr.evalf(app.calc_dec_precicion)
+			logging_print(f"Expr (evalf):{' '*8}`{expr}` - type: {type(expr)}")
+			#if re.search(r'[a-zA-Z]', str(expr)):
+				#app.calc_last_result = str(expr)
+				#return str(expr)
+			#else:
+			#if not any(char.isalpha() for char in str(expr)):
+			#	# Simplify Decimal
+			#	expr: str = simplify_decimal(expr, app.calc_dec_display)
+			#	logging_print(f"Expr (simplify_dec):{' '*1}`{expr}` - type: {type(expr)}")
+		# Round all numbers
+		expr = expr.xreplace({n: S(round(n, app.calc_dec_display)) for n in expr.atoms(sympy.Number)})
+		logging_print(f"Expr (round):{' '*8}`{expr}` - type: {type(expr)}")
+		# Convert floats to integers
+		#expr = expr.xreplace({n: int(n) if n == int(n) else n for n in expr.atoms(sympy.Number)})
+		#cleaned_expr = expr.xreplace({n: sympy.Integer(n) if isinstance(n, sympy.Float) and n == int(n) else n for n in expr.atoms(sympy.Float)})
+		#expr = cleaned_expr
+		#expr = expr.xreplace({n: S(round(n, 0)) if n == int(n) else n for n in expr.atoms(sympy.Number)})
+		#expr = simplify(expr)
+		#logging_print(f"Expr (truncate):{' '*5}`{expr}` - type: {type(expr)}")
+		# Format expression for display
+		expr: str = format_expression(expr)
+		logging_print(f"Expr (format):{' '*7}`{expr}` - type: {type(expr)}")
+		# Return result
+		app.calc_last_result = expr
+		return expr
 	except InvalidOperation:
 		raise InvalidOperation('Invalid number format')
 	#except SympifyError as e:
@@ -364,14 +595,32 @@ def evaluate_expression(app, expression: str, dont_evaluate: bool = False) -> st
 #			display_result(output_element, f"ERROR: {e}")
 #			return
 
-def format_expression(expression: str) -> str:
+def format_expression(expr) -> str:
 	"""
 	Formats an expression by making it more readable.
 	"""
-	expression = expression.replace('**', '^')
-	expression = re.sub(r'(?<=\d)\*([a-zA-Z])', r'\1', expression) # Remove '*' between a number and variable, e.g., 2*x -> 2x
-	expression = re.sub(r'([a-zA-Z])\*\(', r'\1\(', expression) # Remove '*' between a variable and opening parenthesis, e.g., x*(3) -> x(3)
-	return expression
+	#terms: list = expr.as_ordered_terms()
+	#logging_print(f"Terms: `{terms}`")
+	#for term in terms:
+	#	logging_print(f"Term: `{term}` - type: {type(term)}")
+	#	if isinstance(term, sympy.Mul):
+	#		coeff, var = term.as_coeff_Mul()
+	#		logging_print(f"{coeff} * {var}")
+
+	#tokens = []
+	#for node in sympy.preorder_traversal(expr):
+	#	if node.is_Atom:
+	#		tokens.append(node)
+	#	elif node.is_Add or node.is_Mul or node.is_Pow:
+	#		tokens.append(node.func)
+	#logging_print(f"Tokens: `{tokens}`")
+
+	expr = str(expr)
+	expr = expr.replace('**', '^')
+	expr = re.sub(r'(?<=\d)\*([a-zA-Z])', r'\1', expr) # Remove '*' between a number and variable, e.g., 2*x -> 2x
+	expr = re.sub(r'([a-zA-Z])\*\(', r'\1\(', expr)    # Remove '*' between a variable and opening parenthesis, e.g., x*(3) -> x(3)
+# ***TO DO***: truncate decimal places
+	return expr
 
 def implied_exp(expression: str) -> str:
 	"""
@@ -385,13 +634,13 @@ def implied_exp(expression: str) -> str:
 	"""
 	return expression.replace('^', '**')
 
-def implied_mult(expression: str, functions: list | tuple | set = KNOWN_FUNCTIONS) -> str:
+def implied_mult(expression: str, functions: list | set | tuple = VALID_FUNCTIONS) -> str:
 	"""
 	Evaluates whether an expression contains implied multiplication and adds explicit multiplication if necessary.
 
 	Args:
 		expression (str): The expression to evaluate.
-		functions (list | tuple | set, optional): The list of known functions. Defaults to `KNOWN_FUNCTIONS`.
+		functions (list | tuple | set, optional): The list of known functions. Defaults to `VALID_FUNCTIONS`.
 
 	Returns:
 		str: The processed expression.
@@ -436,26 +685,26 @@ def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize
 	logging_print(f"Expr (sanitized):{' '*4}`{stripped_expr}`")
 	return stripped_expr
 
-def simplify_decimal(number: any, decimal_places: int = 10) -> str:
-	"""
-	Simplifies a number with decimals by rounding to the specified decimal places and truncating trailing empty decimal places.
+#def simplify_decimal(number: any, decimal_places: int = 10) -> str:
+#	"""
+#	Simplifies a number with decimals by rounding to the specified decimal places and truncating trailing empty decimal places.
 
-	Args:
-		value (any): The number to simplify.
-		decimal_places (int, optional): The number of decimal places to round to. Defaults to `10`.
+#	Args:
+#		value (any): The number to simplify.
+#		decimal_places (int, optional): The number of decimal places to round to. Defaults to `10`.
 
-	Returns:
-		str: The simplified number.
-	"""
-	if not isinstance(number, Decimal):
-		number = Decimal(str(number))
-	#logging_print(value)
-	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
-	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
-	if rounded_number.is_zero():
-		return '0'
-	simplified_number = str(rounded_number).rstrip('0').rstrip('.')
-	return simplified_number
+#	Returns:
+#		str: The simplified number.
+#	"""
+#	if not isinstance(number, Decimal):
+#		number = Decimal(str(number))
+#	#logging_print(value)
+#	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
+#	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
+#	if rounded_number.is_zero():
+#		return '0'
+#	simplified_number = str(rounded_number).rstrip('0').rstrip('.')
+#	return simplified_number
 
 #def simplify_float(value: float):
 #	value = float(value)
@@ -479,44 +728,33 @@ def simplify_decimal(number: any, decimal_places: int = 10) -> str:
 #	terms = expression.split()
 #	return terms
 
-def strip_leading_zeros(expression: str) -> str:
-	"""
-	Strip leading zeros from any numbers in an expression.
-
-	Args:
-		expression (str): The expression to process.
-
-	Returns:
-		str: The processed expression.
-	"""
-	processed_expression = re.sub(r'\b0+(\d+)', r'\1', expression)
-	return processed_expression
-
 
 
 ### TESTING ###
 
 def _test():
-	import math
-	print(math.sqrt(9))
-	print(math.log(9, 3))
-	print(math.fabs(-9))
-	print(math.gcd(9, 3))
-	print(math.factorial(9))
-	print(math.trunc(9.9))
-	print(math.ceil(9.9))
-	print(math.floor(9.9))
-	print(math.pow(9, 3))
-	print(math.acosh(9))
-	print(math.remainder(9, 3))
-	print(math.cbrt(9))
-	print(math.comb(9, 3))
-	print(math.exp2(9))
-	print(math.perm(9, 3))
-	print(math.lcm(9, 3))
-	#print(math.isqrt(9))
-	print(math.atanh(9))
-	#print(math.)
+	#import math
+	#print(math.sqrt(9))
+	#print(math.log(9, 3))
+	#print(math.fabs(-9))
+	#print(math.gcd(9, 3))
+	#print(math.factorial(9))
+	#print(math.trunc(9.9))
+	#print(math.ceil(9.9))
+	#print(math.floor(9.9))
+	#print(math.pow(9, 3))
+	#print(math.acosh(9))
+	#print(math.remainder(9, 3))
+	#print(math.cbrt(9))
+	#print(math.comb(9, 3))
+	#print(math.exp2(9))
+	#print(math.perm(9, 3))
+	#print(math.lcm(9, 3))
+	##print(math.isqrt(9))
+	#print(math.atanh(9))
+	##print(math.)
+	print(sympy.sqrt(9))
+	print(int('9'))
 
 if __name__ == '__main__':
 	_test()

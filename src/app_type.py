@@ -1,4 +1,25 @@
+## IMPORTS ###
+
+# builtins
+import builtins
+
 ### FUNCTIONS ###
+def function_exists(func_name: str) -> bool:
+	"""
+	Determines if a function exists.
+
+	Args:
+		func_name (str): The name of the function to check.
+
+	Returns:
+		bool: True if the function exists, False otherwise.
+	"""
+	if func_name in globals() and callable(globals()[func_name]):
+		return True
+	elif func_name in dir(builtins) and callable(getattr(builtins, func_name)):
+		return True
+	return False
+
 def get_type(data: any) -> str:
 	try:
 		data_type = type(data)

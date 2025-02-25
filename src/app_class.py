@@ -843,7 +843,7 @@ class CalculatorApp(GuiApp):
 		# evaluate the expression
 		try:
 			self._logging_print(f"Evaluating...")
-			result = evaluate_expression(self, expr, dont_evaluate=self._only_simplify)
+			result = evaluate_expression(self, expr, dont_approximate=self._only_simplify)
 			self.display_result(result)
 			return
 		except ZeroDivisionError as e:
