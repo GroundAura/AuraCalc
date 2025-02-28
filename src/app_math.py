@@ -8,9 +8,16 @@ import re
 
 # external
 from sympy import sympify
+import sympy as sp
 
 # internal
 from app_logging import logging_print
+
+
+
+### CONSTANTS ###
+
+tau = sp.pi * 2
 
 
 
@@ -71,6 +78,14 @@ def quad_zero(a, b, c, positive = '+'):
 		return root1
 	elif positive in ['False', 'n', '-', 'negative']:
 		return root2
+	else:
+		raise ValueError("Invalid positive argument. Use 'p' for positive, 'n' for negative.")
+
+def sym_quad_zero(a: str, b: str, c: str, positive: str = '+'):
+	if positive in ['True', 'p', '+', 'positive']:
+		return f"(-({b}) + sqrt(({b})**2 - 4 * {a} * {c})) / (2 * {a})"
+	elif positive in ['False', 'n', '-', 'negative']:
+		return f"(-({b}) - sqrt(({b})**2 - 4 * {a} * {c})) / (2 * {a})"
 	else:
 		raise ValueError("Invalid positive argument. Use 'p' for positive, 'n' for negative.")
 
