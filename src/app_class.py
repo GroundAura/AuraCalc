@@ -523,7 +523,7 @@ class CalculatorApp(GuiApp):
 		# calculator default values
 		self._set_calc_dec_precision(100, use_config)
 		self._set_calc_dec_display(10, use_config)
-		self._set_calc_only_simplify(False, use_config)
+		self._set_calc_approximate(True, use_config)
 		self._set_calc_live_eval(True, use_config)
 		self._set_calc_live_eval_delay(1000, use_config)
 		self._set_calc_sanitize_input(True, use_config)
@@ -597,6 +597,11 @@ class CalculatorApp(GuiApp):
 		else:
 			raise ValueError(f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'")
 
+	def _set_calc_approximate(self, new_val: bool, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'CALCULATION', 'bApproximate', new_val, use_config)
+		validate_type(new_val, bool)
+		self._approximate = value
+
 	def _set_calc_dec_display(self, new_val: int, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'CALCULATION', 'iDecimalDisplay', new_val, use_config)
 		try:
@@ -624,11 +629,6 @@ class CalculatorApp(GuiApp):
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._calc_live_eval_delay = value
-
-	def _set_calc_only_simplify(self, new_val: bool, use_config: bool = False) -> None:
-		value = get_config_value(self._config, 'CALCULATION', 'bOnlySimplify', new_val, use_config)
-		validate_type(new_val, bool)
-		self._only_simplify = value
 
 	def _set_calc_sanitize_input(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'DEBUG', 'bSanitizeInput', new_val, use_config)
@@ -843,7 +843,7 @@ class CalculatorApp(GuiApp):
 		# evaluate the expression
 		try:
 			self._logging_print(f"Evaluating...")
-			result = evaluate_expression(self, expr, dont_approximate=self._only_simplify)
+			result = evaluate_expression(self, expr, approximate=self._approximate)
 			self.display_result(result)
 			return
 		except ZeroDivisionError as e:
