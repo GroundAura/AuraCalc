@@ -17,7 +17,41 @@ from app_logging import logging_print
 
 ### CONSTANTS ###
 
-tau = sp.pi * 2
+TAU = sp.pi * 2
+
+CHAR_EUL = 'e'
+#CHAR_EUL = 'E'
+
+CHAR_IMAG = 'i'
+#CHAR_IMAG = 'I'
+#CHAR_IMAG = 'j'
+#CHAR_IMAG = 'J'
+#CHAR_IMAG = chr(0x03B9) # 'ι'
+#CHAR_IMAG = chr(0x2148) # 'ⅈ'
+##CHAR_IMAG = chr(0x1D4E09) # '𝓲'
+
+#CHAR_INF = 'oo'
+#CHAR_INF = 'inf'
+#CHAR_INF = 'infty'
+#CHAR_INF = 'Infinity'
+CHAR_INF = chr(0x221E) # '∞'
+
+#CHAR_INFJ = 'infj'
+CHAR_INFJ = 'ComplexInfinity'
+
+#CHAR_NAN = 'nan'
+CHAR_NAN = 'NaN'
+
+#CHAR_PHI = 'phi'
+#CHAR_PHI = 'GoldenRatio'
+CHAR_PHI = chr(0x03C6) # 'φ'
+#CHAR_PHI = chr(0x03A6) # 'Φ'
+
+#CHAR_PI = 'pi'
+CHAR_PI = chr(0x03C0) # 'π'
+
+#CHAR_TAU = 'tau'
+CHAR_TAU = chr(0x03C4) # 'τ'
 
 
 
@@ -100,6 +134,14 @@ def _test():
 	dice_string = '3*d*6'
 	expression = sympify(dice_string)
 	print(expression)
+
+	print(CHAR_EUL)
+	print(CHAR_IMAG)
+	print(CHAR_INF)
+	print(CHAR_INFJ)
+	print(CHAR_NAN)
+	print(CHAR_PHI)
+	print(CHAR_PI)
 
 if __name__ == '__main__':
 	_test()

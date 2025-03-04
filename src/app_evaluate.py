@@ -19,148 +19,12 @@ import sympy as sp
 
 # internal
 from app_logging import logging_print
-from app_math import roll_dice, sym_quad_zero
+from app_math import roll_dice, sym_quad_zero, CHAR_EUL, CHAR_IMAG, CHAR_INF, CHAR_INFJ, CHAR_NAN, CHAR_PHI, CHAR_PI
 from app_type import function_exists, matches_key
 
 
 
 ### CONSTANTS ###
-
-#ALLOWED_CHARS: re.Pattern[str] = re.compile(
-#	#r'^(?:\d+|?(?:pi|e|inf)|(?:root\(|sqrt\(|ln\(|log\(log10\(|log2\(|log1p\(|sin\(|cos\(|tan\(|csc\(|sec\(|cot\(|fabs\(|exp\(|exp2\(|expm1\(|gcd\(|factorial\(|trunc\(|ceil\(|floor\(|hex\(|bin\(|oct\()\s*|\+\-\*/\^%().!, ]+)+$'
-#	r'^(?:'
-#	r'\d+|' # Digits
-#	r'(?:pi|e|[nN][aA][nN])|' # Constants: pi, e, NaN
-#	#r'(?:i|inf)|'
-#	r'(?:0x[0-9a-f]+|0b[01]+|0o[0-7]+)|' # Hex, binary, octal numbers
-#	r'(?:' # Allowed function names
-#	r'exp\(|pow\('
-#	r'|cbrt\(|sqrt\(|root\('
-#	r'|log\(|ln\('
-#	r'|acos\(|acosh\(|acot\(|acoth\(|acsc\(|acsch\(|asec\(|asech\(|asin\(|asinh\(|atan\(|atan2\(|atanh\(|cos\(|cosh\(|cot\(|coth\(|csc\(|csch\(|sec\(|sech\(|sin\(|sinh\|tan\(|tanh\('
-#	r'|abs\('
-#	r'|gcd\(|lcm\('
-#	r'|factorial\('
-#	r'|ceiling\(|floor\(|trunc\('
-#	r'|erf\(|erfc\(|gamma\('
-#	#r'|log10\(|log2\(|log1p\('
-#	#r'|comb\(|perm\('
-#	#r'|remainder\('
-#	#r'|bin\(|hex\(|oct\('
-#	#r'|add\(|sub\(|subtract\(|mul\(|mult\(|multiply\(|div\(|divide\('
-#	#r'|ldiv\(|longdiv\(|longdivide\(|longdivision\('
-#	#r'|average\(|mean\(|median\(|mode\('
-#	r'|roll\('
-#	#r')|'
-#	r')\s*'
-#	#r'|[a-zA-Z](?!\s*\()' # Variables, letters that are not followed by '('
-#	r'|[a-zA-Z]'
-#	r'|[\+\-\*/\^%().!, ]+'
-#	r')+$'
-#)
-
-
-#BUILTIN_FUNCTIONS: dict[str, dict[str, Any]] = {
-#	'exp': {'func': 'exp', 'args': 1},
-#	'pow': {'func': 'pow', 'args': 2},
-#	'cbrt': {'func': 'cbrt', 'args': 1},
-#	'sqrt': {'func': 'sqrt', 'args': 1},
-#	'root': {'func': 'root', 'args': 2},
-#	'log': {'func': 'log', 'args': 2},
-#	'ln': {'func': 'log', 'args': 1},
-#	'acos': {'func': 'acos', 'args': 1},
-#	'acosh': {'func': 'acosh', 'args': 1},
-#	'acot': {'func': 'acot', 'args': 1},
-#	'acoth': {'func': 'acoth', 'args': 1},
-#	'acsc': {'func': 'acsc', 'args': 1},
-#	'acsch': {'func': 'acsch', 'args': 1},
-#	'asec': {'func': 'asec', 'args': 1},
-#	'asech': {'func': 'asech', 'args': 1},
-#	'asin': {'func': 'asin', 'args': 1},
-#	'asinh': {'func': 'asinh', 'args': 1},
-#	'atan': {'func': 'atan', 'args': 1},
-#	'atan2': {'func': 'atan2', 'args': 2},
-#	'atanh': {'func': 'atanh', 'args': 1},
-#	'cos': {'func': 'cos', 'args': 1},
-#	'cosh': {'func': 'cosh', 'args': 1},
-#	'cot': {'func': 'cot', 'args': 1},
-#	'coth': {'func': 'coth', 'args': 1},
-#	'csc': {'func': 'csc', 'args': 1},
-#	'csch': {'func': 'csch', 'args': 1},
-#	'sec': {'func': 'sec', 'args': 1},
-#	'sech': {'func': 'sech', 'args': 1},
-#	'sin': {'func': 'sin', 'args': 1},
-#	'sinh': {'func': 'sinh', 'args': 1},
-#	'tan': {'func': 'tan', 'args': 1},
-#	'tanh': {'func': 'tanh', 'args': 1},
-#	'abs': {'func': 'fabs', 'args': 1},
-#	'gcd': {'func': 'gcd', 'args': 2},
-#	'lcm': {'func':' lcm', 'args': 2},
-#	'factorial': {'func': 'factorial', 'args': 1},
-#	#'comb': {'func': 'comb', 'args': 2},
-#	#'perm': {'func':' perm', 'args': 2},
-#	#'remainder': {'func': 'remainder', 'args': 2},
-#	'ceiling': {'func': 'ceil', 'args': 1},
-#	'floor': {'func': 'floor', 'args': 1},
-#	'trunc': {'func': 'trunc', 'args': 1},
-#	'erf': {'func': 'erf', 'args': 1},
-#	'erfc': {'func': 'erfc', 'args': 1},
-#	'gamma': {'func': 'gamma', 'args': 1},
-#	#'bin': {'func': 'bin', 'args': 1},
-#	#'hex': {'func': 'hex', 'args': 1},
-#	#'oct': {'func': 'oct', 'args': 1},
-#	#'average': {'func': 'statistics.mean', 'args': 1},
-#	#'mean': {'func': 'statistics.mean', 'args': 1},
-#	#'median': {'func': 'statistics.median', 'args': 1},
-#	#'mode': {'func': 'statistics.mode', 'args': 1},
-#	'Add': {'func': 'Add'},
-#	'add': {'func': 'Add'},
-#	'Mult': {'func': 'Mult'},
-#	'mult': {'func': 'Mult'},
-#	'Pow': {'func': 'Pow'},
-#	'pow': {'func': 'Pow'},
-#	'Integer': {'func': 'Integer'},
-#	'integer': {'func': 'Integer'},
-#	'int': {'func': 'Integer'},
-#	'Rational': {'func': 'Rational'},
-#	'rational': {'func': 'Rational'},
-#	'Float': {'func': 'Float'},
-#	'float': {'func': 'Float'},
-#	'Infinity': {'func': 'Infinity'},
-#	'Inf': {'func': 'Infinity'},
-#	'inf': {'func': 'Infinity'},
-#	'NaN': {'func': 'NaN'},
-#	'nan': {'func': 'NaN'},
-#	'Zero': {'func': 'Zero'},
-#	'zero': {'func': 'Zero'},
-#	'I': {'func': 'I'},
-#	'pi': {'func': 'pi'},
-#	'E': {'func': 'E'},
-#	'oo': {'func': 'oo'},
-#	'Poly': {'func': 'Poly'},
-#	'poly': {'func': 'Poly'},
-#	'Polynomial': {'func': 'Poly'},
-#	'polynomial': {'func': 'Poly'},
-#	'RootOf': {'func': 'RootOf'},
-#	'rootof': {'func': 'RootOf'},
-#}
-#CUSTOM_FUNCTIONS: dict[str, dict[str, Any]] = {
-#	'roll': {'func': 'roll_dice', 'args': 1, 'returns': 2},
-#	'quad': {'func': 'quad_zero', 'args': 4, 'returns': 1},
-#	'quadratic': {'func': 'quad_zero', 'args': 4, 'returns': 1},
-#	'quadratic_formula': {'func': 'quad_zero', 'args': 4, 'returns': 1},
-#	#'average': {'func': 'statistics.mean', 'args': 1},
-#}
-#KNOWN_FUNCTIONS: tuple[str] = (*BUILTIN_FUNCTIONS, *CUSTOM_FUNCTIONS)
-##logging_print(KNOWN_FUNCTIONS)
-
-#OPERATIONS: dict[str, any] = {
-#	'+': lambda x, y: x + y,
-#	'-': lambda x, y: x - y,
-#	'*': lambda x, y: x * y,
-#	'/': lambda x, y: x / y,
-#	'**': lambda x, y: x ** y
-#}
 
 #FUNCTIONS_BUILTIN: dict[str | Container[str], Callable] = {
 #	#'int': int,                 # int(x)
@@ -327,15 +191,7 @@ FUNCTIONS_SYMPY: dict[str | Container[str], Callable] = {
 	('falling_factorial', 'FallingFactorial'): sp.FallingFactorial,
 	('fibbonacci', 'Fibonacci'): sp.fibonacci
 }
-#FUNCTIONS_ALL: dict[str | Container[str], Callable] = {
-#	**FUNCTIONS_BUILTIN,
-#	**FUNCTIONS_CUSTOM,
-#	**FUNCTIONS_CMATH,
-#	**FUNCTIONS_MATH,
-#	**FUNCTIONS_STATISTICS,
-#	**FUNCTIONS_SYMPY
-#}
-#logging_print(f"FUNCTIONS_ALL: {FUNCTIONS_ALL}")
+
 FUNCTION_MAP: dict[str, tuple[str, Callable]] = dict()
 #for dictionary in (FUNCTIONS_BUILTIN, FUNCTIONS_CMATH, FUNCTIONS_CUSTOM, FUNCTIONS_MATH, FUNCTIONS_STATISTICS, FUNCTIONS_SYMPY):
 for dictionary, name in ((FUNCTIONS_CUSTOM, 'CUSTOM'), (FUNCTIONS_SYMPY, 'SYMPY')):
@@ -348,17 +204,8 @@ for dictionary, name in ((FUNCTIONS_CUSTOM, 'CUSTOM'), (FUNCTIONS_SYMPY, 'SYMPY'
 				FUNCTION_MAP[key] = (name, dictionary[keys])
 logging_print(f"FUNCTION_MAP: {FUNCTION_MAP}")
 
-VALID_FUNCTIONS: set[str] = set()
-#for key in FUNCTIONS_ALL.keys():
-#	if type(key) is str:
-#		VALID_FUNCTIONS.add(key)
-#	elif issubclass(type(key), Container):
-#		for k in key:
-#			VALID_FUNCTIONS.add(k)
-for key in FUNCTION_MAP.keys():
-	VALID_FUNCTIONS.add(key)
-
 FUNCTIONS_PATTERN: str = r'|'.join(FUNCTION_MAP.keys())
+
 
 #CONSTANTS_CMATH: dict[str | Container[str], Any] = {
 #	#'pi': cmath.pi,
@@ -380,19 +227,16 @@ CONSTANTS_CUSTOM: dict[str | Container[str], Any] = {
 #	#'nan': math.nan
 #}
 CONSTANTS_SYMPY: dict[str | Container[str], Any] = {
-	('pi', r'\pi'): sp.pi,                                  # pi (~3.14159)
-	('e', 'E', r'\e', r'\E'): sp.E,                         # e (~2.71828)
-	('oo', 'inf', 'infty', 'infinity', r'\infty'): sp.oo,   # infinity
-	('nan', 'NaN', 'NAN', r'\NaN'): sp.nan,                 # not a number (0/0)
-	('i', 'I', 'j', 'J', r'\i', r'\I', r'\j', r'\J'): sp.I, # imaginary unit (sqrt(-1))
-	('tau', r'\tau'): sp.pi*2,                              # 2pi (~6.28319)
-	('phi', r'\phi'): sp.GoldenRatio,                       # golden ratio
+	('pi', 'Pi', r'\pi', chr(0x03C0)): sp.pi,                                     # pi (~3.14159)
+	('e', 'E', r'\e', r'\E'): sp.E,                                               # e (~2.71828)
+	('oo', 'infinity', 'infty', 'inf', r'\infty', chr(0x221E)): sp.oo,            # infinity
+	('nan', 'NaN', 'NAN', r'\NaN'): sp.nan,                                      # not a number (0/0)
+	('i', 'I', 'j', 'J', r'\i', r'\I', r'\j', r'\J'): sp.I,                      # imaginary unit (sqrt(-1))
+	#('infj', 'complexinfinity', 'ComplexInfinity', r'\infj'): sp.ComplexInfinity, # complex infinity
+	('tau', 'Tau', r'\tau', chr(0x03C4)): sp.pi*2,                               # 2pi (~6.28319)
+	('phi', 'goldenratio', 'GoldenRatio', r'\phi', chr(0x03C6)): sp.GoldenRatio, # golden ratio
 }
-#CONSTANTS_ALL: dict[str | Container[str], Any] = {
-#	**CONSTANTS_CMATH,
-#	**CONSTANTS_MATH,
-#	**CONSTANTS_SYMPY
-#}
+
 CONSTANTS_MAP: dict[str, tuple[str, Callable]] = dict()
 for dictionary, name in ((CONSTANTS_CUSTOM, 'CUSTOM'), (CONSTANTS_SYMPY, 'SYMPY')):
 	for keys in dictionary.keys():
@@ -404,18 +248,11 @@ for dictionary, name in ((CONSTANTS_CUSTOM, 'CUSTOM'), (CONSTANTS_SYMPY, 'SYMPY'
 				CONSTANTS_MAP[key] = (name, dictionary[keys])
 logging_print(f"CONSTANTS_MAP: {CONSTANTS_MAP}")
 
-#VALID_CONSTANTS: set[str] = set()
-#for key in CONSTANTS_ALL.keys():
-#	if type(key) is str:
-#		VALID_CONSTANTS.add(key)
-#	elif issubclass(type(key), Container):
-#		for k in key:
-#			VALID_CONSTANTS.add(k)
-
 CONSTANTS_PATTERN: str = r'|'.join(CONSTANTS_MAP.keys())
 
+
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
-	r'^(?:'
+	r'^(?:' +
 	r'\d+|' + # Digits
 	#r'(?:0x[0-9a-f]+|0b[01]+|0o[0-7]+)|' + # Hex, Binary, Octal Numbers
 	'|'.join(re.escape(k) for k in FUNCTION_MAP.keys()) + '|' + # Functions
@@ -444,28 +281,29 @@ def compact_expr(expr: str) -> str:
 	# Remove whitespace
 	for char in WHITESPACE:
 		expr = expr.replace(char, '')
-	# Remove leading zeros
-# ***TO DO***: ensure there's no decimal points before the zero before removing leading zeros
-	expr = re.sub(r'\b0+(\d+)', r'\1', expr)
+#	# Remove leading zeros
+## ***TO DO***: ensure there's no decimal points before the zero before removing leading zeros
+#	expr = re.sub(r'\b0+(\d+)', r'\1', expr)
 	return expr
 
-def eval_custom_functions(expression: str) -> str:
+def eval_custom_functions(expr: str) -> str:
 	"""
 	Evaluates custom functions in an expression.
 
 	Args:
-		expression (str): The expression to evaluate.
+		expr (str): The expression to evaluate.
 
 	Returns:
 		str: The processed expression.
 	"""
+	# Evaluate custom functions
 	func_pattern: re.Pattern = re.compile(r'(\b\w+)\(([^)]*)\)')
-	def func_replacer(match) -> str:
+	def func_replacer(match: re.Match) -> str:
 		"""
 		Replaces a function call with its result.
 
 		Args:
-			match: The match object.
+			match (Match): The match object.
 
 		Returns:
 			str: The result of the function call or the original expression.
@@ -507,15 +345,48 @@ def eval_custom_functions(expression: str) -> str:
 					return str(result)
 		elif function_exists(func_name):
 			logging_print(f"Function '{func_name}' not valid. Transforming to variable multiplication to ensure it's not treated as a function.")
-			return match.group(0).replace(func_name, '*'.join(func_name))
+			if len(args_list) == 1 and args_list[0] == '':
+				return '*'.join(func_name)
+			else:
+				return match.group(0).replace(func_name, '*'.join(func_name))
 		else:
 			logging_print(f"Function '{func_name}' not found. Assuming it's not a function.")
+			if len(args_list) == 1 and args_list[0] == '':
+				return func_name
+			else:
+				return match.group(0)
+	# Evaluate custom constants
+	const_pattern: re.Pattern = re.compile('|'.join(re.escape(k) for k in CONSTANTS_MAP.keys()))
+	def const_replacer(match: re.Match) -> str:
+		"""
+		Replaces a constant with its value.
+
+		Args:
+			match (Match): The match object.
+
+		Returns:
+			str: The value of the constant.
+		"""
+		const_name: str = match.group(0)
+		logging_print(f"Constant requested: '{const_name}'")
+		if matches_key(const_name, CONSTANTS_MAP.keys()):
+			group: str = CONSTANTS_MAP[const_name][0]
+			const: Callable = CONSTANTS_MAP[const_name][1]
+			if group == 'SYMPY':
+				logging_print(f"Matching SymPy constant: `sympy.{const}`. Letting SymPy handle evaluation.")
+				return '(' + str(const) + ')'
+			else:
+				logging_print(f"Matching constant: '{const_name}': `{CONSTANTS_MAP[const_name]}`")
+				return str(CONSTANTS_MAP[const_name])
+		elif function_exists(const_name):
+			logging_print(f"Constant '{const_name}' not valid. Transforming to variable multiplication to ensure it's not treated as a function.")
+			return '(' + match.group(0).replace(const_name, '*'.join(const_name)) + ')'
+		else:
+			logging_print(f"Constant '{const_name}' not found. Assuming it's not a constant.")
 			return match.group(0)
-	#const_pattern: re.Pattern = re.compile('|'.join(re.escape(k) for k in CONSTANTS_MAP.keys()))
-	#def const_replacer(match) -> str:
-	#	pass
-	processed_expression: str = func_pattern.sub(func_replacer, expression)
-	#processed_expression: str = const_pattern.sub(const_replacer, processed_expression)
+	# Process the expression
+	processed_expression: str = func_pattern.sub(func_replacer, expr)
+	processed_expression: str = const_pattern.sub(const_replacer, processed_expression)
 	return processed_expression
 
 #def eval_with_decimal(expression: any) -> str:
@@ -552,69 +423,62 @@ def evaluate_expression(app, expr: str, approximate: bool = True) -> str:
 	Evaluates an expression.
 
 	Args:
-		expression (str): The expression to evaluate.
+		expr (str): The expression to evaluate.
 		approximate (bool, optional): Whether to approximate the result to a decimal. Defaults to `True`.
 
 	Returns:
 		str: The result of the expression.
 	"""
-	#continue_eval: bool = True
 	#logging_print('Evaluating expression...')
 	#approximate = False
+	#rational = False if approximate else True
 	try:
 		## Detect LaTeX input
 		#if expr.startswith('$') and expr.endswith('$'):
 		#	expr = expr.strip('$')
 		#	expr = sp.latex(expr)
-		# Handle custom functions
-		expr: str = eval_custom_functions(expr)
-		logging_print(f"Expr (eval_func):{' '*4}`{expr}` - type: {type(expr)}")
+		# Handle custom functions & constants
+		expr_cust: str = eval_custom_functions(expr)
+		logging_print(f"Expr (eval_func):{' '*4}`{expr_cust}` - type: {type(expr_cust)}")
 		# Remove unnecessary characters
-		expr = compact_expr(expr)
-		logging_print(f"Expr (compacted):{' '*4}`{expr}` - type: {type(expr)}")
+		expr_comp = compact_expr(expr_cust)
+		logging_print(f"Expr (compacted):{' '*4}`{expr_comp}` - type: {type(expr_comp)}")
 		# Handle implied exponentation
-		expr = implied_exp(expr)
-		logging_print(f"Expr (implied_exp):{' '*2}`{expr}` - type: {type(expr)}")
+		expr_exp = implied_exp(expr_comp)
+		logging_print(f"Expr (implied_exp):{' '*2}`{expr_exp}` - type: {type(expr_exp)}")
 		# Handle implied multiplication
-		expr = implied_mult(expr)
-		logging_print(f"Expr (implied_mult):{' '*1}`{expr}` - type: {type(expr)}")
+		expr_mult = implied_mult(expr_exp)
+		logging_print(f"Expr (implied_mult):{' '*1}`{expr_mult}` - type: {type(expr_mult)}")
 		# Convert to sympy object
-		#rational = False if approximate else True
-		expr = sympify(expr)
-		logging_print(f"Expr (sympify):{' '*6}`{expr}` - type: {type(expr)}")
-		if expr.has(S.NaN):
-			raise ZeroDivisionError('Division by Zero (NaN)')
-		elif expr.has(S.ComplexInfinity):
-			raise ZeroDivisionError('Division by Zero (ComplexInfinity)')
+		expr_sym = sympify(expr_mult)
+		logging_print(f"Expr (sympify):{' '*6}`{expr_sym}` - type: {type(expr_sym)}")
+		#if expr_sym.has(S.NaN):
+		#	raise ZeroDivisionError('Division by Zero (NaN)')
+		#elif expr_sym.has(S.ComplexInfinity):
+		#	raise ZeroDivisionError('Division by Zero (ComplexInfinity)')
 		# Simplify expression
-		expr = simplify(expr)
-		logging_print(f"Expr (simplify):{' '*5}`{expr}` - type: {type(expr)}")
+		expr_simp = simplify(expr_sym)
+		logging_print(f"Expr (simplify):{' '*5}`{expr_simp}` - type: {type(expr_simp)}")
 		if approximate:
 			# Convert floats to rationals
-			expr = nsimplify(expr, rational=True)
-			logging_print(f"Expr (nsimplify):{' '*4}`{expr}` - type: {type(expr)}")
+			expr_rat = nsimplify(expr_simp, rational=True)
+			logging_print(f"Expr (rational):{' '*5}`{expr_rat}` - type: {type(expr_rat)}")
 			# Approximate expression
-			approx_result = expr.evalf(app.calc_dec_precicion)
-			logging_print(f"Expr (evalf):{' '*8}`{approx_result}` - type: {type(approx_result)}")
+			expr_appr = expr_rat.evalf(app.calc_dec_precicion)
+			logging_print(f"Expr (float):{' '*8}`{expr_appr}` - type: {type(expr_appr)}")
 			# Round all numbers
-			approx_result = approx_result.xreplace({n: S(round(n, app.calc_dec_display)) for n in approx_result.atoms(sp.Number)})
-			logging_print(f"Expr (round):{' '*8}`{approx_result}` - type: {type(approx_result)}")
-			result = approx_result
+			expr_round = expr_appr.xreplace({n: S(round(n, app.calc_dec_display)) for n in expr_appr.atoms(sp.Number)})
+			logging_print(f"Expr (round):{' '*8}`{expr_round}` - type: {type(expr_round)}")
+			expr_res = expr_round
 		else:
-			result = expr
-		# Convert floats to integers
-		#expr = expr.xreplace({n: int(n) if n == int(n) else n for n in expr.atoms(sp.Number)})
-		#cleaned_expr = expr.xreplace({n: sp.Integer(n) if isinstance(n, sp.Float) and n == int(n) else n for n in expr.atoms(sp.Float)})
-		#expr = cleaned_expr
-		#expr = expr.xreplace({n: S(round(n, 0)) if n == int(n) else n for n in expr.atoms(sp.Number)})
-		#expr = simplify(expr)
-		#logging_print(f"Expr (truncate):{' '*5}`{expr}` - type: {type(expr)}")
-		# Format expression for display
-		final_result: str = format_expression(result, decimal_places=app.calc_dec_display)
-		logging_print(f"Expr (format):{' '*7}`{final_result}` - type: {type(final_result)}")
+			expr_res = expr_simp
+		expr_dec = simplify_floats(expr_res)
+		logging_print(f"Expr (simplify_floats):{' '*4}`{expr_dec}` - type: {type(expr_dec)}")
+		expr_final: str = format_expression(expr_dec)
+		logging_print(f"Expr (formatted):{' '*4}`{expr_final}` - type: {type(expr_final)}")
 		# Return result
-		app.calc_last_result = final_result
-		return final_result
+		app.calc_last_result = expr_final
+		return expr_final
 	except InvalidOperation:
 		raise InvalidOperation('Invalid number format')
 	except SympifyError as e:
@@ -623,16 +487,16 @@ def evaluate_expression(app, expr: str, approximate: bool = True) -> str:
 		elif 'TokenError' in str(e):
 			if expr.count('(') != expr.count(')'):
 				raise SyntaxError("Mismatched parentheses '( )'")
-			elif expr.count('[') != expr.count(']'):
-				raise SyntaxError("Mismatched brackets '[ ]'")
 			elif expr.count('{') != expr.count('}'):
 				raise SyntaxError("Mismatched braces '{ }'")
+			elif expr.count('[') != expr.count(']'):
+				raise SyntaxError("Mismatched brackets '[ ]'")
 			else:
 				raise e
 		else:
 			raise e
 
-def format_expression(expr: Any, decimal_places: int = 10) -> str:
+def format_expression(expr: Any) -> str:
 	"""
 	Formats an expression by making it more readable.
 
@@ -642,34 +506,13 @@ def format_expression(expr: Any, decimal_places: int = 10) -> str:
 	Returns:
 		str: The formatted expression.
 	"""
-	#terms: list = expr.as_ordered_terms()
-	#logging_print(f"Terms: `{terms}`")
-	#for term in terms:
-	#	logging_print(f"Term: `{term}` - type: {type(term)}")
-	#	if isinstance(term, sp.Mul):
-	#		coeff, var = term.as_coeff_Mul()
-	#		logging_print(f"{coeff} * {var}")
+	# convert to string
+	expr: str = str(expr)
 
-	#tokens = []
-	#for node in sp.preorder_traversal(expr):
-	#	if node.is_Atom:
-	#		tokens.append(node)
-	#	elif node.is_Add or node.is_Mul or node.is_Pow:
-	#		tokens.append(node.func)
-	#logging_print(f"Tokens: `{tokens}`")
-
-	expr = str(expr)
-
-	# truncate decimals
-	if not any(char.isalpha() for char in str(expr)):
-		expr: str = simplify_decimal(expr, decimal_places)
-		#logging_print(f"Expr (simplify_dec):{' '*1}`{expr}` - type: {type(expr)}")
-	expr = expr.replace('.0', '')
-
-	# change exponent operator
+	# replace exponent symbol
 	expr = expr.replace('**', '^') # Replace '**' with '^', e.g., 2**3 -> 2^3
 
-	# change multiplication operator
+	# replace multiplication symbol
 	while re.search(r'(?<=\d)\*([a-zA-Z])', expr):
 		expr = re.sub(r'(?<=\d)\*([a-zA-Z])', r'\1', expr)      # Remove '*' between a number and a variable, e.g., 2*x -> 2x
 	while re.search(r'([a-zA-Z])\*\(', expr):
@@ -678,6 +521,16 @@ def format_expression(expr: Any, decimal_places: int = 10) -> str:
 		expr = re.sub(r'\)\*([a-zA-Z])', r')\1', expr)          # Remove '*' between a closing parenthesis and a variable, e.g., (3)*x -> (3)x
 	while re.search(r'([a-zA-Z])\*([a-zA-Z])', expr):
 		expr = re.sub(r'([a-zA-Z])\*([a-zA-Z])', r'\1\2', expr) # Remove '*' between 2 variables, e.g., x*y -> xy
+
+	# replace constant symbols
+	expr = expr.replace('E', CHAR_EUL)                # Euler's Number
+	expr = expr.replace('exp(', CHAR_EUL + '^(')      # Euler's Number
+	expr = expr.replace('GoldenRatio', CHAR_PHI)      # Golden Ratio
+	expr = expr.replace('I', CHAR_IMAG)               # Imaginary Unit
+	expr = expr.replace('oo', CHAR_INF)               # Infinity
+	expr = expr.replace('ComplexInfinity', CHAR_INFJ) # Complex Infinity
+	expr = expr.replace('nan', CHAR_NAN)              # Not a Number
+	expr = expr.replace('pi', CHAR_PI)                # Pi
 
 	return expr
 
@@ -745,44 +598,55 @@ def sanitize_input(expression: str, allowed_chars: str = ALLOWED_CHARS, sanitize
 	logging_print(f"Expr (sanitized):{' '*4}`{stripped_expr}`")
 	return stripped_expr
 
-def simplify_decimal(number: Any, decimal_places: int = 10) -> str:
+#def simplify_decimal(number: Any, decimal_places: int = 10) -> str:
+#	"""
+#	Simplifies a number with decimals by rounding to the specified decimal places and truncating trailing empty decimal places.
+
+#	Args:
+#		value (Any): The number to simplify.
+#		decimal_places (int, optional): The number of decimal places to round to. Defaults to `10`.
+
+#	Returns:
+#		str: The simplified number.
+#	"""
+#	if not isinstance(number, Decimal):
+#		number = Decimal(str(number))
+#	#logging_print(value)
+#	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
+#	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
+#	if rounded_number.is_zero():
+#		return '0'
+#	simplified_number = str(rounded_number).rstrip('0').rstrip('.')
+#	return simplified_number
+
+def simplify_floats(expr: Any) -> Any:
 	"""
-	Simplifies a number with decimals by rounding to the specified decimal places and truncating trailing empty decimal places.
+	Simplifies floating-point numbers in an expression by truncating trailing zeros and the decimal point.
 
 	Args:
-		value (Any): The number to simplify.
-		decimal_places (int, optional): The number of decimal places to round to. Defaults to `10`.
+		expr (Any): The expression to simplify.
 
 	Returns:
-		str: The simplified number.
+		str: The simplified expression.
 	"""
-	if not isinstance(number, Decimal):
-		number = Decimal(str(number))
-	#logging_print(value)
-	quatitize_pattern = Decimal(f"1.{'0' * decimal_places}")
-	rounded_number = number.quantize(quatitize_pattern, rounding=ROUND_HALF_UP)
-	if rounded_number.is_zero():
-		return '0'
-	simplified_number = str(rounded_number).rstrip('0').rstrip('.')
-	return simplified_number
-
-#def simplify_float(value: float):
-#	value = float(value)
-#	if isinstance(value, float):
-#		# Convert float to string
-#		str_value = str(value)
-		
-#		# Remove trailing zeros and the decimal point if it's the last character
-#		str_value = str_value.rstrip('0').rstrip('.')
-
-#		# Convert to float
-#		float_value = float(str_value)
-#		if float_value.is_integer():
-#			return int(float_value)
-#		else:
-#			return Decimal(float_value)
-#	else:
-#		raise ValueError('Input must be a float to be simplified.')
+	def float_to_int(term: Any) -> Any:
+		#print(f"term: {term} - type: {type(term)}")
+		#print(float(term))
+		if term.is_number:
+			try:
+				# If it's a number, check if it's effectively an integer
+				if float(term) == int(term):  # If the float is mathematically an integer
+					return int(term)  # Convert it to integer
+				else:
+					#return term  # Leave as float
+					return float(term) # Leave as float but truncate trailing zeros
+			except Exception:
+				# If it's not a simple number, return the term unchanged
+				return term
+		return term  # If it's not a number, return the term unchanged
+	converted_expr = expr.xreplace({term: float_to_int(term) for term in expr.atoms()})
+	#print(f"Expr (ints):{' '*4}`{converted_expr}` - type: {type(converted_expr)}")
+	return converted_expr
 
 #def split_terms(expression: str) -> list[str]:
 #	terms = expression.split()
