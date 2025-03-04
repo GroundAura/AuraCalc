@@ -205,8 +205,6 @@ for dictionary, name in ((FUNCTIONS_CUSTOM, 'CUSTOM'), (FUNCTIONS_SYMPY, 'SYMPY'
 				FUNCTION_MAP[key] = (name, dictionary[keys])
 logging_print(f"FUNCTION_MAP: {FUNCTION_MAP}")
 
-FUNCTIONS_PATTERN: str = r'|'.join(FUNCTION_MAP.keys())
-
 
 #CONSTANTS_CMATH: dict[str | Container[str], Any] = {
 #	#'infj': cmath.infj,
@@ -235,8 +233,6 @@ for dictionary, name in ((CONSTANTS_CUSTOM, 'CUSTOM'), (CONSTANTS_SYMPY, 'SYMPY'
 			for key in keys:
 				CONSTANTS_MAP[key] = (name, dictionary[keys])
 logging_print(f"CONSTANTS_MAP: {CONSTANTS_MAP}")
-
-#CONSTANTS_PATTERN: str = r'|'.join(CONSTANTS_MAP.keys())
 
 
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
@@ -498,18 +494,20 @@ def implied_exp(expression: str) -> str:
 	"""
 	return expression.replace('^', '**')
 
-def implied_mult(expression: str, functions: re.Pattern[str] = FUNCTIONS_PATTERN) -> str:
+def implied_mult(expr: str) -> str:
 	"""
 	Evaluates whether an expression contains implied multiplication and adds explicit multiplication if necessary.
 
 	Args:
 		expression (str): The expression to evaluate.
-		functions (Pattern[str], optional): The list of known functions. Defaults to `FUNCTIONS_PATTERN`.
 
 	Returns:
 		str: The processed expression.
 	"""
-	pattern = (
+	# Define patterns
+	#constants: str = '|'.join(re.escape(k) for k in CONSTANTS_MAP.keys())
+	functions: str = '|'.join(re.escape(k) for k in FUNCTION_MAP.keys())
+	pattern: str = (
 		r'(?<=\d)(?=\()'                              # Case 1: number followed by an opening parenthesis, e.g., 1(2)
 		r'|(?<=\))(?=\d)'                             # Case 2: closing parenthesis followed by a number, e.g., (3)4
 		r'|(?<=\))(?=\()'                             # Case 3: two sets of parentheses, e.g., (3)(4)
@@ -519,16 +517,31 @@ def implied_mult(expression: str, functions: re.Pattern[str] = FUNCTIONS_PATTERN
 		r'|(?<=\))(?=[a-zA-Z])'                       # Case 7: closing parenthesis followed by a variable, e.g., (2)x -> (2)*x
 		r'|(?<=[a-zA-Z])(?=\d)'                       # Case 8: variable followed by a number, e.g., x2 -> x*2
 		r'|(?<=[a-zA-Z])(?=\()'                       # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
-		#r'|(?<=[a-zA-Z])(?=[a-zA-Z])'                 # Case 10: variable followed by another variable, e.g., xy -> x*y
+		r'|(?<=[a-zA-Z])(?=[a-zA-Z])'                 # Case 10: variable followed by another variable, e.g., xy -> x*y
 	)
-	#logging_print(pattern)
-	# add '*' to cases
-	modified_expression: str = re.sub(pattern, '*', expression)                                         # Add '*' in all matched cases
-	# exceptions
-	#modified_expression = re.sub(r'(' + functions + r')\*+', lambda m: m.group(0).replace('*', ''), modified_expression) # Remove '*' inside of function names
-	modified_expression = re.sub(r'(' + functions + r')\*\(', r'\1(', modified_expression)         # Remove '*' between functions and '('
-	modified_expression = re.sub(r'(?<=roll\()(\d+)\*d\*(\d+)', r'\1d\2', modified_expression)     # Remove '*' between numbers and 'd' in the roll_dice() function
-	return modified_expression
+	#print(pattern)
+
+	# Add '*' in all matched cases
+	expr_modified: str = re.sub(pattern, '*', expr)
+	#logging_print(expr_modified)
+
+	# Remove '*' inside of function and constant names
+	sym_except_list: list = []
+	for key in list(CONSTANTS_MAP.keys()) + list(FUNCTION_MAP.keys()):
+		if len(key) > 1 and all(c.isalpha() for c in key):
+			sym_except_list.append('*'.join(list(key)))
+	#print(exceptions_lst)
+	symb_except: str = '|'.join(re.escape(k) for k in sym_except_list)
+	#print(exceptions)
+	expr_modified = re.sub(r'(' + symb_except + r')', lambda m: m.group(0).replace('*', ''), expr_modified)
+
+	# Remove '*' between functions and '('
+	expr_modified = re.sub(r'(' + functions + r')\*\(', r'\1(', expr_modified)
+
+	# Remove '*' between numbers and 'd' in the roll_dice() function
+	expr_modified = re.sub(r'(?<=roll\()(\d+)\*d\*(\d+)', r'\1d\2', expr_modified)
+
+	return expr_modified
 
 def sanitize_input(expr: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool = True) -> str:
 	"""
