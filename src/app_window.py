@@ -9,68 +9,22 @@ from app_logging import logging_print
 
 
 ### FUNCTIONS ###
-
-def clear_io(app, input_element, output_element) -> None:
-	"""
-	Clears the input and output elements.
-
-	Args:
-		input_element: The element to clear the input from.
-		output_element: The element to clear the output from.
-	"""
-	input_element.delete('0', 'end')
-	input_element.insert('0', app.calc_def_expr)
-	focus_element(input_element)
-	output_element.configure(state='normal')
-	output_element.delete('1.0', 'end')
-	output_element.insert('end', app._calc_def_result)
-	output_element.configure(state='disabled')
-
-def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
-	"""
-	Copies the text in the element to the clipboard.
+#def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
+#	"""
+#	Copies the text in the element to the clipboard.
 	
-	Args:
-		window (ctk.CTk): The window to copy the text in.
-		element (ctk.CTkEntry | ctk.CTkTextbox): The element to copy the text from.
-	"""
-	app.window.clipboard_clear()
-	if isinstance(element, ctk.CTkEntry):
-		element.get(0, 'end')
-	elif isinstance(element, ctk.CTkText):
-		element.get('1.0', 'end-1c')
-	app.window.clipboard_append(element.get())
-	logging_print(f"Text copied to clipboard: `{app.clipboard}`")
-	app.window.update()
-
-def delayed_display(app, output_element, message: str) -> None:
-	"""
-	Displays the result in the the output element after a delay.
-
-	Args:
-		app: The application instance.
-		output_element: The element to display the result in.
-		message (str): The message to display in the output element.
-	"""
-	#app.timeout_id = app.window.after(app._calc_live_eval_delay, lambda: display_result(app, output_element, message))
-	app.delayed_func(lambda: display_result(output_element, message))
-	display_result(output_element, app.calc_last_result, logging=False)
-
-def display_result(output_element, message: str, logging: bool = True) -> None:
-	"""
-	Displays the result in the output element.
-
-	Args:
-		output_element: The element to display the result in.
-		message (str): The message to display in the output element.
-	"""
-	output_element.configure(state='normal')
-	output_element.delete('1.0', 'end')
-	output_element.insert('end', f"{message}")
-	output_element.configure(state='disabled')
-	if logging:
-		#logging_print(f"Expr (final):{' '*8}`{message.replace('\n', '  ')}`\n")
-		logging_print(f"Result:{' '*14}`{message.replace('\n', '  ')}`")
+#	Args:
+#		window (ctk.CTk): The window to copy the text in.
+#		element (ctk.CTkEntry | ctk.CTkTextbox): The element to copy the text from.
+#	"""
+#	app.window.clipboard_clear()
+#	if isinstance(element, ctk.CTkEntry):
+#		element.get(0, 'end')
+#	elif isinstance(element, ctk.CTkText):
+#		element.get('1.0', 'end-1c')
+#	app.window.clipboard_append(element.get())
+#	logging_print(f"Text copied to clipboard: `{app.clipboard}`")
+#	app.window.update()
 
 def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	"""
@@ -84,6 +38,64 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 		element.select_range('0', 'end')
 	elif isinstance(element, ctk.CTkText):
 		element.tag_add('sel', '1.0', 'end-1c')
+
+def text_clear(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
+	"""
+	Clears the text in a given element.
+
+	Args:
+		element (ctk.CTkEntry | ctk.CTkTextbox): The element to clear the text in.
+	"""
+	if type(element) == ctk.CTkEntry:
+		text_remove(element, '0', 'end')
+	elif type(element) == ctk.CTkTextbox:
+		text_remove(element, '1.0', 'end')
+	else:
+		raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
+
+def text_remove(element: ctk.CTkEntry | ctk.CTkTextbox, start: str, end: str) -> None:
+	"""
+	Removes the text in a given element.
+
+	Args:
+		element (ctk.CTkEntry | ctk.CTkTextbox): The element to remove the text in.
+		start (int): The start index of the text to remove.
+		end (int): The end index of the text to remove.
+	"""
+	if type(element) == ctk.CTkEntry:
+		element.delete(start, end)
+	elif type(element) == ctk.CTkTextbox:
+		if element.state_disabled:
+			disable = True
+			element.configure(state='normal')
+			element.state_disabled = False
+		element.delete(start, end)
+		if disable:
+			element.configure(state='disabled')
+			element.state_disabled = True
+	else:
+		raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
+
+def text_set(element, text: str) -> None:
+	"""
+	Sets the text in a given element.
+
+	Args:
+		element (ctk.CTkEntry | ctk.CTkTextbox): The element to set the text in.
+		text (str): The text to set in the element.
+	"""
+	text_clear(element)
+	if type(element) == ctk.CTkEntry:
+		element.insert('0', text)
+	elif type(element) == ctk.CTkTextbox:
+		if element.state_disabled:
+			disable = True
+			element.configure(state='normal')
+			element.state_disabled = False
+		element.insert('1.0', text)
+		if disable:
+			element.configure(state='disabled')
+			element.state_disabled = True
 
 
 

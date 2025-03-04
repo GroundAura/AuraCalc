@@ -104,13 +104,10 @@ def main():
 
 	# Entry Input Element (CTkEntry)
 	app._win_txt_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
-	app._win_txt_input.insert(ctk.END, app.calc_def_expr)
 
 	# Result Display Element (CTkTextbox)
 	app._win_txt_result.configure(height=1)
 	app._win_txt_result.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
-	app._win_txt_result.insert(ctk.END, app.calc_def_result)
-	app._win_txt_result.configure(state='disabled')
 
 	# Pin Window ELement (CTkButton)
 	app._win_btn_pin.configure(width=30)

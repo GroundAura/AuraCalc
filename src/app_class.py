@@ -1,5 +1,8 @@
 ### IMPORTS ###
 
+# builtins
+from typing import Any
+
 # external
 import customtkinter as ctk
 from decimal import getcontext
@@ -14,7 +17,7 @@ from app_globals import CONFIG, FORCE_DEBUG, PATH_CONFIG, USE_CONFIG
 from app_keybinds import bind_event
 from app_path import get_root_path
 from app_type import validate_type
-from app_window import clear_io, focus_element
+from app_window import focus_element, text_set
 
 
 
@@ -511,14 +514,10 @@ class CalculatorApp(GuiApp):
 		#self._win_frame_help = ctk.CTkFrame(self._window)
 		#self._win_frame_opt = ctk.CTkFrame(self._window)
 		self._win_btn_adv = ctk.CTkButton(self._win_frame_base, text='Expand', command=self.toggle_advanced)
-		self._win_btn_clear = ctk.CTkButton(self._win_frame_base, text='Clear', command=lambda: clear_io(self, self._win_txt_input, self._win_txt_result))
+		self._win_btn_clear = ctk.CTkButton(self._win_frame_base, text='Clear', command=self._clear_io)
 		self._win_btn_pin = ctk.CTkButton(self._win_frame_base, text=pinned_text, command=self.toggle_pinned)
 		self._win_txt_input = ctk.CTkEntry(self._win_frame_base)
 		self._win_txt_result = ctk.CTkTextbox(self._win_frame_base)
-
-		# window
-		if self._win_advanced_def:
-			self.toggle_advanced()
 
 		# calculator default values
 		self._set_calc_dec_precision(100, use_config)
@@ -571,7 +570,20 @@ class CalculatorApp(GuiApp):
 			bind_event(self._win_txt_input, '<KeyRelease>', excluded_seq=self._bound_keys, command=lambda: self.evaluate(live_mode=True))
 		self.window.bind('<FocusIn>', lambda event: focus_element(self._win_txt_input))
 
+		# final window setup
+		text_set(self._win_txt_input, self._calc_def_expr)
+		self._win_txt_result.configure(state='disabled')
+		self._win_txt_result.state_disabled = True
+		text_set(self._win_txt_result, self.calc_def_result)
+		if self._win_advanced_def:
+			self.toggle_advanced()
+
 	# private methods
+	def _clear_io(self) -> None:
+		text_set(self._win_txt_input, self.calc_def_expr)
+		text_set(self._win_txt_result, self._calc_def_result)
+		focus_element(self._win_txt_input)
+
 	#def _del_txt(self, element, begin, end) -> None:
 	#	element.delete(begin, end)
 
@@ -651,7 +663,7 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sClearKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_clear = value
-		bind_event(self._window, self._key_clear, command=lambda: clear_io(self, self._win_txt_input, self._win_txt_result))
+		bind_event(self._window, self._key_clear, command=self._clear_io)
 		self._add_bound_key(self._key_clear)
 
 	def _set_key_del_l(self, new_val: str, use_config: bool = False) -> None:
@@ -802,23 +814,13 @@ class CalculatorApp(GuiApp):
 
 
 	# public methods
-	def delayed_func(self, func, custom_delay: int | None = None) -> None:
-		try:
-			delay = custom_delay if custom_delay is not None else self._calc_live_eval_delay
-		except AttributeError:
-			delay = custom_delay if custom_delay is not None else 1000
-		self._timeout_id = self.window.after(delay, func)
-
-	def display_result(self, message: object, logging: bool = True, delay: bool = False) -> None:
+	def display_result(self, message: Any, logging: bool = True, delay: bool = False) -> None:
 		if delay:
 			self._timeout_id = self._window.after(self._calc_live_eval_delay, self.display_result, message, logging, False)
 			return
 		message = str(message)
 		#message = message.replace('\n', '\\n')
-		self._win_txt_result.configure(state='normal')
-		self._win_txt_result.delete('1.0', 'end')
-		self._win_txt_result.insert('1.0', message)
-		self._win_txt_result.configure(state='disabled')
+		text_set(self._win_txt_result, message)
 		if logging:
 			self._logging_print(f"Result:{' '*14}`{message.replace('\n', '\\n')}`")
 			#self._logging_print(f"Result:{' '*14}`{message}`")
