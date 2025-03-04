@@ -425,7 +425,7 @@ def evaluate_expression(expr: str, approximate: bool = True, dec_precision: int 
 		else:
 			expr_res: sp.Expr = expr_simp
 		# Round all numbers
-		expr_round: sp.Expr = simplify_floats(expr_res, dec_display)
+		expr_round: sp.Expr = simplify_floats(expr_res, dec_display, approximate)
 		logging_print(f"Expr (clean_floats):{' '*1}`{expr_round}` - type: {type(expr_round)}")
 		# Format expression
 		expr_final: str = format_expression(expr_round)
@@ -550,33 +550,38 @@ def sanitize_input(expr: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool
 	logging_print(f"Expr (sanitized):{' '*4}`{expr_comp}` - type: {type(expr_comp)}")
 	return expr_comp
 
-def simplify_floats(expr: sp.Expr, ndec: int) -> sp.Expr:
+def simplify_floats(expr: sp.Expr, ndec: int, approx: bool) -> sp.Expr:
 	"""
 	Simplifies floating-point numbers in an expression by rounding, then truncating any trailing zeros and the decimal point if applicable.
 
 	Args:
 		expr (sympy.Expr): The expression to simplify.
 		ndec (int): The number of decimal places to round to.
+		approx (bool): Whether to approximate the result to a decimal.
 
 	Returns:
 		sympy.Expr: The simplified expression.
 	"""
-	def round_float(term: sp.Basic, ndec: int) -> sp.Basic:
+	def round_float(term: sp.Basic, ndec: int, approx: bool) -> sp.Basic:
 		"""
 		Rounds a floating-point number to the given number of decimal places, then truncates any insignificant decimal places.
 
 		Args:
 			term (sympy.Basic): The term to round.
 			ndec (int): The number of decimal places to round to.
+			approx (bool): Whether to approximate the result to a decimal.
 
 		Returns:
 			sympy.Basic: The rounded and truncated term.
 		"""
 		#logging_print(f"Raw term:{' '*7}`{term}`")
 		if term.is_number:
-			try: # Round the term to the given number of decimal places
-				rounded_term = S(round(term, ndec))
-				#logging_print(f"Rounded term:{' '*3}`{rounded_term}`")
+			try:
+				if approx: # Round to the specified number of decimal places
+					rounded_term: sp.Basic = S(round(term, ndec))
+					#logging_print(f"Rounded term:{' '*3}`{rounded_term}`")
+				else:
+					rounded_term: sp.Basic = term # If not using approximate simplification, leave the term unchanged
 			except Exception:
 				rounded_term: sp.Basic = term # If rounding fails, leave the term unchanged
 			try: # Truncate remaining insignificant decimal places
@@ -590,7 +595,7 @@ def simplify_floats(expr: sp.Expr, ndec: int) -> sp.Expr:
 			except Exception:
 				return rounded_term # If truncating fails, return the term unchanged
 		return term  # If the term is not a number, return the term unchanged
-	rounded_expr: sp.Expr = expr.xreplace({term: round_float(term, ndec) for term in expr.atoms()})
+	rounded_expr: sp.Expr = expr.xreplace({term: round_float(term, ndec, approx) for term in expr.atoms()})
 	return rounded_expr
 
 
