@@ -5,7 +5,7 @@
 # external
 
 # internal
-from app_logging import logging_print
+#from app_logging import logging_print
 from app_type import validate_type
 
 
@@ -17,13 +17,13 @@ def bind_event(widget, sequence: str, excluded_seq: str | list[str] | set[str] |
 		return
 	validate_type(sequence, str)
 	if excluded_seq and excluded_seq is not None:
-		widget.bind(sequence, lambda event: on_event(event, excluded_seq, command, *args, **kwargs))
+		widget.bind(sequence, lambda event: _on_event(event, excluded_seq, command, *args, **kwargs))
 	elif pass_event:
 		widget.bind(sequence, lambda event: command(event, *args, **kwargs))
 	else:
 		widget.bind(sequence, lambda event: command(*args, **kwargs))
 
-def on_event(event, excluded_keys: str | list[str] | set[str] | tuple[str], func, *args, **kwargs) -> None:
+def _on_event(event, excluded_keys: str | list[str] | set[str] | tuple[str], func, *args, **kwargs) -> None:
 	#logging_print(excluded_keys)
 	#logging_print(event)
 	#logging_print(type(event))

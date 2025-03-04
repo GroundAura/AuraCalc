@@ -5,7 +5,6 @@ import configparser
 import os
 
 # internal
-#from app_logging import logging_print
 from app_type import str_to_bool, str_to_dict, str_to_float, str_to_int, str_to_list, str_to_set, str_to_tuple
 
 

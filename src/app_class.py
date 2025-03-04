@@ -5,14 +5,13 @@ from typing import Any
 
 # external
 import customtkinter as ctk
-from decimal import getcontext
+#from decimal import getcontext
 from pathlib import Path
 
 # internal
 from app_config import read_config, get_config_value
 from app_logging import logging_print
 from app_evaluate import sanitize_input, evaluate_expression
-#import app_globals
 from app_globals import CONFIG, FORCE_DEBUG, PATH_CONFIG, USE_CONFIG
 from app_keybinds import bind_event
 from app_path import get_root_path
@@ -629,7 +628,7 @@ class CalculatorApp(GuiApp):
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._calc_dec_precision = value
-		getcontext().prec = self._calc_dec_precision
+		#getcontext().prec = self._calc_dec_precision
 
 	def _set_calc_live_eval(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'CALCULATION', 'bLiveEval', new_val, use_config)
@@ -845,7 +844,8 @@ class CalculatorApp(GuiApp):
 		# evaluate the expression
 		try:
 			self._logging_print(f"Evaluating...")
-			result = evaluate_expression(self, expr, approximate=self._approximate)
+			result = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
+			self.calc_last_result = result
 			self.display_result(result)
 			return
 		except ZeroDivisionError as e:

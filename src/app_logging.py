@@ -5,14 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 # internal
-#from app_path import get_full_path
 from app_globals import DEBUG_MODE, PATH_LOG
-
-
-
-### CONSTANTS ###
-
-#PATH_LOG: Path = get_full_path(DIR_RESOURCES, FILE_LOG)
 
 
 
