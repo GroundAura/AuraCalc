@@ -545,6 +545,7 @@ class CalculatorApp(GuiApp):
 
 		# event bindings
 		self._set_key_advanced('<F3>', use_config)
+		self._set_key_approx('<F4>', use_config)
 		self._set_key_clear('<Alt-BackSpace>', use_config)
 		self._set_key_del_l('<Control-BackSpace>', use_config)
 		self._set_key_del_r('<Control-Delete>', use_config)
@@ -665,6 +666,13 @@ class CalculatorApp(GuiApp):
 		self._key_advanced: str = value
 		bind_event(self._window, self._key_advanced, command=self.toggle_advanced)
 		self._add_bound_key(self._key_advanced)
+
+	def _set_key_approx(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'KEYBINDS', 'sApproximateKey', new_val, use_config)
+		validate_type(new_val, str)
+		self._key_approx: str = value
+		bind_event(self._window, self._key_approx, command=self.toggle_approximate)
+		self._add_bound_key(self._key_approx)
 
 	def _set_key_clear(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sClearKey', new_val, use_config)

@@ -24,8 +24,8 @@
 
 - [ ] Angle mode (degrees/degrees:minutes:seconds/radians/gradients)
 - [ ] Scientific notation or not
-- [ ] Exact or decimal approximation
-- [ ] Approximate constants (pi, e, etc.)
+- [x] Exact or decimal approximation
+- [x] Approximate constants (pi, e, etc.)
 - [ ] which var to isolate ("Solve for var: [x]")
 
 ## Error Handling

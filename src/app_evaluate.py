@@ -242,6 +242,7 @@ ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	r'|[a-zA-Z]' +        # Variables
 	r'|[.,()]+' +         # Misc Characters
 	r'|[ ]+' +            # Whitespace
+	r'|[${}\\]' +         # Temp semi-handle LaTeX
 	#r'|[$_{}\\]' +       # LaTeX Symbols
 	#r'|(?:0x[0-9a-f]+|0b[01]+|0o[0-7]+)|' + # Hex, Binary, Octal Numbers
 	'|'.join(re.escape(k) for k in CONSTANTS_MAP.keys()) + '|' + # Constants
@@ -267,8 +268,10 @@ def compact_expr(expr: str) -> str:
 	#logging_print(repr(WHITESPACE))
 	for char in WHITESPACE:
 		expr = expr.replace(char, '')
-	# Remove equal signs at each end
+	# Remove '=' at each end
 	expr = expr.strip('=')
+	# Temp semi-handle LaTeX
+	expr = expr.strip('$').replace('{', '(').replace('}', ')').replace('\\', '')
 	return expr
 
 def eval_custom_functions(expr: str) -> str:
@@ -472,13 +475,16 @@ def format_expression(expr: str | sp.Basic | sp.Expr) -> str:
 
 	# replace constant symbols
 	expr_str = expr_str.replace('E', CHAR_EUL)                # Euler's Number
-	expr_str = expr_str.replace('exp(', CHAR_EUL + '^(')      # Euler's Number
 	expr_str = expr_str.replace('GoldenRatio', CHAR_PHI)      # Golden Ratio
 	expr_str = expr_str.replace('I', CHAR_IMAG)               # Imaginary Unit
 	expr_str = expr_str.replace('oo', CHAR_INF)               # Infinity
 	expr_str = expr_str.replace('ComplexInfinity', CHAR_INFJ) # Complex Infinity
 	expr_str = expr_str.replace('nan', CHAR_NAN)              # Not a Number
 	expr_str = expr_str.replace('pi', CHAR_PI)                # Pi
+
+	# replace additional symbols
+	expr_str = expr_str.replace('exp(', CHAR_EUL + '^(')      # Euler's Number
+	expr_str = expr_str.replace('log(', 'ln(')                # Natural Logarithm)
 
 	return expr_str
 
