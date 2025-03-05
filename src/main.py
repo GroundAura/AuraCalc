@@ -103,23 +103,26 @@ def main():
 	### GUI ELEMENTS ###
 
 	# Entry Input Element (CTkEntry)
-	app._win_txt_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_txt_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Result Display Element (CTkTextbox)
-	app._win_txt_result.configure(height=1)
-	app._win_txt_result.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_txt_result.configure(height=1)
+	app._wgt_txt_result.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Pin Window ELement (CTkButton)
-	app._win_btn_pin.configure(width=30)
-	app._win_btn_pin.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_btn_pin.configure(width=30)
+	app._wgt_btn_pin.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Clear Entry/Result Element (CTkButton)
-	app._win_btn_clear.configure(width=30)
-	app._win_btn_clear.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_btn_clear.configure(width=30)
+	app._wgt_btn_clear.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
 
 	# Advanced View Element (CTkButton)
-	app._win_btn_adv.configure(width=30)
-	app._win_btn_adv.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_btn_adv.configure(width=30)
+	app._wgt_btn_adv.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
+
+	# Approximate Option Element (CTkCheckBox)
+	app._wgt_chk_approx.grid(row=0, column=0, columnspan=1, sticky='NW', padx=x_padding, pady=y_padding)
 
 
 	### FINAL INITIALIZATION ###
