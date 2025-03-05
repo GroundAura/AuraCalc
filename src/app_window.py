@@ -36,7 +36,7 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	element.focus_set()
 	if isinstance(element, ctk.CTkEntry):
 		element.select_range('0', 'end')
-	elif isinstance(element, ctk.CTkText):
+	elif isinstance(element, ctk.CTkTextbox):
 		element.tag_add('sel', '1.0', 'end-1c')
 
 def text_clear(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:

@@ -511,7 +511,7 @@ class CalculatorApp(GuiApp):
 		#self._win_frame_help = ctk.CTkFrame(self._window)
 		#self._win_frame_opt = ctk.CTkFrame(self._window)
 		self._wgt_btn_adv = ctk.CTkButton(self._wgt_frame_base, text='Expand', command=self.toggle_advanced)
-		self._wgt_btn_clear = ctk.CTkButton(self._wgt_frame_base, text='Clear', command=self._clear_io)
+		self._wgt_btn_clear = ctk.CTkButton(self._wgt_frame_base, text='Clear', command=self.clear_memory)
 		pinned_text: str = 'Unpin' if self._win_pinned else 'Pin'
 		self._wgt_btn_pin = ctk.CTkButton(self._wgt_frame_base, text=pinned_text, command=self.toggle_pinned)
 		self._wgt_txt_input = ctk.CTkEntry(self._wgt_frame_base)
@@ -531,17 +531,12 @@ class CalculatorApp(GuiApp):
 		self._timeout_patience: int = 1
 		self._calc_wait_chars: str = r'+-*/^%.([{_, '
 
-		# calculator state
-		self._calc_last_expr: str = self._calc_def_expr
-		self._calc_last_result: str = self._calc_def_result
-		self._calc_expressions: list[str] = [self._calc_def_expr]
-		self._calc_results: list[str] = [self._calc_def_result]
-
 		# app state
 		self._timeout_id = None
+		self._calc_history: list[dict[str, str | None]] = []
+		self._calc_history_index: int = -1
 		self._history: dict[str, Any] = {
-			'expressions': self._calc_expressions,
-			'results': self._calc_results,
+			'calculations': self._calc_history,
 			'pinned': self._win_pinned,
 			'advanced': self._win_expanded,
 			'dimensions': self.window_dimensions,
@@ -560,12 +555,27 @@ class CalculatorApp(GuiApp):
 		self._set_key_eval('<Return>', use_config)
 		#self._set_key_help('<F1>', use_config)
 		#bind_event(self._window, self._key_help, command=self.show_help)
+		self._set_key_next('<Down>', use_config)
 		#self._set_key_options('<F2>', use_config)
 		#bind_event(self._window, self._key_options, command=self.show_options)
+		self._set_key_previous('<Up>', use_config)
 		#self._set_key_redo('<Control-y>', use_config)
 		#bind_event(self._window, self._key_options, command=self.undo_txt)
 		#self._set_key_undo('<Control-z>', use_config)
 		#bind_event(self._window, self._key_options, command=self.redo_txt)
+		manual_exclusions: tuple[str] = (
+			'<Shift_L>', '<Shift_R>', '<Alt_L>', '<Alt_R>', '<Control_L>', '<Control_R>',
+			'<Super_L>', '<Super_R>', '<Hyper_L>', '<Hyper_R>', '<Meta_L>', '<Meta_R>',
+			#'<Mod1>', '<Mod2>', '<Mod3>', '<Mod4>', '<Mod5>',
+			'<Left>', '<Right>', '<KP_Left>', '<KP_Right>',
+			'<Home>', '<End>', '<KP_Home>', '<KP_End>',
+			'<Prior>', '<Next>', '<KP_Prior>', '<KP_Next>',
+			'<Caps_Lock>', '<Num_Lock>', '<Scroll_Lock>', '<Shift_Lock>',
+			'<Pause>', '<Print>', '<Cancel>', '<Insert>',
+			'<Tab>'
+		)
+		for key in manual_exclusions:
+			self._add_bound_key(key)
 		if self._calc_live_eval:
 			bind_event(self._wgt_txt_input, '<KeyRelease>', excluded_seq=self._bound_keys, command=lambda: self.evaluate(live_mode=True))
 		self.window.bind('<FocusIn>', lambda event: focus_element(self._wgt_txt_input))
@@ -579,11 +589,6 @@ class CalculatorApp(GuiApp):
 			self.toggle_advanced()
 
 	# private methods
-	def _clear_io(self) -> None:
-		text_set(self._wgt_txt_input, self.calc_def_expr)
-		text_set(self._wgt_txt_result, self._calc_def_result)
-		focus_element(self._wgt_txt_input)
-
 	#def _del_txt(self, element, begin, end) -> None:
 	#	element.delete(begin, end)
 
@@ -665,7 +670,7 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sClearKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_clear: str = value
-		bind_event(self._window, self._key_clear, command=self._clear_io)
+		bind_event(self._window, self._key_clear, command=self.clear_memory)
 		self._add_bound_key(self._key_clear)
 
 	def _set_key_del_l(self, new_val: str, use_config: bool = False) -> None:
@@ -696,7 +701,7 @@ class CalculatorApp(GuiApp):
 		value = get_config_value(self._config, 'KEYBINDS', 'sEvaluateKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_eval: str = value
-		bind_event(self._wgt_txt_input, self._key_eval, command=self.evaluate)
+		bind_event(self._wgt_txt_input, self._key_eval, command=self.eval_or_clear)
 		self._add_bound_key(self._key_eval)
 
 	def _set_key_help(self, new_val: str, use_config: bool = False) -> None:
@@ -704,10 +709,24 @@ class CalculatorApp(GuiApp):
 		validate_type(new_val, str)
 		self._key_help: str = value
 
+	def _set_key_next(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'KEYBINDS', 'sNextKey', new_val, use_config)
+		validate_type(new_val, str)
+		self._key_next: str = value
+		bind_event(self._wgt_txt_input, self._key_next, command=self.history_next)
+		self._add_bound_key(self._key_next)
+
 	def _set_key_options(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sOptionsKey', new_val, use_config)
 		validate_type(new_val, str)
 		self._key_options: str = value
+
+	def _set_key_previous(self, new_val: str, use_config: bool = False) -> None:
+		value = get_config_value(self._config, 'KEYBINDS', 'sPreviousKey', new_val, use_config)
+		validate_type(new_val, str)
+		self._key_previous: str = value
+		bind_event(self._wgt_txt_input, self._key_previous, command=self.history_previous)
+		self._add_bound_key(self._key_previous)
 
 	def _set_key_redo(self, new_val: str, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'KEYBINDS', 'sRedoKey', new_val, use_config)
@@ -814,8 +833,61 @@ class CalculatorApp(GuiApp):
 		else:
 			raise ValueError(f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'")
 
+	def _store_eval(self) -> bool:
+		changes_made: bool = False
+		expr: str = self._wgt_txt_input.get()
+		if expr == self.calc_def_expr:
+			#self._calc_history_index = len(self._calc_history) - 1
+			return changes_made
+		result: str = self._wgt_txt_result.get('1.0', 'end-1c')
+		result_approx: str | None = result if self._approximate else None
+		result_exact: str | None = result if not self._approximate else None
+		#calculatation = {
+		#	'expression': expr,
+		#	'result_approx': result_approx,
+		#	'result_exact': result_exact
+		#}
+		index = next((i for i, calc in enumerate(self._calc_history) if calc['expression'] == expr), None)
+		#if not any(calc['expression'] == expr for calc in self._calc_history):
+		if index is None:
+			self._calc_history.append({
+				'expression': expr,
+				'result_approx': result_approx,
+				'result_exact': result_exact
+			})
+			changes_made = True
+		#elif self._calc_history[-1]['expression'] == expr:
+		#elif index == len(self._calc_history) - 1:
+		#	self._calc_history[-1]['result_approx'] = result_approx if self._calc_history[-1]['result_approx'] is None else self._calc_history[-1]['result_approx']
+		#	self._calc_history[-1]['result_exact'] = result_exact if self._calc_history[-1]['result_exact'] is None else self._calc_history[-1]['result_exact']
+		else:
+			#self._calc_history[index]['result_approx'] = result_approx if self._calc_history[index]['result_approx'] is None else self._calc_history[index]['result_approx']
+			if result_approx is not None and self._calc_history[index]['result_approx'] is None:
+				self._calc_history[index]['result_approx'] = result_approx
+				changes_made = True
+			#self._calc_history[index]['result_exact'] = result_exact if self._calc_history[index]['result_exact'] is None else self._calc_history[index]['result_exact']
+			if result_exact is not None and self._calc_history[index]['result_exact'] is None:
+				self._calc_history[index]['result_exact'] = result_exact
+				changes_made = True
+			#if not index == len(self._calc_history) - 1:
+			#	self._calc_history.append(self._calc_history.pop(index))
+			#	changes_made = True
+		#logging_print(f"changes_made: `{changes_made}`")
+		#if changes_made:
+		#	logging_print(f"History: `{self._calc_history}`")
+		return changes_made
+
 
 	# public methods
+	def clear_io(self) -> None:
+		text_set(self._wgt_txt_input, self.calc_def_expr)
+		text_set(self._wgt_txt_result, self._calc_def_result)
+		focus_element(self._wgt_txt_input)
+
+	def clear_memory(self) -> None:
+		self.history_clear()
+		self.clear_io()
+
 	def display_result(self, message: Any, logging: bool = True, delay: bool = False) -> None:
 		if delay:
 			self._timeout_id = self._window.after(self._calc_live_eval_delay, self.display_result, message, logging, False)
@@ -839,38 +911,114 @@ class CalculatorApp(GuiApp):
 		try:
 			expr: str = sanitize_input(input_expr, sanitize=self._sanitize_input)
 			if not expr:
-				self.display_result(self._calc_def_result)
-				return
+				result: str = self._calc_def_result
+				self.display_result(result)
+				return result
 		except ValueError as e:
-			self.display_result(f"ERROR: {e}")
-			return
+			result: str = f"ERROR: {e}"
+			self.display_result(result)
+			return result
 		# evaluate the expression
 		try:
 			self._logging_print(f"Evaluating...")
 			result: str = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
-			self.calc_last_result = result
+			#self.calc_last_result = result
 			self.display_result(result)
-			return
+			return result
 		except ZeroDivisionError as e:
-			#self.display_result('Undefined (division by zero)')
-			#self.display_result(f"Undefined: {e}")
-			#self.display_result(f"Undefined")
-			self.display_result(e)
-			return
+			result: str = e
+			self.display_result(result)
+			return result
 		except Exception as e:
 			if live_mode and self._timeout_patience > 0 and expr and expr[-1] in self._calc_wait_chars:
-				#self.display_result(self._calc_last_result, logging=False) # temporarily show last result
-				self.display_result('ERROR: Incomplete expression', delay=True) # then show error
-				return
+				result: str = 'ERROR: Incomplete expression'
+				self.display_result(result, delay=True)
+				return result
 			elif live_mode and self._timeout_patience > 1:
-				#self.display_result(self._calc_last_result, logging=False) # temporarily show last result
-				self.display_result(f"ERROR: {e}", delay=True) # then show error
-				return
+				result: str = f"ERROR: {e}"
+				self.display_result(result, delay=True)
+				return result
 			else:
-				self.display_result(f"ERROR: {e}")
+				result: str = f"ERROR: {e}"
+				self.display_result(result)
+				return result
+
+	def eval_or_clear(self) -> None:
+		#expr: str = self._wgt_txt_input.get()
+		#result: str = self.evaluate()
+		#changes_made: bool = self._store_eval(expr, result)
+		self.evaluate()
+		changes_made: bool = self._store_eval()
+		if self._calc_live_eval or not changes_made:
+			#text_set(self._wgt_txt_input, self.calc_def_expr)
+			#text_set(self._wgt_txt_result, self._calc_def_result)
+			self.clear_io()
+			#if changes_made:
+				#self._calc_history_index += 1
+		self._calc_history_index = len(self._calc_history) if len(self._calc_history) > 0 else -1
+		logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
+
+	def history_clear(self) -> None:
+		self._calc_history.clear()
+		self._calc_history_index = -1
+		logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
+
+	def history_next(self) -> None:
+		#print('next')
+		changes_made: bool = self._store_eval()
+		if changes_made:
+			self._calc_history_index = len(self._calc_history)
+		if len(self._calc_history) > 1 and -1 < self._calc_history_index < len(self._calc_history) - 1:
+			#self._store_eval()
+			try:
+				expr: str = self._calc_history[self._calc_history_index + 1]['expression']
+				result_approx: str | None = self._calc_history[self._calc_history_index + 1]['result_approx']
+				result_exact: str | None = self._calc_history[self._calc_history_index + 1]['result_exact']
+			except IndexError:
 				return
+			text_set(self._wgt_txt_input, expr)
+			if self._approximate:
+				if result_approx is not None:
+					text_set(self._wgt_txt_result, result_approx)
+				else:
+					self.evaluate()
+			else:
+				if result_exact is not None:
+					text_set(self._wgt_txt_result, result_exact)
+				else:
+					self.evaluate()
+			self._calc_history_index += 1
+		else:
+			self.clear_io()
+			self._calc_history_index = len(self._calc_history) if len(self._calc_history) > 0 else -1
+		logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
-
+	def history_previous(self) -> None:
+		#print('previous')
+		changes_made: bool = self._store_eval()
+		if changes_made:
+			self._calc_history_index = len(self._calc_history)
+		if len(self._calc_history) > 0 and self._calc_history_index > 0:
+			#self._store_eval()
+			try:
+				expr: str = self._calc_history[self._calc_history_index - 1]['expression']
+				result_approx: str | None = self._calc_history[self._calc_history_index - 1]['result_approx']
+				result_exact: str | None = self._calc_history[self._calc_history_index - 1]['result_exact']
+			except IndexError:
+				return
+			text_set(self._wgt_txt_input, expr)
+			if self._approximate:
+				if result_approx is not None:
+					text_set(self._wgt_txt_result, result_approx)
+				else:
+					self.evaluate()
+			else:
+				if result_exact is not None:
+					text_set(self._wgt_txt_result, result_exact)
+				else:
+					self.evaluate()
+			self._calc_history_index -= 1
+		logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
 	def open_window(self) -> None: # override
 		self._logging_print(f"Opening {self.name}.")
@@ -1000,18 +1148,6 @@ class CalculatorApp(GuiApp):
 	@property
 	def calc_def_result(self) -> str:
 		return self._calc_def_result
-
-	@property
-	def calc_last_expr(self) -> str:
-		return self._calc_last_expr
-
-	@property
-	def calc_last_result(self) -> str:
-		return self._calc_last_result
-	@calc_last_result.setter
-	def calc_last_result(self, new_val: str) -> None:
-		validate_type(new_val, str)
-		self._calc_last_result = new_val
 
 	@property
 	def calc_wait_chars(self) -> str:
