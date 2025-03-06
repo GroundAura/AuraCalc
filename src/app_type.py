@@ -19,23 +19,29 @@ else:
 
 
 ### FUNCTIONS ###
-def fits_typing(object: Any, class_or_tuple: _ClassInfo) -> bool:
-	"""
-	Determines if an object is an instance or subclass of a given class or tuple of classes.
+#def fits_typing(object: Any, class_or_tuple: _ClassInfo) -> bool:
+#	"""
+#	Determines if an object is an instance or subclass of a given class or tuple of classes.
 
-	Args:
-		object (Any): The object to check.
-		class_or_tuple (_ClassInfo): The class or tuple of classes to check against.
+#	Args:
+#		object (Any): The object to check.
+#		class_or_tuple (_ClassInfo): The class or tuple of classes to check against.
 
-	Returns:
-		bool: `True` if the object is an instance or subclass of the given class or tuple of classes, `False` otherwise.
-	"""
-	try:
-		return isinstance(object, class_or_tuple) or issubclass(type(object), class_or_tuple)
-	except Exception as e:
-		raise Exception(f"Error while trying to check if {object} is instance or subclass of {class_or_tuple}:\n  {e}")
+#	Returns:
+#		bool: `True` if the object is an instance or subclass of the given class or tuple of classes, `False` otherwise.
+#	"""
+#	try:
+#		return isinstance(object, class_or_tuple) or issubclass(type(object), class_or_tuple)
+#	except Exception as e:
+#		raise Exception(f"Error while trying to check if {object} is instance or subclass of {class_or_tuple}:\n  {e}")
 
-def function_exists(func_name: str, check_builtins: bool = True, check_global: bool = True, check_local: bool = False, modules_to_check: Container[ModuleType] | None = None) -> bool:
+def function_exists(
+	func_name: str,
+	check_builtins: bool = True,
+	check_global: bool = True,
+	check_local: bool = False,
+	modules_to_check: Container[ModuleType] | None = None
+) -> bool:
 	"""
 	Determines if a function exists in the global or builtins namespace and is callable.
 
@@ -51,12 +57,20 @@ def function_exists(func_name: str, check_builtins: bool = True, check_global: b
 	"""
 	if check_global and func_name in globals() and callable(globals()[func_name]):
 		return True
-	elif check_local and func_name in locals() and callable(locals()[func_name]):
+
+	if check_local and func_name in locals() and callable(locals()[func_name]):
 		return True
-	elif check_builtins and func_name in dir(builtins) and callable(getattr(builtins, func_name)):
+
+	if check_builtins and \
+		func_name in dir(builtins) and callable(getattr(builtins, func_name)):
 		return True
-	elif modules_to_check is not None and len(modules_to_check) > 0 and any(func_name in dir(module) and callable(getattr(module, func_name)) for module in modules_to_check):
+
+	if modules_to_check is not None and len(modules_to_check) > 0 and any(
+		func_name in dir(module) and callable(getattr(module, func_name))
+		for module in modules_to_check
+	):
 		return True
+
 	return False
 
 def get_type(obj: Any) -> str:
@@ -114,7 +128,7 @@ def str_to_dict(string: str) -> dict:
 			string: dict = eval(string)
 		else:
 			string: dict = eval('{' + string + '}')
-		if type(string) == dict:
+		if type(string) is dict:
 			return string
 		else:
 			raise Exception('Failed to convert str to dict.')
@@ -124,7 +138,7 @@ def str_to_dict(string: str) -> dict:
 def str_to_float(string: str) -> float:
 	try:
 		string: float = float(string)
-		if type(string) == float:
+		if type(string) is float:
 			return string
 		else:
 			raise Exception('Failed to convert str to float.')
@@ -134,7 +148,7 @@ def str_to_float(string: str) -> float:
 def str_to_int(string: str) -> int:
 	try:
 		string: int = int(string)
-		if type(string) == int:
+		if type(string) is int:
 			return string
 		else:
 			raise Exception('Failed to convert str to int.')
@@ -145,7 +159,7 @@ def str_to_list(string: str) -> list:
 	try:
 		string: str = string.lstrip('[').rstrip(']')
 		string: list = string.split(', ')
-		if type(string) == list:
+		if type(string) is list:
 			return string
 		else:
 			raise Exception('Failed to convert str to list.')
@@ -156,7 +170,7 @@ def str_to_set(string: str) -> set:
 	try:
 		string: str = string.lstrip('{').rstrip('}')
 		string: set = set(string.split(', '))
-		if type(string) == set:
+		if type(string) is set:
 			return string
 		else:
 			raise Exception('Failed to convert str to set.')
@@ -167,7 +181,7 @@ def str_to_tuple(string: str) -> tuple:
 	try:
 		string: str = string.lstrip('(').rstrip(')')
 		string: tuple = tuple(string.split(', '))
-		if type(string) == tuple:
+		if type(string) is tuple:
 			return string
 		else:
 			raise Exception('Failed to convert str to tuple.')
@@ -185,22 +199,27 @@ def validate_type(value, valid_type: type) -> bool:
 
 def _test() -> None:
 	try:
-	# get_type()
+		# get_type()
 		data = 123
 		data_type = get_type(data)
 		print('get_type():')
 		print(f"data = {data}")
 		print(f"data_type = {data_type}")
 		print()
-	# str_to_bool()
+		# str_to_bool()
 		bool_as_str = 'TrUe'
-		bool_as_bool = str_to_bool(bool_as_str, case_sensitive=False, true_values=('TRUE', 'True', 'true', 'T', 't', '1'), false_values=('FALSE', 'False', 'false', 'F', 'f', '0'))
+		bool_as_bool = str_to_bool(
+			bool_as_str,
+			case_sensitive=False,
+			true_values=('TRUE', 'True', 'true', 'T', 't', '1'),
+			false_values=('FALSE', 'False', 'false', 'F', 'f', '0')
+		)
 		print('str_to_bool():')
 		print(f"bool_as_str = {bool_as_str}")
 		print(f"bool_as_bool = {bool_as_bool}")
 		print(f"data_type = {get_type(bool_as_bool)}")
 		print()
-	# str_to_dict()
+		# str_to_dict()
 		dict_as_str = '{"key": "value"}'
 		dict_as_dict = str_to_dict(dict_as_str)
 		print('str_to_dict():')
@@ -208,7 +227,7 @@ def _test() -> None:
 		print(f"dict_as_dict = {dict_as_dict}")
 		print(f"data_type = {get_type(dict_as_dict)}")
 		print()
-	# str_to_float()
+		# str_to_float()
 		float_as_str = '123.456'
 		float_as_float = str_to_float(float_as_str)
 		print('str_to_float():')
@@ -216,7 +235,7 @@ def _test() -> None:
 		print(f"float_as_float = {float_as_float}")
 		print(f"data_type = {get_type(float_as_float)}")
 		print()
-	# str_to_int()
+		# str_to_int()
 		int_as_str = '123'
 		int_as_int = str_to_int(int_as_str)
 		print('str_to_int():')
@@ -224,7 +243,7 @@ def _test() -> None:
 		print(f"int_as_int = {int_as_int}")
 		print(f"data_type = {get_type(int_as_int)}")
 		print()
-	# str_to_list()
+		# str_to_list()
 		list_as_str = '[1, 2, 3]'
 		list_as_list = str_to_list(list_as_str)
 		print('str_to_list():')
@@ -232,7 +251,7 @@ def _test() -> None:
 		print(f"list_as_list = {list_as_list}")
 		print(f"data_type = {get_type(list_as_list)}")
 		print()
-	# str_to_set()
+		# str_to_set()
 		set_as_str = '{1, 2, 3}'
 		set_as_set = str_to_set(set_as_str)
 		print('str_to_set():')
@@ -240,7 +259,7 @@ def _test() -> None:
 		print(f"set_as_set = {set_as_set}")
 		print(f"data_type = {get_type(set_as_set)}")
 		print()
-	# str_to_tuple()
+		# str_to_tuple()
 		tuple_as_str = '(1, 2, 3)'
 		tuple_as_tuple = str_to_tuple(tuple_as_str)
 		print('str_to_tuple():')
@@ -276,31 +295,34 @@ def _test() -> None:
 	#print(f"isinstance(dict, Collection): {isinstance(dict, Collection)}")
 	#print(f"isinstance(str, Collection): {isinstance(str, Collection)}")
 
-	print(f"issubclass(list, Sequence): {issubclass(list, Sequence)}")       # True
-	print(f"issubclass(set, Sequence): {issubclass(set, Sequence)}")         # False
-	print(f"issubclass(tuple, Sequence): {issubclass(tuple, Sequence)}")     # True
-	print(f"issubclass(dict, Sequence): {issubclass(dict, Sequence)}")       # False
-	print(f"issubclass(str, Sequence): {issubclass(str, Sequence)}")         # True
+	# True, False, True, False, True
+	print(f"issubclass(list, Sequence): {issubclass(list, Sequence)}")
+	print(f"issubclass(set, Sequence): {issubclass(set, Sequence)}")
+	print(f"issubclass(tuple, Sequence): {issubclass(tuple, Sequence)}")
+	print(f"issubclass(dict, Sequence): {issubclass(dict, Sequence)}")
+	print(f"issubclass(str, Sequence): {issubclass(str, Sequence)}")
 	print()
-	print(f"issubclass(list, Iterable): {issubclass(list, Iterable)}")       # True
-	print(f"issubclass(set, Iterable): {issubclass(set, Iterable)}")         # True
-	print(f"issubclass(tuple, Iterable): {issubclass(tuple, Iterable)}")     # True
-	print(f"issubclass(dict, Iterable): {issubclass(dict, Iterable)}")       # True
-	print(f"issubclass(str, Iterable): {issubclass(str, Iterable)}")         # True
+	# True
+	print(f"issubclass(list, Iterable): {issubclass(list, Iterable)}")
+	print(f"issubclass(set, Iterable): {issubclass(set, Iterable)}")
+	print(f"issubclass(tuple, Iterable): {issubclass(tuple, Iterable)}")
+	print(f"issubclass(dict, Iterable): {issubclass(dict, Iterable)}")
+	print(f"issubclass(str, Iterable): {issubclass(str, Iterable)}")
 	print()
-	print(f"issubclass(list, Container): {issubclass(list, Container)}")     # True
-	print(f"issubclass(set, Container): {issubclass(set, Container)}")       # True
-	print(f"issubclass(tuple, Container): {issubclass(tuple, Container)}")   # True
-	print(f"issubclass(dict, Container): {issubclass(dict, Container)}")     # True
-	print(f"issubclass(str, Container): {issubclass(str, Container)}")       # True
+	# True
+	print(f"issubclass(list, Container): {issubclass(list, Container)}")
+	print(f"issubclass(set, Container): {issubclass(set, Container)}")
+	print(f"issubclass(tuple, Container): {issubclass(tuple, Container)}")
+	print(f"issubclass(dict, Container): {issubclass(dict, Container)}")
+	print(f"issubclass(str, Container): {issubclass(str, Container)}")
 	print()
-	print(f"issubclass(list, Collection): {issubclass(list, Collection)}")   # True
-	print(f"issubclass(set, Collection): {issubclass(set, Collection)}")     # True
-	print(f"issubclass(tuple, Collection): {issubclass(tuple, Collection)}") # True
-	print(f"issubclass(dict, Collection): {issubclass(dict, Collection)}")   # True
-	print(f"issubclass(str, Collection): {issubclass(str, Collection)}")     # True
+	# True
+	print(f"issubclass(list, Collection): {issubclass(list, Collection)}")
+	print(f"issubclass(set, Collection): {issubclass(set, Collection)}")
+	print(f"issubclass(tuple, Collection): {issubclass(tuple, Collection)}")
+	print(f"issubclass(dict, Collection): {issubclass(dict, Collection)}")
+	print(f"issubclass(str, Collection): {issubclass(str, Collection)}")
+
 
 if __name__ == '__main__':
 	_test()
-
-

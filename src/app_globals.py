@@ -1,3 +1,11 @@
+### IMPORTS ###
+
+# internal
+from app_config import read_config, get_config_value
+from app_path import get_full_path
+
+
+
 ### CONSTANTS ###
 
 # Metadata
@@ -21,7 +29,6 @@ USE_CONFIG: bool = True
 ### VARIABLES ###
 
 # Paths
-from app_path import get_full_path
 PATH_LOG = get_full_path(DIR_RESOURCES, FILE_LOG)
 PATH_CONFIG = get_full_path(DIR_RESOURCES, FILE_CONFIG)
 
@@ -31,10 +38,7 @@ if FORCE_DEBUG:
 else:
 	DEBUG_MODE: bool = False
 if USE_CONFIG:
-	from app_config import read_config, get_config_value
 	CONFIG: dict | None = read_config(PATH_CONFIG, preserve_key_case=True)
 	DEBUG_MODE: bool = get_config_value(CONFIG, 'DEBUG', 'bDebugMode', False)
 else:
 	CONFIG: dict | None = None
-
-

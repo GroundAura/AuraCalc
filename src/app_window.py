@@ -4,7 +4,7 @@
 import customtkinter as ctk
 
 # internal
-from app_logging import logging_print
+#from app_logging import logging_print
 
 
 
@@ -12,7 +12,7 @@ from app_logging import logging_print
 #def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 #	"""
 #	Copies the text in the element to the clipboard.
-	
+
 #	Args:
 #		window (ctk.CTk): The window to copy the text in.
 #		element (ctk.CTkEntry | ctk.CTkTextbox): The element to copy the text from.
@@ -46,14 +46,18 @@ def text_clear(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
 	Args:
 		element (ctk.CTkEntry | ctk.CTkTextbox): The element to clear the text in.
 	"""
-	if type(element) == ctk.CTkEntry:
+	if type(element) is ctk.CTkEntry:
 		text_remove(element, '0', 'end')
-	elif type(element) == ctk.CTkTextbox:
+	elif type(element) is ctk.CTkTextbox:
 		text_remove(element, '1.0', 'end')
 	else:
 		raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
 
-def text_remove(element: ctk.CTkEntry | ctk.CTkTextbox, start: str, end: str) -> None:
+def text_remove(
+	element: ctk.CTkEntry | ctk.CTkTextbox,
+	start: str,
+	end: str
+) -> None:
 	"""
 	Removes the text in a given element.
 
@@ -62,9 +66,9 @@ def text_remove(element: ctk.CTkEntry | ctk.CTkTextbox, start: str, end: str) ->
 		start (int): The start index of the text to remove.
 		end (int): The end index of the text to remove.
 	"""
-	if type(element) == ctk.CTkEntry:
+	if type(element) is ctk.CTkEntry:
 		element.delete(start, end)
-	elif type(element) == ctk.CTkTextbox:
+	elif type(element) is ctk.CTkTextbox:
 		if element.state_disabled:
 			disable = True
 			element.configure(state='normal')
@@ -85,9 +89,9 @@ def text_set(element, text: str) -> None:
 		text (str): The text to set in the element.
 	"""
 	text_clear(element)
-	if type(element) == ctk.CTkEntry:
+	if type(element) is ctk.CTkEntry:
 		element.insert('0', text)
-	elif type(element) == ctk.CTkTextbox:
+	elif type(element) is ctk.CTkTextbox:
 		if element.state_disabled:
 			disable = True
 			element.configure(state='normal')
@@ -104,7 +108,6 @@ def text_set(element, text: str) -> None:
 def _test():
 	pass
 
+
 if __name__ == '__main__':
 	_test()
-
-

@@ -5,14 +5,15 @@
 #from tkinter import ttk
 
 # external
-import customtkinter as ctk
+#import customtkinter as ctk
 #import PyQt6 as pyqt
 #import tkinterdnd2 as tkdnd
 #import tkinterplus as tkp
 
 # internal
 from app_class import CalculatorApp
-from app_globals import META_NAME, META_VERSION, META_AUTHOR, DIR_RESOURCES, FILE_HISTORY, FILE_ICON, FILE_LOG, FILE_CONFIG
+from app_globals import META_NAME, META_VERSION, META_AUTHOR, DIR_RESOURCES
+from app_path import FILE_HISTORY, FILE_ICON, FILE_LOG, FILE_CONFIG
 from app_logging import logging_print
 
 
@@ -55,7 +56,7 @@ def main():
 
 	# Configure padding
 	x_padding = 2
-	
+
 	y_padding = 3
 	#y_pad_try = window_height / 2 - 25
 	#y_padding = y_pad_try if y_pad_try > 5 and window_height > 100 else 5
@@ -103,26 +104,44 @@ def main():
 	### GUI ELEMENTS ###
 
 	# Entry Input Element (CTkEntry)
-	app._wgt_txt_input.grid(row=2, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_txt_input.grid(
+		row=2, column=0, columnspan=5,
+		sticky='NEW', padx=x_padding, pady=y_padding
+	)
 
 	# Result Display Element (CTkTextbox)
 	app._wgt_txt_result.configure(height=1)
-	app._wgt_txt_result.grid(row=3, column=0, columnspan=5, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_txt_result.grid(
+		row=3, column=0, columnspan=5,
+		sticky='NEW', padx=x_padding, pady=y_padding
+	)
 
 	# Pin Window ELement (CTkButton)
 	app._wgt_btn_pin.configure(width=30)
-	app._wgt_btn_pin.grid(row=4, column=0, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_btn_pin.grid(
+		row=4, column=0, columnspan=1,
+		sticky='NEW', padx=x_padding, pady=y_padding
+	)
 
 	# Clear Entry/Result Element (CTkButton)
 	app._wgt_btn_clear.configure(width=30)
-	app._wgt_btn_clear.grid(row=4, column=1, columnspan=3, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_btn_clear.grid(
+		row=4, column=1, columnspan=3,
+		sticky='NEW', padx=x_padding, pady=y_padding
+	)
 
 	# Advanced View Element (CTkButton)
 	app._wgt_btn_adv.configure(width=30)
-	app._wgt_btn_adv.grid(row=4, column=4, columnspan=1, sticky='NEW', padx=x_padding, pady=y_padding)
+	app._wgt_btn_adv.grid(
+		row=4, column=4, columnspan=1,
+		sticky='NEW', padx=x_padding, pady=y_padding
+	)
 
 	# Approximate Option Element (CTkCheckBox)
-	app._wgt_chk_approx.grid(row=0, column=0, columnspan=1, sticky='NW', padx=x_padding, pady=y_padding)
+	app._wgt_chk_approx.grid(
+		row=0, column=0, columnspan=1,
+		sticky='NW', padx=x_padding, pady=y_padding
+	)
 
 
 	### FINAL INITIALIZATION ###
@@ -131,7 +150,6 @@ def main():
 	logging_print('Initialization complete!')
 	app.open_window()
 
+
 if __name__ == '__main__':
 	main()
-
-

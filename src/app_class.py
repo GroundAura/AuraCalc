@@ -24,17 +24,17 @@ from app_window import focus_element, text_set
 
 class App:
 	# constructor
-	def __init__(self,
-			name: str = 'App',
-			version: str = '1.0.0',
-			author: str = 'Unknown',
-			resources_dir: str = 'resources',
-			icon_file: str = 'icon.ico',
-			log_file: str = 'debug.log',
-			config_file: str = 'config.ini',
-			use_config: bool = USE_CONFIG
-		) -> None:
-
+	def __init__(
+		self,
+		name: str = 'App',
+		version: str = '1.0.0',
+		author: str = 'Unknown',
+		resources_dir: str = 'resources',
+		icon_file: str = 'icon.ico',
+		log_file: str = 'debug.log',
+		config_file: str = 'config.ini',
+		use_config: bool = USE_CONFIG
+	) -> None:
 		# metadata
 		self._set_name(name)
 		self._set_version(version)
@@ -56,14 +56,16 @@ class App:
 
 
 	# private methods
-	def _logging_print(self,
-			message: str = '',
-			indent: int = 0,
-			timestamp: bool = True,
-			print_to_console: bool = True,
-			print_to_file: bool = True,
-			debug_mode_only: bool = True
-		) -> None:
+
+	def _logging_print(
+		self,
+		message: str = '',
+		indent: int = 0,
+		timestamp: bool = True,
+		print_to_console: bool = True,
+		print_to_file: bool = True,
+		debug_mode_only: bool = True
+	) -> None:
 		#try:
 		#	validate_type(self._log_path, Path)
 		#except AttributeError:
@@ -182,29 +184,34 @@ class App:
 
 class GuiApp(App):
 	# constructor
-	def __init__(self,
-			name: str = 'App',
-			version: str = '1.0.0',
-			author: str = 'Unknown',
-			resources_dir: str = 'resources',
-			icon_file: str = 'icon.ico',
-			log_file: str = 'debug.log',
-			config_file: str = 'config.ini',
-			use_config: bool = USE_CONFIG,
-			win_width: int = 800,
-			win_height: int = 600,
-			win_width_min: int = 400,
-			win_height_min: int = 300,
-			win_x_pos: int = 0,
-			win_y_pos: int = 0,
-			win_centered: bool = False,
-			win_pinned: bool = False,
-			win_resize_width: bool = True,
-			win_resize_height: bool = True,
-			win_layout: str = 'grid'
-		) -> None:
+	def __init__(
+		self,
+		name: str = 'App',
+		version: str = '1.0.0',
+		author: str = 'Unknown',
+		resources_dir: str = 'resources',
+		icon_file: str = 'icon.ico',
+		log_file: str = 'debug.log',
+		config_file: str = 'config.ini',
+		use_config: bool = USE_CONFIG,
+		win_width: int = 800,
+		win_height: int = 600,
+		win_width_min: int = 400,
+		win_height_min: int = 300,
+		win_x_pos: int = 0,
+		win_y_pos: int = 0,
+		win_centered: bool = False,
+		win_pinned: bool = False,
+		win_resize_width: bool = True,
+		win_resize_height: bool = True,
+		win_layout: str = 'grid'
+	) -> None:
 		# parent constructor
-		App.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config)
+		super().__init__(
+			name, version, author,
+			resources_dir, icon_file, log_file,
+			config_file, use_config
+		)
 
 		# window default values
 		self._set_win_width_min(win_width_min, use_config)
@@ -237,7 +244,6 @@ class GuiApp(App):
 			self._set_window_icon()
 		except FileNotFoundError as e:
 			print(f"ERROR: Error while trying to set window icon: {e}")
-		#self._window.geometry(f"{self._win_width_def}x{self._win_height_def}+{self._win_x_pos_def}+{self._win_y_pos_def}")
 		self.update_window(reset_pos=True)
 		if self._win_pinned_def:
 			self.toggle_pinned()
@@ -297,7 +303,7 @@ class GuiApp(App):
 		try:
 			value = self._win_height_min if value < self._win_height_min else value
 		except AttributeError:
-			pass # ignore if self._win_height_min is not set
+			pass  # ignore if self._win_height_min is not set
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._win_height_def: int = value
@@ -332,7 +338,7 @@ class GuiApp(App):
 		try:
 			value = self._win_width_min if value < self._win_width_min else value
 		except AttributeError:
-			pass # ignore if self._win_width_min is not set
+			pass  # ignore if self._win_width_min is not set
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._win_width_def: int = value
@@ -365,7 +371,7 @@ class GuiApp(App):
 	# public methods
 	def close_window(self) -> None:
 		self._logging_print(f"Closing {self.name}.")
-		self._logging_print('\n\n', timestamp=False, print_to_console=False) # add delimiter to end of log
+		self._logging_print('\n\n', timestamp=False, print_to_console=False)  # add delimiter to end of log
 		self._window.destroy()
 
 	def focus_window(self) -> None:
@@ -384,7 +390,7 @@ class GuiApp(App):
 			self.focus_window()
 		self._window.mainloop()
 
-	def print_info(self) -> None: # override
+	def print_info(self) -> None:  # override
 		App.print_info(self)
 		data = []
 		data.append(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
@@ -460,30 +466,40 @@ class GuiApp(App):
 
 class CalculatorApp(GuiApp):
 	# constructor
-	def __init__(self,
-			name: str = 'Calculator',
-			version: str = '1.0.0',
-			author: str = 'Unknown',
-			resources_dir: str = 'resources',
-			history_file: str = 'history.txt',
-			icon_file: str = 'icon.ico',
-			log_file: str = 'debug.log',
-			config_file: str = 'config.ini',
-			use_config: bool = USE_CONFIG,
-			win_width: int = 250,
-			win_height: int = 110,
-			win_width_min: int = 250,
-			win_height_min: int = 110,
-			win_x_pos: int = 100,
-			win_y_pos: int = 100,
-			win_centered: bool = True,
-			win_pinned: bool = False,
-			win_resize_width: bool = True,
-			win_resize_height: bool = False,
-			win_layout: str = 'grid'
-		) -> None:
+	def __init__(
+		self,
+		name: str = 'Calculator',
+		version: str = '1.0.0',
+		author: str = 'Unknown',
+		resources_dir: str = 'resources',
+		history_file: str = 'history.txt',
+		icon_file: str = 'icon.ico',
+		log_file: str = 'debug.log',
+		config_file: str = 'config.ini',
+		use_config: bool = USE_CONFIG,
+		win_width: int = 250,
+		win_height: int = 110,
+		win_width_min: int = 250,
+		win_height_min: int = 110,
+		win_x_pos: int = 100,
+		win_y_pos: int = 100,
+		win_centered: bool = True,
+		win_pinned: bool = False,
+		win_resize_width: bool = True,
+		win_resize_height: bool = False,
+		win_layout: str = 'grid'
+	) -> None:
 		# parent constructor
-		GuiApp.__init__(self, name, version, author, resources_dir, icon_file, log_file, config_file, use_config, win_width, win_height, win_width_min, win_height_min, win_x_pos, win_y_pos, win_centered, win_pinned, win_resize_width, win_resize_height, win_layout)
+		super().__init__(
+			name, version, author,
+			resources_dir, icon_file, log_file,
+			config_file, use_config,
+			win_width, win_height, win_width_min, win_height_min,
+			win_x_pos, win_y_pos, win_centered,
+			win_pinned,
+			win_resize_width, win_resize_height,
+			win_layout
+		)
 
 		# paths
 		self._set_history_path(history_file)
@@ -565,8 +581,9 @@ class CalculatorApp(GuiApp):
 		#self._set_key_undo('<Control-z>', use_config)
 		#bind_event(self._window, self._key_options, command=self.redo_txt)
 		manual_exclusions: tuple[str] = (
-			'<Shift_L>', '<Shift_R>', '<Alt_L>', '<Alt_R>', '<Control_L>', '<Control_R>',
-			'<Super_L>', '<Super_R>', '<Hyper_L>', '<Hyper_R>', '<Meta_L>', '<Meta_R>',
+			'<Shift_L>', '<Shift_R>', '<Control_L>', '<Control_R>',
+			'<Alt_L>', '<Alt_R>', '<Meta_L>', '<Meta_R>',
+			'<Super_L>', '<Super_R>', '<Hyper_L>', '<Hyper_R>',
 			#'<Mod1>', '<Mod2>', '<Mod3>', '<Mod4>', '<Mod5>',
 			'<Left>', '<Right>', '<KP_Left>', '<KP_Right>',
 			'<Home>', '<End>', '<KP_Home>', '<KP_End>',
@@ -595,14 +612,14 @@ class CalculatorApp(GuiApp):
 
 	def _del_txt_cursor(self, element, direction) -> None:
 		if direction.lower() in ('left', 'l', '<'):
-			if type(element) == ctk.CTkEntry:
+			if type(element) is ctk.CTkEntry:
 				element.delete('0', 'insert')
-			elif type(element) == ctk.CTkTextbox:
+			elif type(element) is ctk.CTkTextbox:
 				element.delete('1.0', 'insert', 'end')
 		elif direction.lower() in ('right', 'r', '>'):
-			if type(element) == ctk.CTkEntry:
+			if type(element) is ctk.CTkEntry:
 				element.delete('insert', 'end')
-			elif type(element) == ctk.CTkTextbox:
+			elif type(element) is ctk.CTkTextbox:
 				element.delete('insert', 'end-1c')
 		else:
 			raise ValueError(f"Invalid direction: {direction}. Must be 'left', 'l', '<', 'right', 'r', '>'")
@@ -627,7 +644,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = self._calc_dec_precision if value > self._calc_dec_precision else value
 		except AttributeError:
-			pass # ignore if self._calc_dec_precision is not set
+			pass  # ignore if self._calc_dec_precision is not set
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._calc_dec_display: int = value
@@ -761,7 +778,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = self._win_height_min_adv if value < self._win_height_min_adv else value
 		except AttributeError:
-			pass # ignore if self._win_height_min_adv is not set
+			pass  # ignore if self._win_height_min_adv is not set
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._win_height_adv: int = value
@@ -782,7 +799,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = False if not self._win_restore else value
 		except AttributeError:
-			pass # ignore if self._win_restore is not set
+			pass  # ignore if self._win_restore is not set
 			#value = False # disable if self._win_restore is not set
 		validate_type(new_val, bool)
 		self._win_restore_adv: bool = value
@@ -792,7 +809,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = False if not self._win_restore else value
 		except AttributeError:
-			pass # ignore if self._win_restore is not set
+			pass  # ignore if self._win_restore is not set
 			#value = False # disable if self._win_restore is not set
 		validate_type(new_val, bool)
 		self._win_restore_dim: bool = value
@@ -802,7 +819,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = False if not self._win_restore else value
 		except AttributeError:
-			pass # ignore if self._win_restore is not set
+			pass  # ignore if self._win_restore is not set
 			#value = False # disable if self._win_restore is not set
 		validate_type(new_val, bool)
 		self._win_restore_pin: bool = value
@@ -812,7 +829,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = False if not self._win_restore else value
 		except AttributeError:
-			pass # ignore if self._win_restore is not set
+			pass  # ignore if self._win_restore is not set
 			#value = False # disable if self._win_restore is not set
 		validate_type(new_val, bool)
 		self._win_restore_pos: bool = value
@@ -822,7 +839,7 @@ class CalculatorApp(GuiApp):
 		try:
 			value = self._win_width_min_adv if value < self._win_width_min_adv else value
 		except AttributeError:
-			pass # ignore if self._win_width_min_adv is not set
+			pass  # ignore if self._win_width_min_adv is not set
 		validate_type(value, int)
 		value = 0 if value < 0 else value
 		self._win_width_adv: int = value
@@ -904,13 +921,13 @@ class CalculatorApp(GuiApp):
 		#message = message.replace('\n', '\\n')
 		text_set(self._wgt_txt_result, message)
 		if logging:
-			self._logging_print(f"Result:{' '*14}`{message.replace('\n', '\\n')}`")
+			self._logging_print(f"Result:{' ' * 14}`{message.replace('\n', '\\n')}`")
 			#self._logging_print(f"Result:{' '*14}`{message}`")
 
 	def evaluate(self, live_mode: bool = False) -> None:
 		# get input
 		input_expr: str = self._wgt_txt_input.get()
-		self._logging_print(f"Expression:{' '*10}`{input_expr.replace('\n', '\\n')}`")
+		self._logging_print(f"Expression:{' ' * 10}`{input_expr.replace('\n', '\\n')}`")
 		# handle live mode
 		if self._timeout_id is not None:
 			self._window.after_cancel(self._timeout_id)
@@ -928,7 +945,7 @@ class CalculatorApp(GuiApp):
 			return result
 		# evaluate the expression
 		try:
-			self._logging_print(f"Evaluating...")
+			self._logging_print('Evaluating...')
 			result: str = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
 			#self.calc_last_result = result
 			self.display_result(result)
@@ -962,7 +979,7 @@ class CalculatorApp(GuiApp):
 			#text_set(self._wgt_txt_result, self._calc_def_result)
 			self.clear_io()
 			#if changes_made:
-				#self._calc_history_index += 1
+			#	self._calc_history_index += 1
 		self._calc_history_index = len(self._calc_history) if len(self._calc_history) > 0 else -1
 		logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
@@ -1028,7 +1045,7 @@ class CalculatorApp(GuiApp):
 			self._calc_history_index -= 1
 		logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
-	def open_window(self) -> None: # override
+	def open_window(self) -> None:  # override
 		self._logging_print(f"Opening {self.name}.")
 		#self._logging_print()
 		if self._win_force_focus:
@@ -1037,7 +1054,7 @@ class CalculatorApp(GuiApp):
 		self._window.after(100, lambda: focus_element(self._wgt_txt_input))
 		self._window.mainloop()
 
-	def print_info(self) -> None: # override
+	def print_info(self) -> None:  # override
 		GuiApp.print_info(self)
 		data = []
 		data.append(f"History File: {self._history_path}")
@@ -1067,7 +1084,7 @@ class CalculatorApp(GuiApp):
 		self._logging_print(f"Approximate = {self._approximate}")
 		self.evaluate()
 
-	def toggle_pinned(self) -> None: # override
+	def toggle_pinned(self) -> None:  # override
 		if not self._win_pinned:
 			self._window.attributes('-topmost', True)
 			self._win_pinned = True
@@ -1084,7 +1101,7 @@ class CalculatorApp(GuiApp):
 				pass
 		self._logging_print(f"Pinned = {self._win_pinned}")
 
-	def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None: # override
+	def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None:  # override
 		self._screen_width, self._screen_height = self.screen_dimensions
 		#print(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
 		if reset_pos:
@@ -1168,6 +1185,7 @@ class CalculatorApp(GuiApp):
 	@property
 	def timeout_id(self) -> int | None:
 		return self._timeout_id
+
 	@timeout_id.setter
 	def timeout_id(self, new_val: int | None) -> None:
 		validate_type(new_val, int | None)
@@ -1180,6 +1198,7 @@ class CalculatorApp(GuiApp):
 	#@property
 	#def win_expanded(self) -> bool:
 	#	return self._win_expanded
+
 	#@win_expanded.setter
 	#def win_expanded(self, new_val: bool) -> None:
 	#	validate_type(new_val, bool)
@@ -1192,6 +1211,7 @@ class CalculatorApp(GuiApp):
 	@property
 	def win_resize_height(self) -> bool:
 		return self._win_resize_height
+
 	@win_resize_height.setter
 	def win_resize_height(self, new_val: bool) -> None:
 		validate_type(new_val, bool)
@@ -1213,8 +1233,5 @@ def _test():
 	app.open_window()
 
 
-
 if __name__ == '__main__':
 	_test()
-
-
