@@ -37,6 +37,8 @@ CHAR_INF = chr(0x221E)  # '∞'
 
 #CHAR_INFJ = 'infj'
 CHAR_INFJ = 'ComplexInfinity'
+#CHAR_INFJ = 'zoo'
+#CHAR_INFJ = 'Zoo'
 
 #CHAR_NAN = 'nan'
 CHAR_NAN = 'NaN'

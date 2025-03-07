@@ -2,7 +2,7 @@
 
 # builtins
 #import cmath
-from collections.abc import Callable, Container
+from collections.abc import Callable, Iterable
 #import fractions
 #import math
 #import numbers
@@ -27,15 +27,15 @@ from app_type import function_exists, matches_key
 
 ### CONSTANTS ###
 
-#FUNCTIONS_BUILTIN: dict[str | Container[str], Callable] = {
+#FUNCTIONS_BUILTIN: dict[str | Iterable[str], Callable] = {
 #	#'int': int,                 # int(x)
 #	#'float': float              # float(x)
 #}
-FUNCTIONS_CUSTOM: dict[str | Container[str], Callable] = {
+FUNCTIONS_CUSTOM: dict[str | Iterable[str], Callable] = {
 	('roll', 'roll_dice'): roll_dice,
 	('quad', 'quad_zero', 'quadratic', 'quadratic_formula'): sym_quad_zero
 }
-#FUNCTIONS_CMATH: dict[str | Container[str], Callable] = {
+#FUNCTIONS_CMATH: dict[str | Iterable[str], Callable] = {
 #	# Conversions to and from polar coordinates
 #	'phase': cmath.phase,        # cmath.phase(x)
 #	'polar': cmath.polar,        # cmath.polar(x)
@@ -65,7 +65,7 @@ FUNCTIONS_CUSTOM: dict[str | Container[str], Callable] = {
 #	'isnan': cmath.isnan,        # cmath.isnan(x)
 #	'isclose': cmath.isclose     # cmath.isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0)
 #}
-#FUNCTIONS_MATH: dict[str | Container[str], Callable] = {
+#FUNCTIONS_MATH: dict[str | Iterable[str], Callable] = {
 #	# Number-theoretic functions
 #	'comb': math.comb,           # math.comb(n, k)
 #	'factorial': math.factorial, # math.factorial(n)
@@ -133,11 +133,11 @@ FUNCTIONS_CUSTOM: dict[str | Container[str], Callable] = {
 #	'gamma': math.gamma,         # math.gamma(x)
 #	'lgamma': math.lgamma        # math.lgamma(x)
 #}
-#FUNCTIONS_RANDOM: dict[str | Container[str], Callable] = {
+#FUNCTIONS_RANDOM: dict[str | Iterable[str], Callable] = {
 #}
-#FUNCTIONS_STATISTICS: dict[str | Container[str], Callable] = {
+#FUNCTIONS_STATISTICS: dict[str | Iterable[str], Callable] = {
 #}
-FUNCTIONS_SYMPY: dict[str | Container[str], Callable] = {
+FUNCTIONS_SYMPY: dict[str | Iterable[str], Callable] = {
 	('abs', 'Abs'): sp.Abs,
 	# Numeric functions
 	('int', 'Int', 'Integer'): sp.Integer,
@@ -203,19 +203,19 @@ for dictionary, name in (
 		if isinstance(keys, str):
 			key = keys
 			FUNCTION_MAP[key] = (name, dictionary[keys])
-		elif issubclass(type(keys), Container):
+		elif issubclass(type(keys), Iterable):
 			for key in keys:
 				FUNCTION_MAP[key] = (name, dictionary[keys])
-logging_print(f"FUNCTION_MAP: {FUNCTION_MAP}")
+#logging_print(f"FUNCTION_MAP: {FUNCTION_MAP}")
 
 
-#CONSTANTS_CMATH: dict[str | Container[str], Any] = {
+#CONSTANTS_CMATH: dict[str | Iterable[str], Any] = {
 #	#'infj': cmath.infj,
 #	#'nanj': cmath.nanj
 #}
-CONSTANTS_CUSTOM: dict[str | Container[str], Any] = {
+CONSTANTS_CUSTOM: dict[str | Iterable[str], Any] = {
 }
-CONSTANTS_SYMPY: dict[str | Container[str], Any] = {
+CONSTANTS_SYMPY: dict[str | Iterable[str], Any] = {
 	# Pi
 	('pi', 'Pi', r'\pi', chr(0x03C0)): sp.pi,
 	# Euler's Number
@@ -242,10 +242,10 @@ for dictionary, name in (
 		if isinstance(keys, str):
 			key = keys
 			CONSTANTS_MAP[key] = (name, dictionary[keys])
-		elif issubclass(type(keys), Container):
+		elif issubclass(type(keys), Iterable):
 			for key in keys:
 				CONSTANTS_MAP[key] = (name, dictionary[keys])
-logging_print(f"CONSTANTS_MAP: {CONSTANTS_MAP}")
+#logging_print(f"CONSTANTS_MAP: {CONSTANTS_MAP}")
 
 
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
@@ -262,7 +262,7 @@ ALLOWED_CHARS: re.Pattern[str] = re.compile(
 	f"|{'|'.join(re.escape(k) for k in FUNCTION_MAP.keys())}"   # Functions
 	r')+$'
 )
-logging_print(f"ALLOWED_CHARS: {ALLOWED_CHARS}")
+#logging_print(f"ALLOWED_CHARS: {ALLOWED_CHARS}")
 
 
 
@@ -492,13 +492,14 @@ def format_expression(expr: str | sp.Basic | sp.Expr) -> str:
 		expr_str = re.sub(r'([a-zA-Z])\*([a-zA-Z])', r'\1\2', expr_str)
 
 	# replace constant symbols
-	expr_str = expr_str.replace('E', CHAR_EUL)                 # Euler's Number
 	expr_str = expr_str.replace('GoldenRatio', CHAR_PHI)       # Golden Ratio
-	expr_str = expr_str.replace('I', CHAR_IMAG)                # Imaginary Unit
-	expr_str = expr_str.replace('oo', CHAR_INF)                # Infinity
+	expr_str = expr_str.replace('zoo', CHAR_INFJ)              # Complex Infinity
 	expr_str = expr_str.replace('ComplexInfinity', CHAR_INFJ)  # Complex Infinity
+	expr_str = expr_str.replace('oo', CHAR_INF)                # Infinity
 	expr_str = expr_str.replace('nan', CHAR_NAN)               # Not a Number
 	expr_str = expr_str.replace('pi', CHAR_PI)                 # Pi
+	expr_str = expr_str.replace('I', CHAR_IMAG)                # Imaginary Unit
+	expr_str = expr_str.replace('E', CHAR_EUL)                 # Euler's Number
 
 	# replace additional symbols
 	expr_str = expr_str.replace('exp(', CHAR_EUL + '^(')      # Euler's Number
