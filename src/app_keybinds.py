@@ -17,7 +17,7 @@ from app_type import validate_type
 def bind_event(
 	widget: CTkBaseClass,
 	sequence: str,
-	excluded_seq: str | Container[str] = None,
+	excluded_seq: str | Container[str] | None = None,
 	pass_event: bool = False,
 	command: Callable = lambda: None,
 	*args,

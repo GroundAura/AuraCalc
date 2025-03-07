@@ -5,7 +5,7 @@ import builtins
 from collections.abc import Collection, Container, Iterable, Sequence
 import sys
 from typing import Any, TypeAlias, Tuple, Union
-from types import ModuleType, UnionType
+from types import UnionType
 
 
 
@@ -40,7 +40,6 @@ def function_exists(
 	check_builtins: bool = True,
 	check_global: bool = True,
 	check_local: bool = False,
-	modules_to_check: Container[ModuleType] | None = None
 ) -> bool:
 	"""
 	Determines if a function exists in the global or builtins namespace and is callable.
@@ -50,7 +49,6 @@ def function_exists(
 		check_builtins (bool, optional): Whether to check the builtins namespace. Defaults to `True`.
 		check_globals (bool, optional): Whether to check the global scope. Defaults to `True`.
 		check_locals (bool, optional): Whether to check the local scope. Defaults to `False`.
-		modules_to_check (Container[ModuleType] | None, optional): A list-like container of modules to check. Defaults to `None`.
 
 	Returns:
 		bool: `True` if the function is found and callable, `False` otherwise.
@@ -63,12 +61,6 @@ def function_exists(
 
 	if check_builtins and \
 		func_name in dir(builtins) and callable(getattr(builtins, func_name)):
-		return True
-
-	if modules_to_check is not None and len(modules_to_check) > 0 and any(
-		func_name in dir(module) and callable(getattr(module, func_name))
-		for module in modules_to_check
-	):
 		return True
 
 	return False
@@ -105,41 +97,46 @@ def matches_key(string: str, key: str | Container[str]) -> bool:
 	except Exception as e:
 		raise Exception(f"Error while trying to check if string '{string}' matches key '{key}':\n  {e}")
 
-def str_to_bool(string: str, case_sensitive: bool = False, true_values: str | Container[str] = ('TRUE', 'True', 'true', 'T', 't', '1'), false_values: str | Container[str] = ('FALSE', 'False', 'false', 'F', 'f', '0')) -> bool:
+def str_to_bool(
+	string: str,
+	case_sensitive: bool = False,
+	true_values: str | Container[str] = ('TRUE', 'True', 'true', 'T', 't', '1'),
+	false_values: str | Container[str] = ('FALSE', 'False', 'false', 'F', 'f', '0')
+) -> bool:
 	try:
 		if not case_sensitive:
 			string = string.lower()
-			true_values: list[str] = sorted(set(value.lower() for value in true_values))
-			false_values: list[str] = sorted(set(value.lower() for value in false_values))
+			true_values = sorted(set(value.lower() for value in true_values))
+			false_values = sorted(set(value.lower() for value in false_values))
 		if string in true_values:
 			return True
 		elif string in false_values:
 			return False
 		else:
-			true_values: list[str] = sorted(set(true_values))
-			false_values: list[str] = sorted(set(false_values))
+			true_values = sorted(set(true_values))
+			false_values = sorted(set(false_values))
 			raise Exception(f"Failed to convert str to bool. Valid values are: {true_values + false_values}. Case sensitive: '{case_sensitive}'.")
 	except Exception as e:
 		raise Exception(f"Error while trying to convert string '{string}' to a boolean:\n  {e}")
 
-def str_to_dict(string: str) -> dict:
+def str_to_dict(string: str) -> dict[str, str]:
 	try:
 		if string.startswith('{') and string.endswith('}'):
-			string: dict = eval(string)
+			new_val: dict = eval(string)
 		else:
-			string: dict = eval('{' + string + '}')
+			new_val = eval('{' + string + '}')
 		if type(string) is dict:
-			return string
+			return new_val
 		else:
 			raise Exception('Failed to convert str to dict.')
 	except Exception as e:
-		raise Exception(f"Error while trying to convert string '{string}' to a list:\n  {e}")
+		raise Exception(f"Error while trying to convert string '{string}' to a dictionary:\n  {e}")
 
 def str_to_float(string: str) -> float:
 	try:
-		string: float = float(string)
-		if type(string) is float:
-			return string
+		new_val: float = float(string)
+		if type(new_val) is float:
+			return new_val
 		else:
 			raise Exception('Failed to convert str to float.')
 	except Exception as e:
@@ -147,50 +144,50 @@ def str_to_float(string: str) -> float:
 
 def str_to_int(string: str) -> int:
 	try:
-		string: int = int(string)
-		if type(string) is int:
-			return string
+		new_val: int = int(string)
+		if type(new_val) is int:
+			return new_val
 		else:
 			raise Exception('Failed to convert str to int.')
 	except Exception as e:
 		raise Exception(f"Error while trying to convert string '{string}' to an integer:\n  {e}")
 
-def str_to_list(string: str) -> list:
+def str_to_list(string: str) -> list[str]:
 	try:
-		string: str = string.lstrip('[').rstrip(']')
-		string: list = string.split(', ')
-		if type(string) is list:
-			return string
+		string = string.lstrip('[').rstrip(']')
+		new_val: list = string.split(', ')
+		if type(new_val) is list:
+			return new_val
 		else:
 			raise Exception('Failed to convert str to list.')
 	except Exception as e:
 		raise Exception(f"Error while trying to convert string '{string}' to a list:\n  {e}")
 
-def str_to_set(string: str) -> set:
+def str_to_set(string: str) -> set[str]:
 	try:
-		string: str = string.lstrip('{').rstrip('}')
-		string: set = set(string.split(', '))
-		if type(string) is set:
-			return string
+		string = string.lstrip('{').rstrip('}')
+		new_val: set = set(string.split(', '))
+		if type(new_val) is set:
+			return new_val
 		else:
 			raise Exception('Failed to convert str to set.')
 	except Exception as e:
 		raise Exception(f"Error while trying to convert string '{string}' to a set:\n  {e}")
 
-def str_to_tuple(string: str) -> tuple:
+def str_to_tuple(string: str) -> tuple[str, ...]:
 	try:
-		string: str = string.lstrip('(').rstrip(')')
-		string: tuple = tuple(string.split(', '))
-		if type(string) is tuple:
-			return string
+		string = string.lstrip('(').rstrip(')')
+		new_val: tuple = tuple(string.split(', '))
+		if type(new_val) is tuple:
+			return new_val
 		else:
 			raise Exception('Failed to convert str to tuple.')
 	except Exception as e:
 		raise Exception(f"Error while trying to convert string '{string}' to a tuple:\n  {e}")
 
-def validate_type(value, valid_type: type) -> bool:
+def validate_type(value, valid_type: _ClassInfo) -> bool:
 	if not isinstance(value, valid_type):
-		raise TypeError(f"Expected type '{valid_type.__name__}', got '{type(value).__name__}'")
+		raise TypeError(f"Expected type `{valid_type}`, got `{type(value)}`")
 	return True
 
 

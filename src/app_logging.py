@@ -15,7 +15,7 @@ from app_globals import DEBUG_MODE, PATH_LOG
 ### FUNCTIONS ###
 
 def logging_print(
-	message: Any = '',
+	message: Any | str = '',
 	indent: int = 0,
 	timestamp: bool = True,
 	print_to_console: bool = True,
@@ -28,7 +28,7 @@ def logging_print(
 	Displays a debug message in the console and in the debug log file.
 
 	Args:
-		message (Any, optional): The message to display. Defaults to `''`.
+		message (Any | str, optional): The message to display. Defaults to `''`.
 		indent (int, optional): The number of spaces to indent by. Defaults to `0`.
 		timestamp (bool, optional): Whether to include a timestamp. Defaults to `True`.
 		print_to_console (bool, optional): Whether to print the message to the console. Defaults to `True`.

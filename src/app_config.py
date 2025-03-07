@@ -16,44 +16,43 @@ from app_type import str_to_dict, str_to_list, str_to_set, str_to_tuple
 
 def config_to_dict(
 	config: ConfigParser,
-	root_dir_key: str | tuple[str],
+	root_dir_key: str | tuple[str, ...],
 	root_dir_value: str,
 	root_path: str | None,
 	bool_case_sens: bool,
 	bool_true: str | Container[str],
 	bool_false: str | Container[str]
-) -> dict[str, dict[str]]:
-	config_dict: dict = {}
+) -> dict[str, dict[str, Any]]:
 	root_path = root_path if root_path else getcwd()
 	config_dict: dict = {}
 	for section in config.sections():
 		section_dict: dict = {}
 		for option in config.options(section):
-			value: str = config.get(section, option)
+			value: str | Any = config.get(section, option)
 			if option.startswith('s', 0, 1):
 				if option[1:].startswith(root_dir_key) or option.endswith(root_dir_key):
 					if value.startswith(root_dir_value):
 						value = root_path + value[len(root_dir_value):]
 			elif option.startswith('b', 0, 1):
-				value: bool = str_to_bool(value, bool_case_sens, bool_true, bool_false)
+				value = str_to_bool(value, bool_case_sens, bool_true, bool_false)
 			elif option.startswith('i', 0, 1):
-				value: int = str_to_int(value)
+				value = str_to_int(value)
 			elif option.startswith('f', 0, 1):
-				value: float = str_to_float(value)
+				value = str_to_float(value)
 			elif option.startswith('l', 0, 1):
-				value: list[str] = str_to_list(value)
+				value = str_to_list(value)
 			elif option.startswith('t', 0, 1):
-				value: tuple[str] = str_to_tuple(value)
+				value = str_to_tuple(value)
 			elif option.startswith('d', 0, 1):
-				value: dict[str, str] = str_to_dict(value)
+				value = str_to_dict(value)
 			elif option.startswith('o', 0, 1):
-				value: set[str] = str_to_set(value)
+				value = str_to_set(value)
 			section_dict[option] = value
 		config_dict[section] = section_dict
 	return config_dict
 
 def get_config_value(
-	config: dict,
+	config: dict | None,
 	cfg_section: str,
 	cfg_key: str,
 	def_val: Any = None,
@@ -71,13 +70,13 @@ def read_config(
 	preserve_key_case: bool = False,
 	comment_prefixes: Sequence[str] = (';', '#', '//'),
 	inline_comment_prefixes: Sequence[str] = (';', '#', '//'),
-	root_dir_key: str | tuple[str] = ('PATH', 'Path', 'path'),
+	root_dir_key: str | tuple[str, ...] = ('PATH', 'Path', 'path'),
 	root_dir_value: str = '[ROOT]',
 	root_path: str | None = None,
 	bool_case_sens: bool = False,
 	bool_true: str | Container[str] = ('TRUE', 'True', 'true', 'T', 't', '1'),
 	bool_false: str | Container[str] = ('FALSE', 'False', 'false', 'F', 'f', '0')
-) -> dict[str, dict[str]]:
+) -> dict[str, dict[str, Any]]:
 	config = ConfigParser(
 		comment_prefixes=comment_prefixes,
 		inline_comment_prefixes=inline_comment_prefixes
@@ -93,7 +92,7 @@ def read_config(
 	except Exception as e:
 		raise Exception(f"ERROR: Error while trying to read config file: {e}")
 	try:
-		config_dict: dict[str, dict[str]] = config_to_dict(
+		config_dict: dict[str, dict[str, Any]] = config_to_dict(
 			config,
 			root_dir_key,
 			root_dir_value,

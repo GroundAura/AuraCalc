@@ -388,9 +388,9 @@ def eval_custom_functions(expr: str) -> str:
 	const_pattern: re.Pattern = re.compile(
 		'|'.join(re.escape(k) for k in CONSTANTS_MAP.keys())
 	)
-	processed_expr: str = func_pattern.sub(func_replacer, expr)
-	processed_expr: str = const_pattern.sub(const_replacer, processed_expr)
-	return processed_expr
+	expr = func_pattern.sub(func_replacer, expr)
+	expr = const_pattern.sub(const_replacer, expr)
+	return expr
 
 def evaluate_expression(expr: str, approximate: bool = True, dec_precision: int = 20, dec_display: int = 8) -> str:
 	"""
@@ -435,7 +435,7 @@ def evaluate_expression(expr: str, approximate: bool = True, dec_precision: int 
 			logging_print(f"Expr (float):{' ' * 8}`{expr_appr}` - type: {type(expr_appr)}")
 			expr_res: sp.Expr = expr_appr
 		else:
-			expr_res: sp.Expr = expr_simp
+			expr_res = expr_simp
 		# Round all numbers
 		expr_round: sp.Expr = simplify_floats(expr_res, dec_display, approximate)
 		logging_print(f"Expr (clean_floats):{' ' * 1}`{expr_round}` - type: {type(expr_round)}")
@@ -567,7 +567,7 @@ def implied_mult(expr: str) -> str:
 
 	return expr_modified
 
-def sanitize_input(expr: str, allowed_chars: str = ALLOWED_CHARS, sanitize: bool = True) -> str:
+def sanitize_input(expr: str, allowed_chars: re.Pattern[str] = ALLOWED_CHARS, sanitize: bool = True) -> str:
 	"""
 	Sanitize an expression by removing invalid sequences of characters if possible, or raising an exception if not.
 
@@ -620,10 +620,10 @@ def simplify_floats(expr: sp.Expr, ndec: int, approx: bool) -> sp.Expr:
 					#logging_print(f"Rounded term:{' '*3}`{rounded_term}`")
 				else:
 					# If not using approximate simplification, leave the term unchanged
-					rounded_term: sp.Basic = term
+					rounded_term = term
 			except Exception:
 				# If rounding fails, leave the term unchanged
-				rounded_term: sp.Basic = term
+				rounded_term = term
 			# Truncate remaining insignificant decimal places
 			try:
 				# Number of significant decimal places (after rounding)

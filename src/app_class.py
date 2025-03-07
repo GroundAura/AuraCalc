@@ -104,14 +104,14 @@ class App:
 			else:
 				validate_type(self._resources_path, Path)
 				validate_type(file_name, str)
-				self._config_path: Path | None = self._resources_path / file_name
+				self._config_path = self._resources_path / file_name
 				validate_type(self._config_path, Path)
 				if not self._config_path.exists():
 					raise FileNotFoundError(f"File `{self._config_path}` does not exist")
-				self._config: dict | None = read_config(self._config_path, preserve_key_case=True)
+				self._config = read_config(str(self._config_path), preserve_key_case=True)
 		else:
-			self._config_path: Path | None = None
-			self._config: dict | None = None
+			self._config_path = None
+			self._config = None
 
 	def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
 		value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
@@ -141,7 +141,7 @@ class App:
 			validate_type(dir_name, str)
 			self._resources_path: Path = self._root_path / dir_name
 		else:
-			self._resources_path: Path = self._root_path
+			self._resources_path = self._root_path
 
 	def _set_version(self, new_val: str) -> None:
 		validate_type(new_val, str)
@@ -204,7 +204,7 @@ class GuiApp(App):
 		win_pinned: bool = False,
 		win_resize_width: bool = True,
 		win_resize_height: bool = True,
-		win_layout: str = 'grid'
+		win_layout: Literal['grid', 'pack'] = 'grid'
 	) -> None:
 		# parent constructor
 		super().__init__(
@@ -253,7 +253,7 @@ class GuiApp(App):
 		self._wgt_frame_base = ctk.CTkFrame(self._window)
 
 		# event bindings
-		self._bound_keys = set()
+		self._bound_keys: set[str] = set()
 		self._set_key_quit('<Escape>', use_config)
 		self._window.protocol('WM_DELETE_WINDOW', self.close_window)
 
@@ -385,9 +385,6 @@ class GuiApp(App):
 
 	def open_window(self) -> None:
 		self._logging_print(f"Opening {self.name}.")
-		if self._win_force_focus:
-			logging_print('Forcing window focus.')
-			self.focus_window()
 		self._window.mainloop()
 
 	def print_info(self) -> None:  # override
@@ -487,7 +484,7 @@ class CalculatorApp(GuiApp):
 		win_pinned: bool = False,
 		win_resize_width: bool = True,
 		win_resize_height: bool = False,
-		win_layout: str = 'grid'
+		win_layout: Literal['grid', 'pack'] = 'grid'
 	) -> None:
 		# parent constructor
 		super().__init__(
@@ -548,7 +545,7 @@ class CalculatorApp(GuiApp):
 		self._calc_wait_chars: str = r'+-*/^%.([{_, '
 
 		# app state
-		self._timeout_id = None
+		self._timeout_id: int | None = None
 		self._calc_history: list[dict[str, str | None]] = []
 		self._calc_history_index: int = -1
 		self._history: dict[str, Any] = {
@@ -580,7 +577,7 @@ class CalculatorApp(GuiApp):
 		#bind_event(self._window, self._key_options, command=self.undo_txt)
 		#self._set_key_undo('<Control-z>', use_config)
 		#bind_event(self._window, self._key_options, command=self.redo_txt)
-		manual_exclusions: tuple[str] = (
+		manual_exclusions: tuple[str, ...] = (
 			'<Shift_L>', '<Shift_R>', '<Control_L>', '<Control_R>',
 			'<Alt_L>', '<Alt_R>', '<Meta_L>', '<Meta_R>',
 			'<Super_L>', '<Super_R>', '<Hyper_L>', '<Hyper_R>',
@@ -850,7 +847,7 @@ class CalculatorApp(GuiApp):
 		value = 0 if value < 0 else value
 		self._win_width_min_adv: int = value
 
-	def _show_element(self, element: str) -> None:
+	def _show_element(self, element: ctk.CTkBaseClass) -> None:
 		if self._win_layout == 'grid':
 			element.grid()
 		elif self._win_layout == 'pack':
@@ -913,18 +910,18 @@ class CalculatorApp(GuiApp):
 		self.history_clear()
 		self.clear_io()
 
-	def display_result(self, message: Any, logging: bool = True, delay: bool = False) -> None:
+	def display_result(self, message: Any | str, logging: bool = True, delay: bool = False) -> None:
 		if delay:
 			self._timeout_id = self._window.after(self._calc_live_eval_delay, self.display_result, message, logging, False)
 			return
-		message: str = str(message)
+		message = str(message)
 		#message = message.replace('\n', '\\n')
 		text_set(self._wgt_txt_result, message)
 		if logging:
 			self._logging_print(f"Result:{' ' * 14}`{message.replace('\n', '\\n')}`")
 			#self._logging_print(f"Result:{' '*14}`{message}`")
 
-	def evaluate(self, live_mode: bool = False) -> None:
+	def evaluate(self, live_mode: bool = False) -> str:
 		# get input
 		input_expr: str = self._wgt_txt_input.get()
 		self._logging_print(f"Expression:{' ' * 10}`{input_expr.replace('\n', '\\n')}`")
@@ -940,31 +937,31 @@ class CalculatorApp(GuiApp):
 				self.display_result(result)
 				return result
 		except ValueError as e:
-			result: str = f"ERROR: {e}"
+			result = f"ERROR: {e}"
 			self.display_result(result)
 			return result
 		# evaluate the expression
 		try:
 			self._logging_print('Evaluating...')
-			result: str = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
+			result = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
 			#self.calc_last_result = result
 			self.display_result(result)
 			return result
 		except ZeroDivisionError as e:
-			result: str = e
+			result = str(e)
 			self.display_result(result)
 			return result
 		except Exception as e:
 			if live_mode and self._timeout_patience > 0 and expr and expr[-1] in self._calc_wait_chars:
-				result: str = 'ERROR: Incomplete expression'
+				result = 'ERROR: Incomplete expression'
 				self.display_result(result, delay=True)
 				return result
 			elif live_mode and self._timeout_patience > 1:
-				result: str = f"ERROR: {e}"
+				result = f"ERROR: {e}"
 				self.display_result(result, delay=True)
 				return result
 			else:
-				result: str = f"ERROR: {e}"
+				result = f"ERROR: {e}"
 				self.display_result(result)
 				return result
 
@@ -996,7 +993,7 @@ class CalculatorApp(GuiApp):
 		if len(self._calc_history) > 1 and -1 < self._calc_history_index < len(self._calc_history) - 1:
 			#self._store_eval()
 			try:
-				expr: str = self._calc_history[self._calc_history_index + 1]['expression']
+				expr: str | None = self._calc_history[self._calc_history_index + 1]['expression']
 				result_approx: str | None = self._calc_history[self._calc_history_index + 1]['result_approx']
 				result_exact: str | None = self._calc_history[self._calc_history_index + 1]['result_exact']
 			except IndexError:
@@ -1026,7 +1023,7 @@ class CalculatorApp(GuiApp):
 		if len(self._calc_history) > 0 and self._calc_history_index > 0:
 			#self._store_eval()
 			try:
-				expr: str = self._calc_history[self._calc_history_index - 1]['expression']
+				expr: str | None = self._calc_history[self._calc_history_index - 1]['expression']
 				result_approx: str | None = self._calc_history[self._calc_history_index - 1]['result_approx']
 				result_exact: str | None = self._calc_history[self._calc_history_index - 1]['result_exact']
 			except IndexError:

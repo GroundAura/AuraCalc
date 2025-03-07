@@ -80,15 +80,17 @@ def text_remove(
 	else:
 		raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
 
-def text_set(element, text: str) -> None:
+def text_set(element, text: str | None = None) -> None:
 	"""
 	Sets the text in a given element.
 
 	Args:
 		element (ctk.CTkEntry | ctk.CTkTextbox): The element to set the text in.
-		text (str): The text to set in the element.
+		text (str | None, optional): The text to set in the element. Defaults to `None`.
 	"""
 	text_clear(element)
+	if text is None or text == '':
+		return
 	if type(element) is ctk.CTkEntry:
 		element.insert('0', text)
 	elif type(element) is ctk.CTkTextbox:

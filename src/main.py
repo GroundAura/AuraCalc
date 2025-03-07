@@ -13,7 +13,7 @@
 # internal
 from app_class import CalculatorApp
 from app_globals import META_NAME, META_VERSION, META_AUTHOR, DIR_RESOURCES
-from app_path import FILE_HISTORY, FILE_ICON, FILE_LOG, FILE_CONFIG
+from app_globals import FILE_HISTORY, FILE_ICON, FILE_LOG, FILE_CONFIG
 from app_logging import logging_print
 
 
