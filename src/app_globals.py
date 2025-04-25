@@ -34,12 +34,12 @@ PATH_CONFIG = get_full_path(DIR_RESOURCES, FILE_CONFIG)
 
 # Config
 if FORCE_DEBUG:
-	DEBUG_MODE: bool = True
+    DEBUG_MODE: bool = True
 else:
-	DEBUG_MODE = False
+    DEBUG_MODE = False
 
 if USE_CONFIG:
-	CONFIG: dict | None = read_config(str(PATH_CONFIG), preserve_key_case=True)
-	DEBUG_MODE = get_config_value(CONFIG, 'DEBUG', 'bDebugMode', False)
+    CONFIG: dict | None = read_config(str(PATH_CONFIG), preserve_key_case=True)
+    DEBUG_MODE = get_config_value(CONFIG, 'DEBUG', 'bDebugMode', False)
 else:
-	CONFIG = None
+    CONFIG = None
