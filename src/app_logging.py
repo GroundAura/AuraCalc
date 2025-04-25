@@ -1,4 +1,4 @@
-### IMPORTS ###
+# IMPORTS #
 
 # builtins
 from datetime import datetime
@@ -11,8 +11,7 @@ from pathlib import Path
 from app_globals import DEBUG_MODE, PATH_LOG
 
 
-
-### FUNCTIONS ###
+# FUNCTIONS #
 
 def logging_print(
     message: Any | str = '',
@@ -39,7 +38,6 @@ def logging_print(
     """
     message = str(message)
     if debug_mode or not debug_mode_only:
-        #message = str(message)
         if timestamp or indent > 0:
             if '\n' in message:
                 lines = message.split('\n')
@@ -54,7 +52,6 @@ def logging_print(
                     )
                 return
         if indent > 0:
-            #message = ' ' * indent + message
             message = f"{' ' * indent}{message}"
         if timestamp:
             message = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')}] {message}"
@@ -62,12 +59,10 @@ def logging_print(
             print(message)
         if print_to_file:
             with open(log_path, 'a') as log_file:
-                #print(message, file=log_file)
                 log_file.write(f"{message}\n")
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
     pass

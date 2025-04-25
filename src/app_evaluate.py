@@ -1,14 +1,8 @@
-### IMPORTS ###
+# IMPORTS #
 
 # builtins
-#import cmath
 from collections.abc import Callable, Iterable
-#import fractions
-#import math
-#import numbers
-#import random
 import re
-#import statistics
 from string import whitespace as WHITESPACE
 from typing import Any
 
@@ -24,119 +18,12 @@ from app_math import CHAR_NAN, CHAR_PHI, CHAR_PI
 from app_type import function_exists, matches_key
 
 
+# CONSTANTS #
 
-### CONSTANTS ###
-
-#FUNCTIONS_BUILTIN: dict[str | Iterable[str], Callable] = {
-#    #'int': int,                 # int(x)
-#    #'float': float              # float(x)
-#}
 FUNCTIONS_CUSTOM: dict[str | Iterable[str], Callable] = {
     ('roll', 'roll_dice'): roll_dice,
     ('quad', 'quad_zero', 'quadratic', 'quadratic_formula'): sym_quad_zero
 }
-#FUNCTIONS_CMATH: dict[str | Iterable[str], Callable] = {
-#    # Conversions to and from polar coordinates
-#    'phase': cmath.phase,        # cmath.phase(x)
-#    'polar': cmath.polar,        # cmath.polar(x)
-#    'rect': cmath.rect,          # cmath.rect(r, phi)
-#    # Power and logarithmic functions
-#    'exp': cmath.exp,            # cmath.exp(x)
-#    'log': cmath.log,            # cmath.log(x[, base])
-#    'log10': cmath.log10,        # cmath.log10(x)
-#    #'sqrt': cmath.sqrt,          # cmath.sqrt(x)
-#    # Trigonometric functions
-#    'acos': cmath.acos,          # cmath.acos(x)
-#    'asin': cmath.asin,          # cmath.asin(x)
-#    'atan': cmath.atan,          # cmath.atan(x)
-#    'cos': cmath.cos,            # cmath.cos(x)
-#    'sin': cmath.sin,            # cmath.sin(x)
-#    'tan': cmath.tan,            # cmath.tan(x)
-#    # Hyperbolic functions
-#    'acosh': cmath.acosh,        # cmath.acosh(x)
-#    'asinh': cmath.asinh,        # cmath.asinh(x)
-#    'atanh': cmath.atanh,        # cmath.atanh(x)
-#    'cosh': cmath.cosh,          # cmath.cosh(x)
-#    'sinh': cmath.sinh,          # cmath.sinh(x)
-#    'tanh': cmath.tanh,          # cmath.tanh(x)
-#    # Classification functions
-#    'isfinite': cmath.isfinite,  # cmath.isfinite(x)
-#    'isinf': cmath.isinf,        # cmath.isinf(x)
-#    'isnan': cmath.isnan,        # cmath.isnan(x)
-#    'isclose': cmath.isclose     # cmath.isclose(a, b, *, rel_tol=1e-09, abs_tol=0.0)
-#}
-#FUNCTIONS_MATH: dict[str | Iterable[str], Callable] = {
-#    # Number-theoretic functions
-#    'comb': math.comb,           # math.comb(n, k)
-#    'factorial': math.factorial, # math.factorial(n)
-#    'gcd': math.gcd,             # math.gcd(*integers)
-#    'isqrt': math.isqrt,         # math.isqrt(n)
-#    'lcm': math.lcm,             # math.lcm(*integers)
-#    'perm': math.perm,           # math.perm(n, k)
-#    # Floating point arithmetic
-#    'ceil': math.ceil,           # math.ceil(x)
-#    'fabs': math.fabs,           # math.fabs(x)
-#    'floor': math.floor,         # math.floor(x)
-#    #'fma': math.fma,             # math.fma(x, y, z)
-#    'fmod': math.fmod,           # math.fmod(x, y)
-#    'modf': math.modf,           # math.modf(x)
-#    'remainder': math.remainder, # math.remainder(x, y)
-#    'trunc': math.trunc,         # math.trunc(x)
-#    # Floating point manipulation functions
-#    'copysign': math.copysign,   # math.copysign(x, y)
-#    'frexp': math.frexp,         # math.frexp(x)
-#    'isclose': math.isclose,     # math.isclose(a, b, rel_tol, abs_tol)
-#    'isfinite': math.isfinite,   # math.isfinite(x)
-#    'isinf': math.isinf,         # math.isinf(x)
-#    'isnan': math.isnan,         # math.isnan(x)
-#    'ldexp': math.ldexp,         # math.ldexp(x, i)
-#    'nextafter': math.nextafter, # math.nextafter(x, y, steps)
-#    'ulp': math.ulp,             # math.ulp(x)
-#    # Power, exponential and logarithmic functions
-#    'cbrt': math.cbrt,           # math.cbrt(x)
-#    'exp': math.exp,             # math.exp(x)
-#    'exp2': math.exp2,           # math.exp2(x)
-#    'expm1': math.expm1,         # math.expm1(x)
-#    'log': math.log,             # math.log(x, base)
-#    'log1p': math.log1p,         # math.log1p(x)
-#    'log2': math.log2,           # math.log2(x)
-#    'log10': math.log10,         # math.log10(x)
-#    'pow': math.pow,             # math.pow(x, y)
-#    #'sqrt': math.sqrt,           # math.sqrt(x)
-#    # Summation and product functions
-#    'dist': math.dist,           # math.dist(p, q)
-#    'fsum': math.fsum,           # math.fsum(iterable)
-#    'hypot': math.hypot,         # math.hypot(*coordinates)
-#    'prod': math.prod,           # math.prod(iterable, start)
-#    'sumprod': math.sumprod,     # math.sumprod(p, q)
-#    # Angular conversion
-#    'degrees': math.degrees,     # math.degrees(x)
-#    'radians': math.radians,     # math.radians(x)
-#    # Trigonometric functions
-#    'acos': math.acos,           # math.acos(x)
-#    'asin': math.asin,           # math.asin(x)
-#    'atan': math.atan,           # math.atan(x)
-#    'atan2': math.atan2,         # math.atan2(y, x)
-#    'cos': math.cos,             # math.cos(x)
-#    'sin': math.sin,             # math.sin(x)
-#    'tan': math.tan,             # math.tan(x)
-#    # Hyperbolic functions
-#    'acosh': math.acosh,         # math.acosh(x)
-#    'asinh': math.asinh,         # math.asinh(x)
-#    'atanh': math.atanh,         # math.atanh(x)
-#    'cosh': math.cosh,           # math.cosh(x)
-#    'sinh': math.sinh,           # math.sinh(x)
-#    'tanh': math.tanh,           # math.tanh(x)
-#    # Special functions
-#    'erf': math.erf,             # math.erf(x)
-#    'erfc': math.erfc,           # math.erfc(x)
-#    'gamma': math.gamma,         # math.gamma(x)
-#    'lgamma': math.lgamma        # math.lgamma(x)
-#}
-#FUNCTIONS_RANDOM: dict[str | Iterable[str], Callable] = {
-#}
-#FUNCTIONS_STATISTICS: dict[str | Iterable[str], Callable] = {
-#}
 FUNCTIONS_SYMPY: dict[str | Iterable[str], Callable] = {
     ('abs', 'Abs'): sp.Abs,
     # Numeric functions
@@ -206,13 +93,7 @@ for dictionary, name in (
         elif issubclass(type(keys), Iterable):
             for key in keys:
                 FUNCTION_MAP[key] = (name, dictionary[keys])
-#logging_print(f"FUNCTION_MAP: {FUNCTION_MAP}")
 
-
-#CONSTANTS_CMATH: dict[str | Iterable[str], Any] = {
-#    #'infj': cmath.infj,
-#    #'nanj': cmath.nanj
-#}
 CONSTANTS_CUSTOM: dict[str | Iterable[str], Any] = {
 }
 CONSTANTS_SYMPY: dict[str | Iterable[str], Any] = {
@@ -245,8 +126,6 @@ for dictionary, name in (
         elif issubclass(type(keys), Iterable):
             for key in keys:
                 CONSTANTS_MAP[key] = (name, dictionary[keys])
-#logging_print(f"CONSTANTS_MAP: {CONSTANTS_MAP}")
-
 
 ALLOWED_CHARS: re.Pattern[str] = re.compile(
     r'^(?:'
@@ -256,17 +135,14 @@ ALLOWED_CHARS: re.Pattern[str] = re.compile(
     r'|[.,()]+'          # Misc Characters
     r'|[ ]+'             # Whitespace
     r'|[${}\\]'          # Temp semi-handle LaTeX
-    #r'|[$_{}\\]'        # LaTeX Symbols
-    #r'|(?:0x[0-9a-f]+|0b[01]+|0o[0-7]+)|'  # Hex, Binary, Octal Numbers
     f"|{'|'.join(re.escape(k) for k in CONSTANTS_MAP.keys())}"  # Constants
     f"|{'|'.join(re.escape(k) for k in FUNCTION_MAP.keys())}"   # Functions
     r')+$'
 )
-#logging_print(f"ALLOWED_CHARS: {ALLOWED_CHARS}")
 
 
+# FUNCTIONS #
 
-### FUNCTIONS ###
 def compact_expr(expr: str) -> str:
     """
     Removes any unnecessary characters from an expression, just as whitespace.
@@ -278,7 +154,6 @@ def compact_expr(expr: str) -> str:
         str: The processed expression.
     """
     # Remove whitespace
-    #logging_print(repr(WHITESPACE))
     for char in WHITESPACE:
         expr = expr.replace(char, '')
     # Remove '=' at each end
@@ -286,6 +161,7 @@ def compact_expr(expr: str) -> str:
     # Temp semi-handle LaTeX
     expr = expr.strip('$').replace('{', '(').replace('}', ')').replace('\\', '')
     return expr
+
 
 def eval_custom_functions(expr: str) -> str:
     """
@@ -318,11 +194,9 @@ def eval_custom_functions(expr: str) -> str:
                 if func_name in ('log', '\\log') and len(args_list) == 1 and args_list[0]:
                     args_list.append('10')
                 logging_print(f"Matching SymPy function: `sympy.{func.__name__}`. Letting SymPy handle evaluation.")
-                #result = match.group(0).replace(func_name, str(func.__name__))
                 result = f"{func.__name__}({','.join(args_list)})"
                 return result
             else:
-                #logging_print(f"Matching function: '{func_name}': {func.__module__}.{func.__name__}")
                 args: list = []
                 for arg in args_list:
                     if group == 'CUSTOM' and func is roll_dice and args_list.index(arg) == 0:
@@ -331,7 +205,6 @@ def eval_custom_functions(expr: str) -> str:
                         args.append(arg)
                     else:
                         args.append(float(arg))
-                #logging_print(f"Calling function: `{func.__module__}.{func.__name__}({', '.join(map(str, args))})`")
                 result = func(*args)
                 if func is roll_dice:
                     result = result[0]
@@ -392,6 +265,7 @@ def eval_custom_functions(expr: str) -> str:
     expr = const_pattern.sub(const_replacer, expr)
     return expr
 
+
 def evaluate_expression(expr: str, approximate: bool = True, dec_precision: int = 20, dec_display: int = 8) -> str:
     """
     Evaluates an expression.
@@ -405,12 +279,7 @@ def evaluate_expression(expr: str, approximate: bool = True, dec_precision: int 
     Returns:
         str: The result of the expression.
     """
-    #approximate = False
     try:
-        ## Detect LaTeX input
-        #if expr.startswith('$') and expr.endswith('$'):
-        #    expr_latex: str = expr.strip('$')
-        #    expr_res: sp.Expr = sp.latex(expr_latex)
         # Handle custom functions & constants
         expr_cust: str = eval_custom_functions(expr)
         logging_print(f"Expr (eval_func):{' ' * 4}`{expr_cust}` - type: {type(expr_cust)}")
@@ -507,6 +376,7 @@ def format_expression(expr: str | sp.Basic | sp.Expr) -> str:
 
     return expr_str
 
+
 def implied_exp(expression: str) -> str:
     """
     Evaluates whether an expression contains implied exponentation and adds explicit exponentation if necessary.
@@ -519,6 +389,7 @@ def implied_exp(expression: str) -> str:
     """
     return expression.replace('^', '**')
 
+
 def implied_mult(expr: str) -> str:
     """
     Evaluates whether an expression contains implied multiplication and adds explicit multiplication if necessary.
@@ -530,7 +401,6 @@ def implied_mult(expr: str) -> str:
         str: The processed expression.
     """
     # Define patterns
-    #constants: str = '|'.join(re.escape(k) for k in CONSTANTS_MAP.keys())
     functions: str = '|'.join(re.escape(k) for k in FUNCTION_MAP.keys())
     pattern: str = (
         r'(?<=\d)(?=\()'                              # Case 1: number followed by an opening parenthesis, e.g., 1(2)
@@ -544,20 +414,16 @@ def implied_mult(expr: str) -> str:
         r'|(?<=[a-zA-Z])(?=\()'                       # Case 9: variable followed by an opening parenthesis, e.g., x(3) -> x*(3)
         r'|(?<=[a-zA-Z])(?=[a-zA-Z])'                 # Case 10: variable followed by another variable, e.g., xy -> x*y
     )
-    #print(pattern)
 
     # Add '*' in all matched cases
     expr_modified: str = re.sub(pattern, '*', expr)
-    #logging_print(expr_modified)
 
     # Remove '*' inside of function and constant names
     sym_except_list: list = []
     for key in list(CONSTANTS_MAP.keys()) + list(FUNCTION_MAP.keys()):
         if len(key) > 1 and all(c.isalpha() for c in key):
             sym_except_list.append('*'.join(list(key)))
-    #print(exceptions_lst)
     symb_except: str = '|'.join(re.escape(k) for k in sym_except_list)
-    #print(exceptions)
     expr_modified = re.sub(r'(' + symb_except + r')', lambda m: m.group(0).replace('*', ''), expr_modified)
 
     # Remove '*' between functions and '('
@@ -567,6 +433,7 @@ def implied_mult(expr: str) -> str:
     expr_modified = re.sub(r'(?<=roll\()(\d+)\*d\*(\d+)', r'\1d\2', expr_modified)
 
     return expr_modified
+
 
 def sanitize_input(expr: str, allowed_chars: re.Pattern[str] = ALLOWED_CHARS, sanitize: bool = True) -> str:
     """
@@ -587,6 +454,7 @@ def sanitize_input(expr: str, allowed_chars: re.Pattern[str] = ALLOWED_CHARS, sa
         raise ValueError('Invalid characters in expression')
     logging_print(f"Expr (sanitized):{' ' * 4}`{expr_comp}` - type: {type(expr_comp)}")
     return expr_comp
+
 
 def simplify_floats(expr: sp.Expr, ndec: int, approx: bool) -> sp.Expr:
     """
@@ -612,13 +480,11 @@ def simplify_floats(expr: sp.Expr, ndec: int, approx: bool) -> sp.Expr:
         Returns:
             sympy.Basic: The rounded and truncated term.
         """
-        #logging_print(f"Raw term:{' '*7}`{term}`")
         if term.is_number:
             try:
                 if approx:
                     # Round to the specified number of decimal places
                     rounded_term: sp.Basic = S(round(term, ndec))
-                    #logging_print(f"Rounded term:{' '*3}`{rounded_term}`")
                 else:
                     # If not using approximate simplification, leave the term unchanged
                     rounded_term = term
@@ -631,12 +497,10 @@ def simplify_floats(expr: sp.Expr, ndec: int, approx: bool) -> sp.Expr:
                 sig_ndec: int = len(str(rounded_term).split('.')[1].rstrip('0'))
                 if sig_ndec == 0:
                     # No significant decimal places
-                    #logging_print(f"Truncated term:{' '*1}`{int(rounded_term)}`")
                     # Return integer
                     return S(int(rounded_term))
                 else:
                     # Has significant decimal places
-                    #logging_print(f"Truncated term:{' '*1}`{round(rounded_term, term_ndec)}`")
                     # Return float truncated to significant decimal places
                     return S(round(rounded_term, sig_ndec))
             except Exception:
@@ -648,8 +512,7 @@ def simplify_floats(expr: sp.Expr, ndec: int, approx: bool) -> sp.Expr:
     return rounded_expr
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
     pass

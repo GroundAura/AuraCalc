@@ -1,4 +1,4 @@
-### IMPORTS ###
+# IMPORTS #
 
 # builtins
 from collections.abc import Container, Sequence
@@ -11,8 +11,7 @@ from app_type import str_to_bool, str_to_float, str_to_int
 from app_type import str_to_dict, str_to_list, str_to_set, str_to_tuple
 
 
-
-### FUNCTIONS ###
+# FUNCTIONS #
 
 def config_to_dict(
     config: ConfigParser,
@@ -51,6 +50,7 @@ def config_to_dict(
         config_dict[section] = section_dict
     return config_dict
 
+
 def get_config_value(
     config: dict | None,
     cfg_section: str,
@@ -64,6 +64,7 @@ def get_config_value(
         return config[cfg_section][cfg_key]
     except KeyError:
         return def_val
+
 
 def read_config(
     file_path: str,
@@ -106,12 +107,10 @@ def read_config(
     return config_dict
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
     pass
-
 
 
 if __name__ == '__main__':

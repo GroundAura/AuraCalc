@@ -1,4 +1,4 @@
-### IMPORTS ###
+# IMPORTS #
 
 # builtins
 from collections.abc import Callable, Container
@@ -7,12 +7,10 @@ from collections.abc import Callable, Container
 from customtkinter import CTkBaseClass
 
 # internal
-#from app_logging import logging_print
 from app_type import validate_type
 
 
-
-### FUNCTIONS ###
+# FUNCTIONS #
 
 def bind_event(
     widget: CTkBaseClass,
@@ -42,6 +40,7 @@ def bind_event(
             lambda event: command(*args, **kwargs)
         )
 
+
 def _on_event(
     event,
     excluded_keys: str | Container[str],
@@ -49,23 +48,17 @@ def _on_event(
     *args,
     **kwargs
 ) -> None:
-    #logging_print(excluded_keys)
-    #logging_print(event)
-    #logging_print(type(event))
-    #logging_print(event.keysym)
     if not excluded_keys or excluded_keys is None:
         func(*args, **kwargs)
         return
     if issubclass(type(excluded_keys), Container):
         if event.keysym in excluded_keys:
-            #logging_print('excluded')
             return
         else:
             func(*args, **kwargs)
             return
     elif type(excluded_keys) is str:
         if event.keysym == excluded_keys:
-            #logging_print('excluded')
             return
         else:
             func(*args, **kwargs)
@@ -74,8 +67,7 @@ def _on_event(
         raise ValueError(f"Invalid type for excluded_seq: {type(excluded_keys)}. Must be list, tuple, or str.")
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
     pass

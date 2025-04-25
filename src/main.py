@@ -1,14 +1,4 @@
-### IMPORTS ###
-
-# builtins
-#import tkinter as tk
-#from tkinter import ttk
-
-# external
-#import customtkinter as ctk
-#import PyQt6 as pyqt
-#import tkinterdnd2 as tkdnd
-#import tkinterplus as tkp
+# IMPORTS #
 
 # internal
 from app_class import CalculatorApp
@@ -17,59 +7,42 @@ from app_globals import FILE_HISTORY, FILE_ICON, FILE_LOG, FILE_CONFIG
 from app_logging import logging_print
 
 
-
-### MAIN ###
+# MAIN #
 
 def main():
-    ### WINDOW SETUP ###
+    # WINDOW SETUP #
 
     # Initialize window
     logging_print(f"{META_NAME} v{META_VERSION} by {META_AUTHOR}")
     logging_print('Initializing...')
     app = CalculatorApp(
-        name = META_NAME,
-        version = META_VERSION,
-        author = META_AUTHOR,
-        resources_dir = DIR_RESOURCES,
-        history_file = FILE_HISTORY,
-        icon_file = FILE_ICON,
-        log_file = FILE_LOG,
-        config_file = FILE_CONFIG,
-        use_config = True,
-        win_layout = 'grid'
+        name=META_NAME,
+        version=META_VERSION,
+        author=META_AUTHOR,
+        resources_dir=DIR_RESOURCES,
+        history_file=FILE_HISTORY,
+        icon_file=FILE_ICON,
+        log_file=FILE_LOG,
+        config_file=FILE_CONFIG,
+        use_config=True,
+        win_layout='grid'
     )
-
-    # Configure theme
-    #app._set_theme_mode('dark')
-    #app._set_theme_color('green')
-    #tk.ttk.Style().theme_use('clam')
 
     # Configure grid
     app.window.grid_columnconfigure(0, weight=1)
-    #app.window.grid_columnconfigure(1, weight=1)
-    #app.window.grid_columnconfigure(2, weight=1)
-    #app.window.grid_columnconfigure(3, weight=1)
 
     app.window.grid_rowconfigure(0, weight=0)
     app.window.grid_rowconfigure(1, weight=1)
-    #app.window.grid_rowconfigure(2, weight=0)
 
     # Configure padding
     x_padding = 2
 
     y_padding = 3
-    #y_pad_try = window_height / 2 - 25
-    #y_padding = y_pad_try if y_pad_try > 5 and window_height > 100 else 5
 
-
-
-    ### FRAME SETUP ###
+    # FRAME SETUP #
 
     # Basic calculator frame
     app.win_frame_base.grid(row=0, column=0, padx=0, pady=0, sticky='NSEW')
-    #logging_print(app.win_frame_base.winfo_pointerxy())
-    #logging_print(app.win_frame_base.winfo_manager())
-    #logging_print(app.win_frame_base.winfo_screen())
     app.win_frame_base.grid_columnconfigure(0, weight=1)
     app.win_frame_base.grid_columnconfigure(1, weight=1)
     app.win_frame_base.grid_columnconfigure(2, weight=1)
@@ -79,29 +52,11 @@ def main():
     app.win_frame_base.grid_rowconfigure(1, weight=0)
     app.win_frame_base.grid_rowconfigure(2, weight=0)
 
-    ## Advanced calculator frame
+    # Advanced calculator frame
     app.win_frame_adv.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
     app.win_frame_adv.grid_remove()
 
-
-
-    ### MENU BAR SETUP ###
-
-    ## Create the menu bar
-    #menu_bar = tk.Menu(app.window)
-
-    ## Create the File menu
-    #file_menu = tk.Menu(menu_bar, tearoff=0, activebackground='#106a43')
-    #file_menu.add_command(label='Exit', command=app.close_window)
-    ###file_menu.grid(row=0, column=0, padx=x_padding, pady=y_padding)
-
-    ## Add the menus to the menu bar
-    #menu_bar.add_cascade(label='File', menu=file_menu)
-    #app.window.config(menu=menu_bar)
-
-
-
-    ### GUI ELEMENTS ###
+    # GUI ELEMENTS #
 
     # Entry Input Element (CTkEntry)
     app._wgt_txt_input.grid(
@@ -143,8 +98,7 @@ def main():
         sticky='NW', padx=x_padding, pady=y_padding
     )
 
-
-    ### FINAL INITIALIZATION ###
+    # FINAL INITIALIZATION #
 
     # Start main loop
     logging_print('Initialization complete!')

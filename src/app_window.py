@@ -1,30 +1,10 @@
-### IMPORTS ###
+# IMPORTS #
 
 # external
 import customtkinter as ctk
 
-# internal
-#from app_logging import logging_print
 
-
-
-### FUNCTIONS ###
-#def copy_text(app, element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
-#    """
-#    Copies the text in the element to the clipboard.
-
-#    Args:
-#        window (ctk.CTk): The window to copy the text in.
-#        element (ctk.CTkEntry | ctk.CTkTextbox): The element to copy the text from.
-#    """
-#    app.window.clipboard_clear()
-#    if isinstance(element, ctk.CTkEntry):
-#        element.get(0, 'end')
-#    elif isinstance(element, ctk.CTkText):
-#        element.get('1.0', 'end-1c')
-#    app.window.clipboard_append(element.get())
-#    logging_print(f"Text copied to clipboard: `{app.clipboard}`")
-#    app.window.update()
+# FUNCTIONS #
 
 def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
     """
@@ -39,6 +19,7 @@ def focus_element(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
     elif isinstance(element, ctk.CTkTextbox):
         element.tag_add('sel', '1.0', 'end-1c')
 
+
 def text_clear(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
     """
     Clears the text in a given element.
@@ -52,6 +33,7 @@ def text_clear(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
         text_remove(element, '1.0', 'end')
     else:
         raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
+
 
 def text_remove(
     element: ctk.CTkEntry | ctk.CTkTextbox,
@@ -80,6 +62,7 @@ def text_remove(
     else:
         raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
 
+
 def text_set(element, text: str | None = None) -> None:
     """
     Sets the text in a given element.
@@ -104,8 +87,7 @@ def text_set(element, text: str | None = None) -> None:
             element.state_disabled = True
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
     pass

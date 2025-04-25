@@ -1,4 +1,4 @@
-### IMPORTS ###
+# IMPORTS #
 
 # builtins
 from pathlib import Path
@@ -8,8 +8,7 @@ import sys
 from app_type import validate_type
 
 
-
-### FUNCTIONS ###
+# FUNCTIONS #
 
 def get_full_path(
     dir_name: str,
@@ -26,19 +25,18 @@ def get_full_path(
     else:
         return root_path / file_name
 
+
 def get_root_path() -> Path:
     try:
         # PyInstaller creates a temporary folder and stores the path in _MEIPASS
         root_path = Path(sys.MEIPASS)
-        #return Path(sys.executable).parent
     except AttributeError:
         root_path = Path.cwd()
     validate_type(root_path, Path)
     return root_path
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
     pass

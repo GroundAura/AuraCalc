@@ -1,4 +1,4 @@
-## IMPORTS ###
+# IMPORTS #
 
 # builtins
 import builtins
@@ -8,8 +8,7 @@ from typing import Any, TypeAlias, Tuple, Union
 from types import UnionType
 
 
-
-### TYPES ###
+# TYPES #
 
 if sys.version_info >= (3, 10):
     _ClassInfo: TypeAlias = Union[type, UnionType, Tuple['_ClassInfo', ...]]
@@ -17,23 +16,7 @@ else:
     _ClassInfo: TypeAlias = Union[type, Tuple['_ClassInfo', ...]]
 
 
-
-### FUNCTIONS ###
-#def fits_typing(object: Any, class_or_tuple: _ClassInfo) -> bool:
-#    """
-#    Determines if an object is an instance or subclass of a given class or tuple of classes.
-
-#    Args:
-#        object (Any): The object to check.
-#        class_or_tuple (_ClassInfo): The class or tuple of classes to check against.
-
-#    Returns:
-#        bool: `True` if the object is an instance or subclass of the given class or tuple of classes, `False` otherwise.
-#    """
-#    try:
-#        return isinstance(object, class_or_tuple) or issubclass(type(object), class_or_tuple)
-#    except Exception as e:
-#        raise Exception(f"Error while trying to check if {object} is instance or subclass of {class_or_tuple}:\n  {e}")
+# FUNCTIONS #
 
 def function_exists(
     func_name: str,
@@ -60,10 +43,11 @@ def function_exists(
         return True
 
     if check_builtins and \
-        func_name in dir(builtins) and callable(getattr(builtins, func_name)):
+            func_name in dir(builtins) and callable(getattr(builtins, func_name)):
         return True
 
     return False
+
 
 def get_type(obj: Any) -> str:
     """
@@ -80,22 +64,18 @@ def get_type(obj: Any) -> str:
     except Exception as e:
         raise Exception(f"Error while trying to get type of data {obj}:\n  {e}")
 
+
 def matches_key(string: str, key: str | Container[str]) -> bool:
     try:
-        #print(f"string: {type(string).__name__} = '{string}'")
-        #print(f"key: {type(key).__name__} = '{key}'")
-        #print(issubclass(type(key), Container))
         if isinstance(key, str):
-            #print(f"string == key :: {string == key}")
             return string == key
         elif issubclass(type(key), Container):
-            #print(f"string in key :: {string in key}")
             return string in key
         else:
-            #print(f"string == key | string in key :: False")
             return False
     except Exception as e:
         raise Exception(f"Error while trying to check if string '{string}' matches key '{key}':\n  {e}")
+
 
 def str_to_bool(
     string: str,
@@ -119,6 +99,7 @@ def str_to_bool(
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to a boolean:\n  {e}")
 
+
 def str_to_dict(string: str) -> dict[str, str]:
     try:
         if string.startswith('{') and string.endswith('}'):
@@ -132,6 +113,7 @@ def str_to_dict(string: str) -> dict[str, str]:
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to a dictionary:\n  {e}")
 
+
 def str_to_float(string: str) -> float:
     try:
         new_val: float = float(string)
@@ -142,6 +124,7 @@ def str_to_float(string: str) -> float:
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to a float:\n  {e}")
 
+
 def str_to_int(string: str) -> int:
     try:
         new_val: int = int(string)
@@ -151,6 +134,7 @@ def str_to_int(string: str) -> int:
             raise Exception('Failed to convert str to int.')
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to an integer:\n  {e}")
+
 
 def str_to_list(string: str) -> list[str]:
     try:
@@ -163,6 +147,7 @@ def str_to_list(string: str) -> list[str]:
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to a list:\n  {e}")
 
+
 def str_to_set(string: str) -> set[str]:
     try:
         string = string.lstrip('{').rstrip('}')
@@ -173,6 +158,7 @@ def str_to_set(string: str) -> set[str]:
             raise Exception('Failed to convert str to set.')
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to a set:\n  {e}")
+
 
 def str_to_tuple(string: str) -> tuple[str, ...]:
     try:
@@ -185,14 +171,14 @@ def str_to_tuple(string: str) -> tuple[str, ...]:
     except Exception as e:
         raise Exception(f"Error while trying to convert string '{string}' to a tuple:\n  {e}")
 
+
 def validate_type(value, valid_type: _ClassInfo) -> bool:
     if not isinstance(value, valid_type):
         raise TypeError(f"Expected type `{valid_type}`, got `{type(value)}`")
     return True
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test() -> None:
     try:
@@ -267,30 +253,6 @@ def _test() -> None:
     except Exception as e:
         print(f"ERROR: {e}")
         exit()
-
-    #print(f"isinstance(list, Sequence): {isinstance(list, Sequence)}")
-    #print(f"isinstance(set, Sequence): {isinstance(set, Sequence)}")
-    #print(f"isinstance(tuple, Sequence): {isinstance(tuple, Sequence)}")
-    #print(f"isinstance(dict, Sequence): {isinstance(dict, Sequence)}")
-    #print(f"isinstance(str, Sequence): {isinstance(str, Sequence)}")
-
-    #print(f"isinstance(list, Iterable): {isinstance(list, Iterable)}")
-    #print(f"isinstance(set, Iterable): {isinstance(set, Iterable)}")
-    #print(f"isinstance(tuple, Iterable): {isinstance(tuple, Iterable)}")
-    #print(f"isinstance(dict, Iterable): {isinstance(dict, Iterable)}")
-    #print(f"isinstance(str, Iterable): {isinstance(str, Iterable)}")
-
-    #print(f"isinstance(list, Container): {isinstance(list, Container)}")
-    #print(f"isinstance(set, Container): {isinstance(set, Container)}")
-    #print(f"isinstance(tuple, Container): {isinstance(tuple, Container)}")
-    #print(f"isinstance(dict, Container): {isinstance(dict, Container)}")
-    #print(f"isinstance(str, Container): {isinstance(str, Container)}")
-
-    #print(f"isinstance(list, Collection): {isinstance(list, Collection)}")
-    #print(f"isinstance(set, Collection): {isinstance(set, Collection)}")
-    #print(f"isinstance(tuple, Collection): {isinstance(tuple, Collection)}")
-    #print(f"isinstance(dict, Collection): {isinstance(dict, Collection)}")
-    #print(f"isinstance(str, Collection): {isinstance(str, Collection)}")
 
     # True, False, True, False, True
     print(f"issubclass(list, Sequence): {issubclass(list, Sequence)}")

@@ -1,12 +1,11 @@
-### IMPORTS ###
+# IMPORTS #
 
 # internal
 from app_config import read_config, get_config_value
 from app_path import get_full_path
 
 
-
-### CONSTANTS ###
+# CONSTANTS #
 
 # Metadata
 META_NAME: str = 'AuraCalc'
@@ -25,8 +24,7 @@ FORCE_DEBUG: bool = False
 USE_CONFIG: bool = True
 
 
-
-### VARIABLES ###
+# VARIABLES #
 
 # Paths
 PATH_LOG = get_full_path(DIR_RESOURCES, FILE_LOG)

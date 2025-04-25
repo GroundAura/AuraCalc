@@ -1,11 +1,10 @@
-### IMPORTS ###
+# IMPORTS #
 
 # builtins
 from typing import Any, Literal
 
 # external
 import customtkinter as ctk
-#from decimal import getcontext
 from pathlib import Path
 
 # internal
@@ -19,8 +18,7 @@ from app_type import validate_type
 from app_window import focus_element, text_set
 
 
-
-### CLASSES ###
+# CLASSES #
 
 class App:
     # constructor
@@ -54,9 +52,7 @@ class App:
         if self._debug_mode and self._config is not None:
             self._logging_print(f"Config Settings: {self._config}")
 
-
     # private methods
-
     def _logging_print(
         self,
         message: str = '',
@@ -66,14 +62,6 @@ class App:
         print_to_file: bool = True,
         debug_mode_only: bool = True
     ) -> None:
-        #try:
-        #    validate_type(self._log_path, Path)
-        #except AttributeError:
-        #    raise AttributeError('Log path not set')
-        #try:
-        #    validate_type(self._debug_mode, bool)
-        #except AttributeError:
-        #    self._set_debug_mode(app_globals.DEBUG_MODE)
         try:
             validate_type(message, str)
         except TypeError:
@@ -115,11 +103,8 @@ class App:
 
     def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
         value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
-        #print(self._config['DEBUG']['bDebugMode'])
         validate_type(new_val, bool)
         self._debug_mode: bool = value
-        #app_globals.DEBUG_MODE = self._debug_mode
-        #print(self._debug_mode, app_globals.DEBUG_MODE)
 
     def _set_icon_path(self, file_name: str) -> None:
         validate_type(self._resources_path, Path)
@@ -147,7 +132,6 @@ class App:
         validate_type(new_val, str)
         self._version: str = new_val
 
-
     # public methods
     def print_info(self) -> None:
         data = []
@@ -161,7 +145,6 @@ class App:
             data.append(f"Config Path: {self._config_path}")
         for line in data:
             self._logging_print(line)
-
 
     # properties
     @property
@@ -179,7 +162,6 @@ class App:
     @property
     def version(self) -> str:
         return self._version
-
 
 
 class GuiApp(App):
@@ -247,7 +229,6 @@ class GuiApp(App):
         self.update_window(reset_pos=True)
         if self._win_pinned_def:
             self.toggle_pinned()
-        #print('Initialized Window')
 
         # window widgets
         self._wgt_frame_base = ctk.CTkFrame(self._window)
@@ -257,22 +238,17 @@ class GuiApp(App):
         self._set_key_quit('<Escape>', use_config)
         self._window.protocol('WM_DELETE_WINDOW', self.close_window)
 
-
     # private methods
     def _add_bound_key(self, sequence: str) -> None:
         validate_type(sequence, str)
         if sequence[0] != '<' or sequence[-1] != '>':
             raise ValueError(f"ERROR: Invalid key sequence: '{sequence}'. Must be in the format '<sequence>'")
         sequence = sequence.lstrip('<').rstrip('>')
-        #sequence = sequence[1:-1]
         if '-' in sequence:
-            #keys = sequence.split('-')
-            #key = keys[-1]
             return
         else:
             key = sequence
             self._bound_keys.add(key)
-        #self._bound_keys.add(key)
 
     def _set_key_quit(self, new_val: str, use_config: bool = False) -> None:
         value = get_config_value(self._config, 'KEYBINDS', 'sQuitKey', new_val, use_config)
@@ -367,7 +343,6 @@ class GuiApp(App):
             raise FileNotFoundError(f"File `{self._icon_path}` does not exist")
         self._window.iconbitmap(self._icon_path)
 
-
     # public methods
     def close_window(self) -> None:
         self._logging_print(f"Closing {self.name}.")
@@ -376,9 +351,6 @@ class GuiApp(App):
 
     def focus_window(self) -> None:
         self._window.focus_force()
-
-    #def maximize_window(self) -> None:
-    #    self._window.attributes('-zoomed', True)
 
     def minimize_window(self) -> None:
         self._window.iconify()
@@ -396,9 +368,6 @@ class GuiApp(App):
         for line in data:
             self._logging_print(line)
 
-    #def restore_window(self) -> None:
-    #    self._window.attributes('-zoomed', False)
-
     def toggle_pinned(self) -> None:
         if not self._win_pinned:
             self._window.attributes('-topmost', True)
@@ -409,13 +378,11 @@ class GuiApp(App):
 
     def update_window(self, reset_pos: bool = False) -> None:
         self._screen_width, self._screen_height = self.screen_dimensions
-        #print(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
         if reset_pos:
             current_width = self._win_width_def
             current_height = self._win_height_def
         else:
             current_width, current_height = self.window_dimensions
-        #print(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
         if reset_pos:
             if self._win_centered_def:
                 target_x_pos = (self._screen_width // 2) - (current_width // 2)
@@ -426,7 +393,6 @@ class GuiApp(App):
         else:
             target_x_pos = self._window.winfo_x()
             target_y_pos = self._window.winfo_y()
-        #print(f"Target Position: ({target_x_pos}, {target_y_pos})")
         target_width = current_width if current_width > self._win_width_min else self._win_width_min
         target_height = current_height if current_height > self._win_height_min else self._win_height_min
         self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
@@ -434,9 +400,6 @@ class GuiApp(App):
         self._window.resizable(self._win_resize_width, self._win_resize_height)
         self._win_width, self._win_height = self.window_dimensions
         self._win_x_pos, self._win_y_pos = self.window_position
-        #self._window.update()
-        #print('Window updated.')
-
 
     # properties
     @property
@@ -458,7 +421,6 @@ class GuiApp(App):
     @property
     def window_position(self) -> tuple[int, int]:
         return self._window.winfo_x(), self._window.winfo_y()
-
 
 
 class CalculatorApp(GuiApp):
@@ -515,14 +477,12 @@ class CalculatorApp(GuiApp):
         self._set_win_restore_pin(False, use_config)
         self._set_win_restore_pos(False, use_config)
 
-        ## window state
+        # window state
         self._win_expanded: bool = False
 
         # window widgets
         validate_type(self._window, ctk.CTk)
         self._wgt_frame_adv = ctk.CTkFrame(self._window)
-        #self._win_frame_help = ctk.CTkFrame(self._window)
-        #self._win_frame_opt = ctk.CTkFrame(self._window)
         self._wgt_btn_adv = ctk.CTkButton(self._wgt_frame_base, text='Expand', command=self.toggle_advanced)
         self._wgt_btn_clear = ctk.CTkButton(self._wgt_frame_base, text='Clear', command=self.clear_memory)
         pinned_text: str = 'Unpin' if self._win_pinned else 'Pin'
@@ -562,26 +522,13 @@ class CalculatorApp(GuiApp):
         self._set_key_clear('<Alt-BackSpace>', use_config)
         self._set_key_del_l('<Control-BackSpace>', use_config)
         self._set_key_del_r('<Control-Delete>', use_config)
-        #self._set_key_del_term_l('<Shift-Delete>', use_config)
-        #bind_event(self._window, self._key_del_term_l, command=lambda: self._del_txt_term(self._win_txt_input, 'left'))
-        #self._set_key_del_term_r('<Shift-BackSpace>', use_config)
-        #bind_event(self._window, self._key_del_term_r, command=lambda: self._del_txt_term(self._win_txt_input, 'right'))
         self._set_key_eval('<Return>', use_config)
-        #self._set_key_help('<F1>', use_config)
-        #bind_event(self._window, self._key_help, command=self.show_help)
         self._set_key_next('<Down>', use_config)
-        #self._set_key_options('<F2>', use_config)
-        #bind_event(self._window, self._key_options, command=self.show_options)
         self._set_key_previous('<Up>', use_config)
-        #self._set_key_redo('<Control-y>', use_config)
-        #bind_event(self._window, self._key_options, command=self.undo_txt)
-        #self._set_key_undo('<Control-z>', use_config)
-        #bind_event(self._window, self._key_options, command=self.redo_txt)
         manual_exclusions: tuple[str, ...] = (
             '<Shift_L>', '<Shift_R>', '<Control_L>', '<Control_R>',
             '<Alt_L>', '<Alt_R>', '<Meta_L>', '<Meta_R>',
             '<Super_L>', '<Super_R>', '<Hyper_L>', '<Hyper_R>',
-            #'<Mod1>', '<Mod2>', '<Mod3>', '<Mod4>', '<Mod5>',
             '<Left>', '<Right>', '<KP_Left>', '<KP_Right>',
             '<Home>', '<End>', '<KP_Home>', '<KP_End>',
             '<Prior>', '<Next>', '<KP_Prior>', '<KP_Next>',
@@ -604,9 +551,6 @@ class CalculatorApp(GuiApp):
             self.toggle_advanced()
 
     # private methods
-    #def _del_txt(self, element, begin, end) -> None:
-    #    element.delete(begin, end)
-
     def _del_txt_cursor(self, element, direction) -> None:
         if direction.lower() in ('left', 'l', '<'):
             if type(element) is ctk.CTkEntry:
@@ -651,7 +595,6 @@ class CalculatorApp(GuiApp):
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._calc_dec_precision: int = value
-        #getcontext().prec = self._calc_dec_precision
 
     def _set_calc_live_eval(self, new_val: bool, use_config: bool = False) -> None:
         value = get_config_value(self._config, 'CALCULATION', 'bLiveEval', new_val, use_config)
@@ -797,7 +740,6 @@ class CalculatorApp(GuiApp):
             value = False if not self._win_restore else value
         except AttributeError:
             pass  # ignore if self._win_restore is not set
-            #value = False # disable if self._win_restore is not set
         validate_type(new_val, bool)
         self._win_restore_adv: bool = value
 
@@ -807,7 +749,6 @@ class CalculatorApp(GuiApp):
             value = False if not self._win_restore else value
         except AttributeError:
             pass  # ignore if self._win_restore is not set
-            #value = False # disable if self._win_restore is not set
         validate_type(new_val, bool)
         self._win_restore_dim: bool = value
 
@@ -817,7 +758,6 @@ class CalculatorApp(GuiApp):
             value = False if not self._win_restore else value
         except AttributeError:
             pass  # ignore if self._win_restore is not set
-            #value = False # disable if self._win_restore is not set
         validate_type(new_val, bool)
         self._win_restore_pin: bool = value
 
@@ -827,7 +767,6 @@ class CalculatorApp(GuiApp):
             value = False if not self._win_restore else value
         except AttributeError:
             pass  # ignore if self._win_restore is not set
-            #value = False # disable if self._win_restore is not set
         validate_type(new_val, bool)
         self._win_restore_pos: bool = value
 
@@ -859,18 +798,11 @@ class CalculatorApp(GuiApp):
         changes_made: bool = False
         expr: str = self._wgt_txt_input.get()
         if expr == self.calc_def_expr:
-            #self._calc_history_index = len(self._calc_history) - 1
             return changes_made
         result: str = self._wgt_txt_result.get('1.0', 'end-1c')
         result_approx: str | None = result if self._approximate else None
         result_exact: str | None = result if not self._approximate else None
-        #calculatation = {
-        #    'expression': expr,
-        #    'result_approx': result_approx,
-        #    'result_exact': result_exact
-        #}
         index = next((i for i, calc in enumerate(self._calc_history) if calc['expression'] == expr), None)
-        #if not any(calc['expression'] == expr for calc in self._calc_history):
         if index is None:
             self._calc_history.append({
                 'expression': expr,
@@ -878,27 +810,14 @@ class CalculatorApp(GuiApp):
                 'result_exact': result_exact
             })
             changes_made = True
-        #elif self._calc_history[-1]['expression'] == expr:
-        #elif index == len(self._calc_history) - 1:
-        #    self._calc_history[-1]['result_approx'] = result_approx if self._calc_history[-1]['result_approx'] is None else self._calc_history[-1]['result_approx']
-        #    self._calc_history[-1]['result_exact'] = result_exact if self._calc_history[-1]['result_exact'] is None else self._calc_history[-1]['result_exact']
         else:
-            #self._calc_history[index]['result_approx'] = result_approx if self._calc_history[index]['result_approx'] is None else self._calc_history[index]['result_approx']
             if result_approx is not None and self._calc_history[index]['result_approx'] is None:
                 self._calc_history[index]['result_approx'] = result_approx
                 changes_made = True
-            #self._calc_history[index]['result_exact'] = result_exact if self._calc_history[index]['result_exact'] is None else self._calc_history[index]['result_exact']
             if result_exact is not None and self._calc_history[index]['result_exact'] is None:
                 self._calc_history[index]['result_exact'] = result_exact
                 changes_made = True
-            #if not index == len(self._calc_history) - 1:
-            #    self._calc_history.append(self._calc_history.pop(index))
-            #    changes_made = True
-        #logging_print(f"changes_made: `{changes_made}`")
-        #if changes_made:
-        #    logging_print(f"History: `{self._calc_history}`")
         return changes_made
-
 
     # public methods
     def clear_io(self) -> None:
@@ -915,11 +834,9 @@ class CalculatorApp(GuiApp):
             self._timeout_id = self._window.after(self._calc_live_eval_delay, self.display_result, message, logging, False)
             return
         message = str(message)
-        #message = message.replace('\n', '\\n')
         text_set(self._wgt_txt_result, message)
         if logging:
             self._logging_print(f"Result:{' ' * 14}`{message.replace('\n', '\\n')}`")
-            #self._logging_print(f"Result:{' '*14}`{message}`")
 
     def evaluate(self, live_mode: bool = False) -> str:
         # get input
@@ -944,7 +861,6 @@ class CalculatorApp(GuiApp):
         try:
             self._logging_print('Evaluating...')
             result = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
-            #self.calc_last_result = result
             self.display_result(result)
             return result
         except ZeroDivisionError as e:
@@ -966,17 +882,10 @@ class CalculatorApp(GuiApp):
                 return result
 
     def eval_or_clear(self) -> None:
-        #expr: str = self._wgt_txt_input.get()
-        #result: str = self.evaluate()
-        #changes_made: bool = self._store_eval(expr, result)
         self.evaluate()
         changes_made: bool = self._store_eval()
         if self._calc_live_eval or not changes_made:
-            #text_set(self._wgt_txt_input, self.calc_def_expr)
-            #text_set(self._wgt_txt_result, self._calc_def_result)
             self.clear_io()
-            #if changes_made:
-            #    self._calc_history_index += 1
         self._calc_history_index = len(self._calc_history) if len(self._calc_history) > 0 else -1
         logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
@@ -986,12 +895,10 @@ class CalculatorApp(GuiApp):
         logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
     def history_next(self) -> None:
-        #print('next')
         changes_made: bool = self._store_eval()
         if changes_made:
             self._calc_history_index = len(self._calc_history)
         if len(self._calc_history) > 1 and -1 < self._calc_history_index < len(self._calc_history) - 1:
-            #self._store_eval()
             try:
                 expr: str | None = self._calc_history[self._calc_history_index + 1]['expression']
                 result_approx: str | None = self._calc_history[self._calc_history_index + 1]['result_approx']
@@ -1016,12 +923,10 @@ class CalculatorApp(GuiApp):
         logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
 
     def history_previous(self) -> None:
-        #print('previous')
         changes_made: bool = self._store_eval()
         if changes_made:
             self._calc_history_index = len(self._calc_history)
         if len(self._calc_history) > 0 and self._calc_history_index > 0:
-            #self._store_eval()
             try:
                 expr: str | None = self._calc_history[self._calc_history_index - 1]['expression']
                 result_approx: str | None = self._calc_history[self._calc_history_index - 1]['result_approx']
@@ -1044,7 +949,6 @@ class CalculatorApp(GuiApp):
 
     def open_window(self) -> None:  # override
         self._logging_print(f"Opening {self.name}.")
-        #self._logging_print()
         if self._win_force_focus:
             self._logging_print('Forcing window focus.')
             self.focus_window()
@@ -1060,21 +964,18 @@ class CalculatorApp(GuiApp):
 
     def toggle_advanced(self) -> None:
         if not self._win_expanded:
-            #self._win_frame_adv.grid(row=1, column=0, padx=0, pady=0, sticky='NSEW')
             self._show_element(self._wgt_frame_adv)
             self._wgt_btn_adv.configure(text='Collapse')
             self._win_expanded = True
             self.win_resize_height = True
             self.update_window(reset_width=False, reset_height=False)
         else:
-            #self._win_frame_adv.grid_forget()
             self._hide_element(self._wgt_frame_adv)
             self._wgt_btn_adv.configure(text='Expand')
             self._win_expanded = False
             self.win_resize_height = False
             self.update_window(reset_width=True, reset_height=True)
         self._logging_print(f"Advanced = {self._win_expanded}")
-        #self._logging_print(f"Viewable = {self._win_frame_adv.winfo_viewable()}")
 
     def toggle_approximate(self) -> None:
         self._set_calc_approximate(not self._approximate, use_config=False)
@@ -1100,13 +1001,11 @@ class CalculatorApp(GuiApp):
 
     def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None:  # override
         self._screen_width, self._screen_height = self.screen_dimensions
-        #print(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
         if reset_pos:
             current_width = self._win_width_def
             current_height = self._win_height_def
         else:
             current_width, current_height = self.window_dimensions
-        #print(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
         if reset_pos:
             if self._win_centered_def:
                 target_x_pos = (self._screen_width // 2) - (current_width // 2)
@@ -1117,7 +1016,6 @@ class CalculatorApp(GuiApp):
         else:
             target_x_pos = self._window.winfo_x()
             target_y_pos = self._window.winfo_y()
-        #print(f"Target Position: ({target_x_pos}, {target_y_pos})")
         try:
             expanded = True if self._win_expanded else False
         except AttributeError:
@@ -1127,32 +1025,25 @@ class CalculatorApp(GuiApp):
                 target_width = self._win_width_adv
             else:
                 target_width = current_width if current_width > self._win_width_min_adv else self._win_width_min_adv
-                #target_width = current_width if current_width > self._win_width_adv else self._win_width_adv
             if reset_height:
                 target_height = self._win_height_adv
             else:
                 target_height = current_height if current_height > self._win_height_min_adv else self._win_height_min_adv
-                #target_height = current_height if current_height > self._win_height_adv else self._win_height_adv
             self._window.minsize(self._win_width_min_adv, self._win_height_min_adv)
         else:
             if reset_width:
                 target_width = self._win_width_def
             else:
                 target_width = current_width if current_width > self._win_width_min else self._win_width_min
-                #target_width = current_width if current_width > self._win_width_def else self._win_width_def
-                #target_width = current_width if current_width > self._win_width_adv else self._win_width_adv
             if reset_height:
                 target_height = self._win_height_def
             else:
                 target_height = current_height if current_height > self._win_height_min else self._win_height_min
-                #target_height = current_height if current_height > self._win_height_def else self._win_height_def
             self._window.minsize(self._win_width_min, self._win_height_min)
         self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
         self._window.resizable(self._win_resize_width, self._win_resize_height)
         self._win_width, self._win_height = self.window_dimensions
         self._win_x_pos, self._win_y_pos = self.window_position
-        #self._window.update()
-        #print('Window updated.')
 
     # properties
     @property
@@ -1192,15 +1083,6 @@ class CalculatorApp(GuiApp):
     def timeout_patience(self) -> int:
         return self._timeout_patience
 
-    #@property
-    #def win_expanded(self) -> bool:
-    #    return self._win_expanded
-
-    #@win_expanded.setter
-    #def win_expanded(self, new_val: bool) -> None:
-    #    validate_type(new_val, bool)
-    #    self._win_expanded = new_val
-
     @property
     def win_frame_adv(self) -> ctk.CTkFrame:
         return self._wgt_frame_adv
@@ -1215,18 +1097,12 @@ class CalculatorApp(GuiApp):
         self._win_resize_height = new_val
 
 
-
-### TESTING ###
+# TESTING #
 
 def _test():
-    #app = App('Test', '0.0.1', 'GroundAura')
-    #app = GuiApp('Test App', '0.0.1', 'GroundAura')
     app = CalculatorApp('Test App', '0.0.1', 'GroundAura', win_centered=True, config_file='AuraCalc.ini', use_config=False)
 
-    #print(app.window_position)
     app.print_info()
-    #app.update_window()
-    #app.print_info()
     app.open_window()
 
 
