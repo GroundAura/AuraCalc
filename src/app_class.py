@@ -95,14 +95,17 @@ class App:
                 self._config_path = self._resources_path / file_name
                 validate_type(self._config_path, Path)
                 if not self._config_path.exists():
-                    raise FileNotFoundError(f"File `{self._config_path}` does not exist")
-                self._config = read_config(str(self._config_path), preserve_key_case=True)
+                    raise FileNotFoundError(
+                        f"File `{self._config_path}` does not exist")
+                self._config = read_config(str(self._config_path),
+                                           preserve_key_case=True)
         else:
             self._config_path = None
             self._config = None
 
     def _set_debug_mode(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
+        value = get_config_value(
+            self._config, 'DEBUG', 'bDebugMode', new_val, use_config)
         validate_type(new_val, bool)
         self._debug_mode: bool = value
 
@@ -242,7 +245,10 @@ class GuiApp(App):
     def _add_bound_key(self, sequence: str) -> None:
         validate_type(sequence, str)
         if sequence[0] != '<' or sequence[-1] != '>':
-            raise ValueError(f"ERROR: Invalid key sequence: '{sequence}'. Must be in the format '<sequence>'")
+            raise ValueError(
+                f"ERROR: Invalid key sequence: '{sequence}'. "
+                "Must be in the format '<sequence>'"
+            )
         sequence = sequence.lstrip('<').rstrip('>')
         if '-' in sequence:
             return
@@ -251,16 +257,23 @@ class GuiApp(App):
             self._bound_keys.add(key)
 
     def _set_key_quit(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sQuitKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sQuitKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_quit: str = value
         bind_event(self._window, self._key_quit, command=self.close_window)
         self._add_bound_key(self._key_quit)
 
-    def _set_theme_mode(self, new_val: Literal['light', 'dark', 'system']) -> None:
+    def _set_theme_mode(
+        self, new_val: Literal['light', 'dark', 'system']
+    ) -> None:
         validate_type(new_val, str)
         if new_val not in ('light', 'dark', 'system'):
-            raise ValueError(f"ERROR: Invalid theme mode: '{new_val}'. Must be 'light', 'dark', or 'system'")
+            raise ValueError(
+                f"ERROR: Invalid theme mode: '{new_val}'. "
+                "Must be 'light', 'dark', or 'system'"
+            )
         self._theme_mode: Literal['light', 'dark', 'system'] = new_val
         ctk.set_appearance_mode(self._theme_mode)
 
@@ -269,23 +282,36 @@ class GuiApp(App):
         self._theme_color: str = new_val
         ctk.set_default_color_theme(self._theme_color)
 
-    def _set_win_centered_def(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_POS', 'bCenterWindow', new_val, use_config)
+    def _set_win_centered_def(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_POS', 'bCenterWindow', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._win_centered_def: bool = value
 
-    def _set_win_height_def(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_BASIC', 'iDefaultHeight', new_val, use_config)
+    def _set_win_height_def(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_BASIC', 'iDefaultHeight', new_val, use_config
+        )
         try:
-            value = self._win_height_min if value < self._win_height_min else value
+            if value < self._win_height_min:
+                value = self._win_height_min
         except AttributeError:
             pass  # ignore if self._win_height_min is not set
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_height_def: int = value
 
-    def _set_win_height_min(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_BASIC', 'iMinHeight', new_val, use_config)
+    def _set_win_height_min(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_BASIC', 'iMinHeight', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_height_min: int = value
@@ -293,11 +319,17 @@ class GuiApp(App):
     def _set_win_layout(self, new_val: Literal['grid', 'pack']) -> None:
         validate_type(new_val, str)
         if new_val not in ('grid', 'pack'):
-            raise ValueError(f"Invalid layout: '{new_val}'. Must be 'grid' or 'pack'")
+            raise ValueError(
+                f"Invalid layout: '{new_val}'. Must be 'grid' or 'pack'"
+            )
         self._win_layout: Literal['grid', 'pack'] = new_val
 
-    def _set_win_pinned_def(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_FLAGS', 'bStartPinned', new_val, use_config)
+    def _set_win_pinned_def(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_FLAGS', 'bStartPinned', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._win_pinned_def: bool = value
 
@@ -309,30 +341,47 @@ class GuiApp(App):
         validate_type(new_val, bool)
         self._win_resize_width: bool = new_val
 
-    def _set_win_width_def(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_BASIC', 'iDefaultWidth', new_val, use_config)
+    def _set_win_width_def(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_BASIC', 'iDefaultWidth', new_val, use_config
+        )
         try:
-            value = self._win_width_min if value < self._win_width_min else value
+            if value < self._win_width_min:
+                value = self._win_width_min
         except AttributeError:
             pass  # ignore if self._win_width_min is not set
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_width_def: int = value
 
-    def _set_win_width_min(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_BASIC', 'iMinWidth', new_val, use_config)
+    def _set_win_width_min(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_BASIC', 'iMinWidth', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_width_min: int = value
 
-    def _set_win_x_pos_def(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_POS', 'iXOffset', new_val, use_config)
+    def _set_win_x_pos_def(
+            self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_POS', 'iXOffset', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_x_pos_def: int = value
 
-    def _set_win_y_pos_def(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_POS', 'iYOffset', new_val, use_config)
+    def _set_win_y_pos_def(
+            self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_POS', 'iYOffset', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_y_pos_def: int = value
@@ -346,7 +395,8 @@ class GuiApp(App):
     # public methods
     def close_window(self) -> None:
         self._logging_print(f"Closing {self.name}.")
-        self._logging_print('\n\n', timestamp=False, print_to_console=False)  # add delimiter to end of log
+        # add delimiter to end of log
+        self._logging_print('\n\n', timestamp=False, print_to_console=False)
         self._window.destroy()
 
     def focus_window(self) -> None:
@@ -362,9 +412,18 @@ class GuiApp(App):
     def print_info(self) -> None:  # override
         App.print_info(self)
         data = []
-        data.append(f"Screen Dimensions (W x H): {self.screen_dimensions[0]} x {self.screen_dimensions[1]}")
-        data.append(f"Window Dimensions (W x H): {self.window_dimensions[0]} x {self.window_dimensions[1]}")
-        data.append(f"Window Position (X, Y): ({self.window_position[0]}, {self.window_position[1]})")
+        data.append(
+            "Screen Dimensions (W x H): "
+            f"{self.screen_dimensions[0]} x {self.screen_dimensions[1]}"
+        )
+        data.append(
+            "Window Dimensions (W x H): "
+            f"{self.window_dimensions[0]} x {self.window_dimensions[1]}"
+        )
+        data.append(
+            "Window Position (X, Y): "
+            f"({self.window_position[0]}, {self.window_position[1]})"
+        )
         for line in data:
             self._logging_print(line)
 
@@ -385,17 +444,29 @@ class GuiApp(App):
             current_width, current_height = self.window_dimensions
         if reset_pos:
             if self._win_centered_def:
-                target_x_pos = (self._screen_width // 2) - (current_width // 2)
-                target_y_pos = (self._screen_height // 2) - (current_height // 2)
+                target_x_pos = (
+                    (self._screen_width // 2) - (current_width // 2)
+                )
+                target_y_pos = (
+                    (self._screen_height // 2) - (current_height // 2)
+                )
             else:
                 target_x_pos = self._win_x_pos_def
                 target_y_pos = self._win_y_pos_def
         else:
             target_x_pos = self._window.winfo_x()
             target_y_pos = self._window.winfo_y()
-        target_width = current_width if current_width > self._win_width_min else self._win_width_min
-        target_height = current_height if current_height > self._win_height_min else self._win_height_min
-        self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
+        if current_width < self._win_width_min:
+            target_width = self._win_width_min
+        else:
+            target_width = current_width
+        if current_height < self._win_height_min:
+            target_height = self._win_height_min
+        else:
+            target_height = current_height
+        self._window.geometry(
+            f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}"
+        )
         self._window.minsize(self._win_width_min, self._win_height_min)
         self._window.resizable(self._win_resize_width, self._win_resize_height)
         self._win_width, self._win_height = self.window_dimensions
@@ -404,7 +475,9 @@ class GuiApp(App):
     # properties
     @property
     def screen_dimensions(self) -> tuple[int, int]:
-        return self._window.winfo_screenwidth(), self._window.winfo_screenheight()
+        w = self._window.winfo_screenwidth()
+        h = self._window.winfo_screenheight()
+        return w, h
 
     @property
     def win_frame_base(self) -> ctk.CTkFrame:
@@ -483,14 +556,25 @@ class CalculatorApp(GuiApp):
         # window widgets
         validate_type(self._window, ctk.CTk)
         self._wgt_frame_adv = ctk.CTkFrame(self._window)
-        self._wgt_btn_adv = ctk.CTkButton(self._wgt_frame_base, text='Expand', command=self.toggle_advanced)
-        self._wgt_btn_clear = ctk.CTkButton(self._wgt_frame_base, text='Clear', command=self.clear_memory)
+        self._wgt_btn_adv = ctk.CTkButton(
+            self._wgt_frame_base, text='Expand', command=self.toggle_advanced
+        )
+        self._wgt_btn_clear = ctk.CTkButton(
+            self._wgt_frame_base, text='Clear', command=self.clear_memory
+        )
         pinned_text: str = 'Unpin' if self._win_pinned else 'Pin'
-        self._wgt_btn_pin = ctk.CTkButton(self._wgt_frame_base, text=pinned_text, command=self.toggle_pinned)
+        self._wgt_btn_pin = ctk.CTkButton(
+            self._wgt_frame_base, text=pinned_text, command=self.toggle_pinned
+        )
         self._wgt_txt_input = ctk.CTkEntry(self._wgt_frame_base)
         self._wgt_txt_result = ctk.CTkTextbox(self._wgt_frame_base)
         self._ctk_var_approx = ctk.IntVar(value=0)
-        self._wgt_chk_approx = ctk.CTkCheckBox(self._wgt_frame_adv, text='Approximate', variable=self._ctk_var_approx, command=self.toggle_approximate)
+        self._wgt_chk_approx = ctk.CTkCheckBox(
+            self._wgt_frame_adv,
+            text='Approximate',
+            variable=self._ctk_var_approx,
+            command=self.toggle_approximate
+        )
 
         # calculator default values
         self._set_calc_dec_precision(100, use_config)
@@ -539,8 +623,15 @@ class CalculatorApp(GuiApp):
         for key in manual_exclusions:
             self._add_bound_key(key)
         if self._calc_live_eval:
-            bind_event(self._wgt_txt_input, '<KeyRelease>', excluded_seq=self._bound_keys, command=lambda: self.evaluate(live_mode=True))
-        self.window.bind('<FocusIn>', lambda event: focus_element(self._wgt_txt_input))
+            bind_event(
+                self._wgt_txt_input,
+                '<KeyRelease>',
+                excluded_seq=self._bound_keys,
+                command=lambda: self.evaluate(live_mode=True)
+            )
+        self.window.bind(
+            '<FocusIn>', lambda event: focus_element(self._wgt_txt_input)
+        )
 
         # final window setup
         text_set(self._wgt_txt_input, self._calc_def_expr)
@@ -563,7 +654,10 @@ class CalculatorApp(GuiApp):
             elif type(element) is ctk.CTkTextbox:
                 element.delete('insert', 'end-1c')
         else:
-            raise ValueError(f"Invalid direction: {direction}. Must be 'left', 'l', '<', 'right', 'r', '>'")
+            raise ValueError(
+                f"Invalid direction: {direction}. "
+                "Must be 'left', 'l', '<', 'right', 'r', '>'"
+            )
 
     def _hide_element(self, element: ctk.CTkBaseClass) -> None:
         if self._win_layout == 'grid':
@@ -571,44 +665,72 @@ class CalculatorApp(GuiApp):
         elif self._win_layout == 'pack':
             element.pack_forget()
         else:
-            raise ValueError(f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'")
+            raise ValueError(
+                f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'"
+            )
 
-    def _set_calc_approximate(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'CALCULATION', 'bApproximate', new_val, use_config)
+    def _set_calc_approximate(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'CALCULATION', 'bApproximate', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._approximate: bool = value
         validate_type(self._ctk_var_approx, ctk.IntVar)
         self._ctk_var_approx.set(int(self._approximate))
 
-    def _set_calc_dec_display(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'CALCULATION', 'iDecimalDisplay', new_val, use_config)
+    def _set_calc_dec_display(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'CALCULATION', 'iDecimalDisplay', new_val, use_config
+        )
         try:
-            value = self._calc_dec_precision if value > self._calc_dec_precision else value
+            if value > self._calc_dec_precision:
+                value = self._calc_dec_precision
         except AttributeError:
             pass  # ignore if self._calc_dec_precision is not set
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._calc_dec_display: int = value
 
-    def _set_calc_dec_precision(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'CALCULATION', 'iDecimalPrecision', new_val, use_config)
+    def _set_calc_dec_precision(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'CALCULATION', 'iDecimalPrecision',
+            new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._calc_dec_precision: int = value
 
-    def _set_calc_live_eval(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'CALCULATION', 'bLiveEval', new_val, use_config)
+    def _set_calc_live_eval(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'CALCULATION', 'bLiveEval', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._calc_live_eval: bool = value
 
-    def _set_calc_live_eval_delay(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'CALCULATION', 'iTimeoutDelay', new_val, use_config)
+    def _set_calc_live_eval_delay(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'CALCULATION', 'iTimeoutDelay', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._calc_live_eval_delay: int = value
 
-    def _set_calc_sanitize_input(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'DEBUG', 'bSanitizeInput', new_val, use_config)
+    def _set_calc_sanitize_input(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'DEBUG', 'bSanitizeInput', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._sanitize_input: bool = value
 
@@ -617,125 +739,208 @@ class CalculatorApp(GuiApp):
         validate_type(new_val, str)
         self._history_path: Path = self._resources_path / new_val
 
-    def _set_key_advanced(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sAdvancedKey', new_val, use_config)
+    def _set_key_advanced(
+        self, new_val: str, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sAdvancedKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_advanced: str = value
-        bind_event(self._window, self._key_advanced, command=self.toggle_advanced)
+        bind_event(
+            self._window, self._key_advanced,
+            command=self.toggle_advanced
+        )
         self._add_bound_key(self._key_advanced)
 
     def _set_key_approx(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sApproximateKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sApproximateKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_approx: str = value
-        bind_event(self._window, self._key_approx, command=self.toggle_approximate)
+        bind_event(
+            self._window, self._key_approx,
+            command=self.toggle_approximate
+        )
         self._add_bound_key(self._key_approx)
 
     def _set_key_clear(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sClearKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sClearKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_clear: str = value
         bind_event(self._window, self._key_clear, command=self.clear_memory)
         self._add_bound_key(self._key_clear)
 
     def _set_key_del_l(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sDeleteAllLKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sDeleteAllLKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_del_l: str = value
-        bind_event(self._window, self._key_del_l, command=lambda: self._del_txt_cursor(self._wgt_txt_input, 'left'))
+        bind_event(
+            self._window, self._key_del_l,
+            command=lambda: self._del_txt_cursor(self._wgt_txt_input, 'left')
+        )
         self._add_bound_key(self._key_del_l)
 
     def _set_key_del_r(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sDeleteAllRKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sDeleteAllRKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_del_r: str = value
-        bind_event(self._window, self._key_del_r, command=lambda: self._del_txt_cursor(self._wgt_txt_input, 'right'))
+        bind_event(
+            self._window, self._key_del_r,
+            command=lambda: self._del_txt_cursor(self._wgt_txt_input, 'right')
+        )
         self._add_bound_key(self._key_del_r)
 
-    def _set_key_del_term_l(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sDeleteTermLKey', new_val, use_config)
+    def _set_key_del_term_l(
+        self, new_val: str, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sDeleteTermLKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_del_term_l: str = value
 
-    def _set_key_del_term_r(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sDeleteTermRKey', new_val, use_config)
+    def _set_key_del_term_r(
+        self, new_val: str, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sDeleteTermRKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_del_term_r: str = value
 
     def _set_key_eval(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sEvaluateKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sEvaluateKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_eval: str = value
-        bind_event(self._wgt_txt_input, self._key_eval, command=self.eval_or_clear)
+        bind_event(
+            self._wgt_txt_input, self._key_eval,
+            command=self.eval_or_clear
+        )
         self._add_bound_key(self._key_eval)
 
     def _set_key_help(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sHelpKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sHelpKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_help: str = value
 
     def _set_key_next(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sNextKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sNextKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_next: str = value
-        bind_event(self._wgt_txt_input, self._key_next, command=self.history_next)
+        bind_event(
+            self._wgt_txt_input, self._key_next,
+            command=self.history_next
+        )
         self._add_bound_key(self._key_next)
 
     def _set_key_options(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sOptionsKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sOptionsKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_options: str = value
 
-    def _set_key_previous(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sPreviousKey', new_val, use_config)
+    def _set_key_previous(
+        self, new_val: str, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sPreviousKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_previous: str = value
-        bind_event(self._wgt_txt_input, self._key_previous, command=self.history_previous)
+        bind_event(
+            self._wgt_txt_input, self._key_previous,
+            command=self.history_previous
+        )
         self._add_bound_key(self._key_previous)
 
     def _set_key_redo(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sRedoKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sRedoKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_redo: str = value
 
     def _set_key_undo(self, new_val: str, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'KEYBINDS', 'sUndoKey', new_val, use_config)
+        value = get_config_value(
+            self._config, 'KEYBINDS', 'sUndoKey', new_val, use_config
+        )
         validate_type(new_val, str)
         self._key_undo: str = value
 
-    def _set_win_advanced_def(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_FLAGS', 'bStartAdvanced', new_val, use_config)
+    def _set_win_advanced_def(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_FLAGS', 'bStartAdvanced', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._win_advanced_def: bool = value
 
-    def _set_win_force_focus(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'DEBUG', 'bForceFocus', new_val, use_config)
+    def _set_win_force_focus(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'DEBUG', 'bForceFocus', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._win_force_focus: bool = value
 
-    def _set_win_height_adv(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_ADV', 'iDefaultHeight', new_val, use_config)
+    def _set_win_height_adv(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_ADV', 'iDefaultHeight', new_val, use_config
+        )
         try:
-            value = self._win_height_min_adv if value < self._win_height_min_adv else value
+            if value < self._win_height_min_adv:
+                value = self._win_height_min_adv
         except AttributeError:
             pass  # ignore if self._win_height_min_adv is not set
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_height_adv: int = value
 
-    def _set_win_height_min_adv(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_ADV', 'iMinHeight', new_val, use_config)
+    def _set_win_height_min_adv(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_ADV', 'iMinHeight', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_height_min_adv: int = value
 
-    def _set_win_restore(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_RESTORE', 'bRestoreMode', new_val, use_config)
+    def _set_win_restore(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_RESTORE', 'bRestoreMode', new_val, use_config
+        )
         validate_type(new_val, bool)
         self._win_restore: bool = value
 
-    def _set_win_restore_adv(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_RESTORE', 'bRestoreAdvanced', new_val, use_config)
+    def _set_win_restore_adv(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_RESTORE', 'bRestoreAdvanced',
+            new_val, use_config
+        )
         try:
             value = False if not self._win_restore else value
         except AttributeError:
@@ -743,8 +948,13 @@ class CalculatorApp(GuiApp):
         validate_type(new_val, bool)
         self._win_restore_adv: bool = value
 
-    def _set_win_restore_dim(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_RESTORE', 'bRestoreDimensions', new_val, use_config)
+    def _set_win_restore_dim(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_RESTORE', 'bRestoreDimensions',
+            new_val, use_config
+        )
         try:
             value = False if not self._win_restore else value
         except AttributeError:
@@ -752,8 +962,12 @@ class CalculatorApp(GuiApp):
         validate_type(new_val, bool)
         self._win_restore_dim: bool = value
 
-    def _set_win_restore_pin(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_RESTORE', 'bRestorePinned', new_val, use_config)
+    def _set_win_restore_pin(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_RESTORE', 'bRestorePinned', new_val, use_config
+        )
         try:
             value = False if not self._win_restore else value
         except AttributeError:
@@ -761,8 +975,13 @@ class CalculatorApp(GuiApp):
         validate_type(new_val, bool)
         self._win_restore_pin: bool = value
 
-    def _set_win_restore_pos(self, new_val: bool, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_RESTORE', 'bRestorePosition', new_val, use_config)
+    def _set_win_restore_pos(
+        self, new_val: bool, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_RESTORE', 'bRestorePosition',
+            new_val, use_config
+        )
         try:
             value = False if not self._win_restore else value
         except AttributeError:
@@ -770,18 +989,27 @@ class CalculatorApp(GuiApp):
         validate_type(new_val, bool)
         self._win_restore_pos: bool = value
 
-    def _set_win_width_adv(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_ADV', 'iDefaultWidth', new_val, use_config)
+    def _set_win_width_adv(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_ADV', 'iDefaultWidth', new_val, use_config
+        )
         try:
-            value = self._win_width_min_adv if value < self._win_width_min_adv else value
+            if value < self._win_width_min_adv:
+                value = self._win_width_min_adv
         except AttributeError:
             pass  # ignore if self._win_width_min_adv is not set
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_width_adv: int = value
 
-    def _set_win_width_min_adv(self, new_val: int, use_config: bool = False) -> None:
-        value = get_config_value(self._config, 'WIN_ADV', 'iMinWidth', new_val, use_config)
+    def _set_win_width_min_adv(
+        self, new_val: int, use_config: bool = False
+    ) -> None:
+        value = get_config_value(
+            self._config, 'WIN_ADV', 'iMinWidth', new_val, use_config
+        )
         validate_type(value, int)
         value = 0 if value < 0 else value
         self._win_width_min_adv: int = value
@@ -792,7 +1020,9 @@ class CalculatorApp(GuiApp):
         elif self._win_layout == 'pack':
             element.pack()
         else:
-            raise ValueError(f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'")
+            raise ValueError(
+                f"Invalid layout: {self._win_layout}. Must be 'grid' or 'pack'"
+            )
 
     def _store_eval(self) -> bool:
         changes_made: bool = False
@@ -802,7 +1032,13 @@ class CalculatorApp(GuiApp):
         result: str = self._wgt_txt_result.get('1.0', 'end-1c')
         result_approx: str | None = result if self._approximate else None
         result_exact: str | None = result if not self._approximate else None
-        index = next((i for i, calc in enumerate(self._calc_history) if calc['expression'] == expr), None)
+        index = next(
+            (
+                i for i, calc in enumerate(self._calc_history)
+                if calc['expression'] == expr
+            ),
+            None
+        )
         if index is None:
             self._calc_history.append({
                 'expression': expr,
@@ -811,10 +1047,12 @@ class CalculatorApp(GuiApp):
             })
             changes_made = True
         else:
-            if result_approx is not None and self._calc_history[index]['result_approx'] is None:
+            hist_apprx: str | None = self._calc_history[index]['result_approx']
+            hist_exact: str | None = self._calc_history[index]['result_exact']
+            if result_approx is not None and hist_apprx is None:
                 self._calc_history[index]['result_approx'] = result_approx
                 changes_made = True
-            if result_exact is not None and self._calc_history[index]['result_exact'] is None:
+            if result_exact is not None and hist_exact is None:
                 self._calc_history[index]['result_exact'] = result_exact
                 changes_made = True
         return changes_made
@@ -829,26 +1067,37 @@ class CalculatorApp(GuiApp):
         self.history_clear()
         self.clear_io()
 
-    def display_result(self, message: Any | str, logging: bool = True, delay: bool = False) -> None:
+    def display_result(
+        self, message: Any | str, logging: bool = True, delay: bool = False
+    ) -> None:
         if delay:
-            self._timeout_id = self._window.after(self._calc_live_eval_delay, self.display_result, message, logging, False)
+            self._timeout_id = self._window.after(
+                self._calc_live_eval_delay,
+                self.display_result, message, logging, False
+            )
             return
         message = str(message)
         text_set(self._wgt_txt_result, message)
         if logging:
-            self._logging_print(f"Result:{' ' * 14}`{message.replace('\n', '\\n')}`")
+            self._logging_print(
+                f"Result:{' ' * 14}`{message.replace('\n', '\\n')}`"
+            )
 
     def evaluate(self, live_mode: bool = False) -> str:
         # get input
         input_expr: str = self._wgt_txt_input.get()
-        self._logging_print(f"Expression:{' ' * 10}`{input_expr.replace('\n', '\\n')}`")
+        self._logging_print(
+            f"Expression:{' ' * 10}`{input_expr.replace('\n', '\\n')}`"
+        )
         # handle live mode
         if self._timeout_id is not None:
             self._window.after_cancel(self._timeout_id)
             self._timeout_id = None
         # check if the expression is valid
         try:
-            expr: str = sanitize_input(input_expr, sanitize=self._sanitize_input)
+            expr: str = sanitize_input(
+                input_expr, sanitize=self._sanitize_input
+            )
             if not expr:
                 result: str = self._calc_def_result
                 self.display_result(result)
@@ -860,7 +1109,12 @@ class CalculatorApp(GuiApp):
         # evaluate the expression
         try:
             self._logging_print('Evaluating...')
-            result = evaluate_expression(expr, approximate=self._approximate, dec_precision=self.calc_dec_precicion, dec_display=self.calc_dec_display)
+            result = evaluate_expression(
+                expr,
+                approximate=self._approximate,
+                dec_precision=self.calc_dec_precicion,
+                dec_display=self.calc_dec_display
+            )
             self.display_result(result)
             return result
         except ZeroDivisionError as e:
@@ -868,7 +1122,12 @@ class CalculatorApp(GuiApp):
             self.display_result(result)
             return result
         except Exception as e:
-            if live_mode and self._timeout_patience > 0 and expr and expr[-1] in self._calc_wait_chars:
+            if (
+                live_mode
+                and self._timeout_patience > 0
+                and expr
+                and expr[-1] in self._calc_wait_chars
+            ):
                 result = 'ERROR: Incomplete expression'
                 self.display_result(result, delay=True)
                 return result
@@ -886,23 +1145,42 @@ class CalculatorApp(GuiApp):
         changes_made: bool = self._store_eval()
         if self._calc_live_eval or not changes_made:
             self.clear_io()
-        self._calc_history_index = len(self._calc_history) if len(self._calc_history) > 0 else -1
-        logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
+        if len(self._calc_history) > 0:
+            self._calc_history_index = len(self._calc_history)
+        else:
+            self._calc_history_index = -1
+        logging_print(
+            "History (index="
+            f"{self._calc_history_index}): `{self._calc_history}`"
+        )
 
     def history_clear(self) -> None:
         self._calc_history.clear()
         self._calc_history_index = -1
-        logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
+        logging_print(
+            "History (index="
+            f"{self._calc_history_index}): `{self._calc_history}`"
+        )
 
     def history_next(self) -> None:
         changes_made: bool = self._store_eval()
         if changes_made:
             self._calc_history_index = len(self._calc_history)
-        if len(self._calc_history) > 1 and -1 < self._calc_history_index < len(self._calc_history) - 1:
+        if (
+            len(self._calc_history) > 1
+            and -1 < self._calc_history_index < len(self._calc_history) - 1
+        ):
             try:
-                expr: str | None = self._calc_history[self._calc_history_index + 1]['expression']
-                result_approx: str | None = self._calc_history[self._calc_history_index + 1]['result_approx']
-                result_exact: str | None = self._calc_history[self._calc_history_index + 1]['result_exact']
+                index = self._calc_history_index + 1
+                expr: str | None = (
+                    self._calc_history[index]['expression']
+                )
+                result_approx: str | None = (
+                    self._calc_history[index]['result_approx']
+                )
+                result_exact: str | None = (
+                    self._calc_history[index]['result_exact']
+                )
             except IndexError:
                 return
             text_set(self._wgt_txt_input, expr)
@@ -919,8 +1197,14 @@ class CalculatorApp(GuiApp):
             self._calc_history_index += 1
         else:
             self.clear_io()
-            self._calc_history_index = len(self._calc_history) if len(self._calc_history) > 0 else -1
-        logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
+            if len(self._calc_history) > 0:
+                self._calc_history_index = len(self._calc_history)
+            else:
+                self._calc_history_index = -1
+        logging_print(
+            "History (index="
+            f"{self._calc_history_index}): `{self._calc_history}`"
+        )
 
     def history_previous(self) -> None:
         changes_made: bool = self._store_eval()
@@ -928,9 +1212,16 @@ class CalculatorApp(GuiApp):
             self._calc_history_index = len(self._calc_history)
         if len(self._calc_history) > 0 and self._calc_history_index > 0:
             try:
-                expr: str | None = self._calc_history[self._calc_history_index - 1]['expression']
-                result_approx: str | None = self._calc_history[self._calc_history_index - 1]['result_approx']
-                result_exact: str | None = self._calc_history[self._calc_history_index - 1]['result_exact']
+                index = self._calc_history_index - 1
+                expr: str | None = (
+                    self._calc_history[index]['expression']
+                )
+                result_approx: str | None = (
+                    self._calc_history[index]['result_approx']
+                )
+                result_exact: str | None = (
+                    self._calc_history[index]['result_exact']
+                )
             except IndexError:
                 return
             text_set(self._wgt_txt_input, expr)
@@ -945,7 +1236,10 @@ class CalculatorApp(GuiApp):
                 else:
                     self.evaluate()
             self._calc_history_index -= 1
-        logging_print(f"History (index={self._calc_history_index}): `{self._calc_history}`")
+        logging_print(
+            "History (index="
+            f"{self._calc_history_index}): `{self._calc_history}`"
+        )
 
     def open_window(self) -> None:  # override
         self._logging_print(f"Opening {self.name}.")
@@ -999,7 +1293,12 @@ class CalculatorApp(GuiApp):
                 pass
         self._logging_print(f"Pinned = {self._win_pinned}")
 
-    def update_window(self, reset_pos: bool = False, reset_width: bool = False, reset_height: bool = False) -> None:  # override
+    def update_window(
+        self,
+        reset_pos: bool = False,
+        reset_width: bool = False,
+        reset_height: bool = False
+    ) -> None:  # override
         self._screen_width, self._screen_height = self.screen_dimensions
         if reset_pos:
             current_width = self._win_width_def
@@ -1008,8 +1307,12 @@ class CalculatorApp(GuiApp):
             current_width, current_height = self.window_dimensions
         if reset_pos:
             if self._win_centered_def:
-                target_x_pos = (self._screen_width // 2) - (current_width // 2)
-                target_y_pos = (self._screen_height // 2) - (current_height // 2)
+                target_x_pos = (
+                    (self._screen_width // 2) - (current_width // 2)
+                )
+                target_y_pos = (
+                    (self._screen_height // 2) - (current_height // 2)
+                )
             else:
                 target_x_pos = self._win_x_pos_def
                 target_y_pos = self._win_y_pos_def
@@ -1023,24 +1326,36 @@ class CalculatorApp(GuiApp):
         if expanded:
             if reset_width:
                 target_width = self._win_width_adv
+            elif current_width < self._win_width_min_adv:
+                target_width = self._win_width_min_adv
             else:
-                target_width = current_width if current_width > self._win_width_min_adv else self._win_width_min_adv
+                target_width = current_width
             if reset_height:
                 target_height = self._win_height_adv
+            elif current_height < self._win_height_min_adv:
+                target_height = self._win_height_min_adv
             else:
-                target_height = current_height if current_height > self._win_height_min_adv else self._win_height_min_adv
-            self._window.minsize(self._win_width_min_adv, self._win_height_min_adv)
+                target_height = current_height
+            self._window.minsize(
+                self._win_width_min_adv, self._win_height_min_adv
+            )
         else:
             if reset_width:
                 target_width = self._win_width_def
+            elif current_width < self._win_width_min:
+                target_width = self._win_width_min
             else:
-                target_width = current_width if current_width > self._win_width_min else self._win_width_min
+                target_width = current_width
             if reset_height:
                 target_height = self._win_height_def
+            elif current_height < self._win_height_min:
+                target_height = self._win_height_min
             else:
-                target_height = current_height if current_height > self._win_height_min else self._win_height_min
+                target_height = current_height
             self._window.minsize(self._win_width_min, self._win_height_min)
-        self._window.geometry(f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}")
+        self._window.geometry(
+            f"{target_width}x{target_height}+{target_x_pos}+{target_y_pos}"
+        )
         self._window.resizable(self._win_resize_width, self._win_resize_height)
         self._win_width, self._win_height = self.window_dimensions
         self._win_x_pos, self._win_y_pos = self.window_position
@@ -1100,7 +1415,14 @@ class CalculatorApp(GuiApp):
 # TESTING #
 
 def _test():
-    app = CalculatorApp('Test App', '0.0.1', 'GroundAura', win_centered=True, config_file='AuraCalc.ini', use_config=False)
+    app = CalculatorApp(
+        'Test App',
+        '0.0.1',
+        'GroundAura',
+        win_centered=True,
+        config_file='AuraCalc.ini',
+        use_config=False
+    )
 
     app.print_info()
     app.open_window()

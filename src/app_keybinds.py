@@ -21,13 +21,18 @@ def bind_event(
     *args,
     **kwargs
 ) -> None:
-    if not sequence or sequence.lower().strip() in ('', '<>', 'none', '<none>'):
+    if not sequence:
+        return
+    if sequence.lower().strip() in ('', '<>', 'none', '<none>'):
         return
     validate_type(sequence, str)
     if excluded_seq and excluded_seq is not None:
         widget.bind(
             sequence,
-            lambda event: _on_event(event, excluded_seq, command, *args, **kwargs)
+            lambda event: _on_event(
+                event, excluded_seq,
+                command, *args, **kwargs
+            )
         )
     elif pass_event:
         widget.bind(
@@ -64,7 +69,10 @@ def _on_event(
             func(*args, **kwargs)
             return
     else:
-        raise ValueError(f"Invalid type for excluded_seq: {type(excluded_keys)}. Must be list, tuple, or str.")
+        raise ValueError(
+            f"Invalid type for excluded_seq: {type(excluded_keys)}. "
+            "Must be list, tuple, or str."
+        )
 
 
 # TESTING #

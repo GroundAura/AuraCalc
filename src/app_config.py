@@ -29,11 +29,16 @@ def config_to_dict(
         for option in config.options(section):
             value: str | Any = config.get(section, option)
             if option.startswith('s', 0, 1):
-                if option[1:].startswith(root_dir_key) or option.endswith(root_dir_key):
+                if (
+                    option[1:].startswith(root_dir_key)
+                    or option.endswith(root_dir_key)
+                ):
                     if value.startswith(root_dir_value):
                         value = root_path + value[len(root_dir_value):]
             elif option.startswith('b', 0, 1):
-                value = str_to_bool(value, bool_case_sens, bool_true, bool_false)
+                value = str_to_bool(
+                    value, bool_case_sens, bool_true, bool_false
+                )
             elif option.startswith('i', 0, 1):
                 value = str_to_int(value)
             elif option.startswith('f', 0, 1):
@@ -75,8 +80,12 @@ def read_config(
     root_dir_value: str = '[ROOT]',
     root_path: str | None = None,
     bool_case_sens: bool = False,
-    bool_true: str | Container[str] = ('TRUE', 'True', 'true', 'T', 't', '1'),
-    bool_false: str | Container[str] = ('FALSE', 'False', 'false', 'F', 'f', '0')
+    bool_true: str | Container[str] = (
+        ('TRUE', 'True', 'true', 'T', 't', '1')
+    ),
+    bool_false: str | Container[str] = (
+        ('FALSE', 'False', 'false', 'F', 'f', '0')
+    )
 ) -> dict[str, dict[str, Any]]:
     config = ConfigParser(
         comment_prefixes=comment_prefixes,
@@ -103,7 +112,9 @@ def read_config(
             bool_false
         )
     except Exception as e:
-        raise Exception(f"ERROR: Error while trying to format config file: {e}")
+        raise Exception(
+            f"ERROR: Error while trying to format config file: {e}"
+        )
     return config_dict
 
 

@@ -27,14 +27,30 @@ def logging_print(
     Displays a debug message in the console and in the debug log file.
 
     Args:
-        message (Any | str, optional): The message to display. Defaults to `''`.
-        indent (int, optional): The number of spaces to indent by. Defaults to `0`.
-        timestamp (bool, optional): Whether to include a timestamp. Defaults to `True`.
-        print_to_console (bool, optional): Whether to print the message to the console. Defaults to `True`.
-        print_to_file (bool, optional): Whether to print the message to the debug log file. Defaults to `True`.
-        debug_mode_only (bool, optional): Whether to only print the message in debug mode. Defaults to `True`.
-        log_path (Path, optional): The path to the debug log file. Defaults to `PATH_LOG`.
-        debug_mode (bool, optional): Whether debug mode is enabled. Defaults to `DEBUG_MODE`.
+        message (Any | str, optional):
+            The message to display.
+            Defaults to `''`.
+        indent (int, optional):
+            The number of spaces to indent by.
+            Defaults to `0`.
+        timestamp (bool, optional):
+            Whether to include a timestamp.
+            Defaults to `True`.
+        print_to_console (bool, optional):
+            Whether to print the message to the console.
+            Defaults to `True`.
+        print_to_file (bool, optional):
+            Whether to print the message to the debug log file.
+            Defaults to `True`.
+        debug_mode_only (bool, optional):
+            Whether to only print the message in debug mode.
+            Defaults to `True`.
+        log_path (Path, optional):
+            The path to the debug log file.
+            Defaults to `PATH_LOG`.
+        debug_mode (bool, optional):
+            Whether debug mode is enabled.
+            Defaults to `DEBUG_MODE`.
     """
     message = str(message)
     if debug_mode or not debug_mode_only:
@@ -54,7 +70,10 @@ def logging_print(
         if indent > 0:
             message = f"{' ' * indent}{message}"
         if timestamp:
-            message = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')}] {message}"
+            message = (
+                f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')}] "
+                f"{message}"
+                )
         if print_to_console:
             print(message)
         if print_to_file:

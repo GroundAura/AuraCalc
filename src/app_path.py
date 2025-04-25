@@ -28,7 +28,7 @@ def get_full_path(
 
 def get_root_path() -> Path:
     try:
-        # PyInstaller creates a temporary folder and stores the path in _MEIPASS
+        # PyInstaller creates a temp dir and stores the path in _MEIPASS
         root_path = Path(sys.MEIPASS)
     except AttributeError:
         root_path = Path.cwd()

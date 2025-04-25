@@ -29,34 +29,49 @@ CHAR_TAU = chr(0x03C4)  # 'τ'
 
 def roll_dice(dice_string: str) -> tuple[int, list[int]]:
     """
-    Generates a random number based on the dice string.
+    Generates a random number based on a given dice string.
 
     Args:
-        dice_string (str): The dice notation (e.g., `'3d6'`).
+        dice_string (str):
+            What dice to roll in the format `XdY` (e.g. `roll_dice('3d6'`).
 
     Returns:
-        int: The random number.
-        list[int]: The individual results of each die.
+        tuple ((int, list[int])):
+            The total result of the roll and a list of individual roll results.
     """
     try:
         num_dice, num_sides = map(int, dice_string.lower().split('d'))
-        rolls: list[int] = [random.randint(1, num_sides) for _ in range(num_dice)]
+        rolls: list[int] = (
+            [random.randint(1, num_sides) for _ in range(num_dice)]
+        )
         total: int = sum(rolls)
-        logging_print(f"Rolling '{dice_string}'... Total: `{total}`,  Rolls: `{rolls}`")
+        logging_print(
+            f"Rolling '{dice_string}'... Total: `{total}`,  Rolls: `{rolls}`"
+        )
         return total, rolls
     except ValueError:
-        raise ValueError("Invalid dice notation. Use 'XdY' format, e.g., '3d6'.")
+        raise ValueError(
+            "Invalid dice notation. Use 'XdY' format, e.g., '3d6'."
+        )
 
 
 def sym_quad_zero(a: str, b: str, c: str, positive: str = '+') -> str:
     """
-    Returns a symbolic expression (for SymPy) for one of the zeros of a quadratic equation.
+    Returns a symbolic expression (for SymPy)
+    for one of the zeros of a quadratic equation.
 
     Args:
-        a (str): Coefficient of x^2.
-        b (str): Coefficient of x.
-        c (str): Constant term.
-        positive (str, optional): Whether to return the positive or negative root. Defaults to '+' (positive). Valid options: `'True'`, `'+'`, `'p'`, `'pos'`, `'positive'` OR `'False'`, `'-'`, `'n'`, `'neg'`, `'negative'`.
+        a (str):
+            Coefficient of x^2.
+        b (str):
+            Coefficient of x.
+        c (str):
+            Constant term.
+        positive (str, optional):
+            Whether to return the positive or negative root.
+            Defaults to `'+'` (positive).
+            Valid options: `'True'`, `'+'`, `'p'`, `'pos'`, `'positive'`
+            OR `'False'`, `'-'`, `'n'`, `'neg'`, `'negative'`.
 
     Returns:
         str: Symbolic expression for the zero of the quadratic equation.
@@ -66,7 +81,10 @@ def sym_quad_zero(a: str, b: str, c: str, positive: str = '+') -> str:
     elif positive in ['False', '-', 'n', 'neg', 'negative']:
         return f"(-({b}) - sqrt(({b})**2 - 4 * {a} * {c})) / (2 * {a})"
     else:
-        raise ValueError("Invalid positive argument. Use 'p' for positive, 'n' for negative.")
+        raise ValueError(
+            "Invalid positive argument. "
+            "Use 'p' for positive, 'n' for negative."
+        )
 
 
 # TESTING #

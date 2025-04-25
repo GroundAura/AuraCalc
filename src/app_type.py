@@ -25,25 +25,45 @@ def function_exists(
     check_local: bool = False,
 ) -> bool:
     """
-    Determines if a function exists in the global or builtins namespace and is callable.
+    Determines if a function exists in the global or builtins namespace
+    and is callable.
 
     Args:
-        func_name (str): The name of the function to check.
-        check_builtins (bool, optional): Whether to check the builtins namespace. Defaults to `True`.
-        check_globals (bool, optional): Whether to check the global scope. Defaults to `True`.
-        check_locals (bool, optional): Whether to check the local scope. Defaults to `False`.
+        func_name (str):
+            The name of the function to check.
+        check_builtins (bool, optional):
+            Whether to check the builtins namespace.
+            Defaults to `True`.
+        check_globals (bool, optional):
+            Whether to check the global scope.
+            Defaults to `True`.
+        check_locals (bool, optional):
+            Whether to check the local scope.
+            Defaults to `False`.
 
     Returns:
-        bool: `True` if the function is found and callable, `False` otherwise.
+        bool:
+            `True` if the function is found and callable, `False` otherwise.
     """
-    if check_global and func_name in globals() and callable(globals()[func_name]):
+    if (
+        check_global
+        and func_name in globals()
+        and callable(globals()[func_name])
+    ):
         return True
 
-    if check_local and func_name in locals() and callable(locals()[func_name]):
+    if (
+        check_local
+        and func_name in locals()
+        and callable(locals()[func_name])
+    ):
         return True
 
-    if check_builtins and \
-            func_name in dir(builtins) and callable(getattr(builtins, func_name)):
+    if (
+        check_builtins
+        and func_name in dir(builtins)
+        and callable(getattr(builtins, func_name))
+    ):
         return True
 
     return False
@@ -62,7 +82,9 @@ def get_type(obj: Any) -> str:
     try:
         return type(obj).__name__
     except Exception as e:
-        raise Exception(f"Error while trying to get type of data {obj}:\n  {e}")
+        raise Exception(
+            f"Error while trying to get type of data {obj}:\n  {e}"
+        )
 
 
 def matches_key(string: str, key: str | Container[str]) -> bool:
@@ -74,14 +96,21 @@ def matches_key(string: str, key: str | Container[str]) -> bool:
         else:
             return False
     except Exception as e:
-        raise Exception(f"Error while trying to check if string '{string}' matches key '{key}':\n  {e}")
+        raise Exception(
+            "Error while trying to check if "
+            f"string '{string}' matches key '{key}':\n  {e}"
+        )
 
 
 def str_to_bool(
     string: str,
     case_sensitive: bool = False,
-    true_values: str | Container[str] = ('TRUE', 'True', 'true', 'T', 't', '1'),
-    false_values: str | Container[str] = ('FALSE', 'False', 'false', 'F', 'f', '0')
+    true_values: str | Container[str] = (
+        ('TRUE', 'True', 'true', 'T', 't', '1')
+    ),
+    false_values: str | Container[str] = (
+        ('FALSE', 'False', 'false', 'F', 'f', '0')
+    )
 ) -> bool:
     try:
         if not case_sensitive:
@@ -95,9 +124,16 @@ def str_to_bool(
         else:
             true_values = sorted(set(true_values))
             false_values = sorted(set(false_values))
-            raise Exception(f"Failed to convert str to bool. Valid values are: {true_values + false_values}. Case sensitive: '{case_sensitive}'.")
+            raise Exception(
+                "Failed to convert str to bool. "
+                f"Valid values are: {true_values + false_values}. "
+                f"Case sensitive: '{case_sensitive}'."
+            )
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to a boolean:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to a boolean:\n  {e}"
+        )
 
 
 def str_to_dict(string: str) -> dict[str, str]:
@@ -111,7 +147,10 @@ def str_to_dict(string: str) -> dict[str, str]:
         else:
             raise Exception('Failed to convert str to dict.')
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to a dictionary:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to a dictionary:\n  {e}"
+        )
 
 
 def str_to_float(string: str) -> float:
@@ -122,7 +161,10 @@ def str_to_float(string: str) -> float:
         else:
             raise Exception('Failed to convert str to float.')
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to a float:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to a float:\n  {e}"
+        )
 
 
 def str_to_int(string: str) -> int:
@@ -133,7 +175,10 @@ def str_to_int(string: str) -> int:
         else:
             raise Exception('Failed to convert str to int.')
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to an integer:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to an integer:\n  {e}"
+        )
 
 
 def str_to_list(string: str) -> list[str]:
@@ -145,7 +190,10 @@ def str_to_list(string: str) -> list[str]:
         else:
             raise Exception('Failed to convert str to list.')
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to a list:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to a list:\n  {e}"
+        )
 
 
 def str_to_set(string: str) -> set[str]:
@@ -157,7 +205,10 @@ def str_to_set(string: str) -> set[str]:
         else:
             raise Exception('Failed to convert str to set.')
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to a set:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to a set:\n  {e}"
+        )
 
 
 def str_to_tuple(string: str) -> tuple[str, ...]:
@@ -169,7 +220,10 @@ def str_to_tuple(string: str) -> tuple[str, ...]:
         else:
             raise Exception('Failed to convert str to tuple.')
     except Exception as e:
-        raise Exception(f"Error while trying to convert string '{string}' to a tuple:\n  {e}")
+        raise Exception(
+            "Error while trying to convert "
+            f"string '{string}' to a tuple:\n  {e}"
+        )
 
 
 def validate_type(value, valid_type: _ClassInfo) -> bool:

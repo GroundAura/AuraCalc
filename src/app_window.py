@@ -25,14 +25,18 @@ def text_clear(element: ctk.CTkEntry | ctk.CTkTextbox) -> None:
     Clears the text in a given element.
 
     Args:
-        element (ctk.CTkEntry | ctk.CTkTextbox): The element to clear the text in.
+        element (ctk.CTkEntry | ctk.CTkTextbox):
+            The element to clear the text in.
     """
     if type(element) is ctk.CTkEntry:
         text_remove(element, '0', 'end')
     elif type(element) is ctk.CTkTextbox:
         text_remove(element, '1.0', 'end')
     else:
-        raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
+        raise ValueError(
+            f"Invalid element type: {type(element)}. "
+            "Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'"
+        )
 
 
 def text_remove(
@@ -44,9 +48,12 @@ def text_remove(
     Removes the text in a given element.
 
     Args:
-        element (ctk.CTkEntry | ctk.CTkTextbox): The element to remove the text in.
-        start (int): The start index of the text to remove.
-        end (int): The end index of the text to remove.
+        element (ctk.CTkEntry | ctk.CTkTextbox):
+            The element to remove the text in.
+        start (int):
+            The start index of the text to remove.
+        end (int):
+            The end index of the text to remove.
     """
     if type(element) is ctk.CTkEntry:
         element.delete(start, end)
@@ -60,7 +67,10 @@ def text_remove(
             element.configure(state='disabled')
             element.state_disabled = True
     else:
-        raise ValueError(f"Invalid element type: {type(element)}. Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'")
+        raise ValueError(
+            f"Invalid element type: {type(element)}. "
+            "Must be 'ctk.CTkEntry' or 'ctk.CTkTextbox'"
+        )
 
 
 def text_set(element, text: str | None = None) -> None:
@@ -68,8 +78,11 @@ def text_set(element, text: str | None = None) -> None:
     Sets the text in a given element.
 
     Args:
-        element (ctk.CTkEntry | ctk.CTkTextbox): The element to set the text in.
-        text (str | None, optional): The text to set in the element. Defaults to `None`.
+        element (ctk.CTkEntry | ctk.CTkTextbox):
+            The element to set the text in.
+        text (str | None, optional):
+            The text to set in the element.
+            Defaults to `None`.
     """
     text_clear(element)
     if text is None or text == '':
