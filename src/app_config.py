@@ -11,6 +11,21 @@ from app_type import str_to_bool, str_to_float, str_to_int
 from app_type import str_to_dict, str_to_list, str_to_set, str_to_tuple
 
 
+# CLASSES #
+
+class Config(ConfigParser):
+    # constructor
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.preserve_case = False
+
+    # methods
+    def optionxform(self, optionstr):  # override
+        if self.preserve_case:
+            return optionstr
+        return optionstr.lower()
+
+
 # FUNCTIONS #
 
 def config_to_dict(
@@ -87,12 +102,12 @@ def read_config(
         ('FALSE', 'False', 'false', 'F', 'f', '0')
     )
 ) -> dict[str, dict[str, Any]]:
-    config = ConfigParser(
+    config = Config(
         comment_prefixes=comment_prefixes,
         inline_comment_prefixes=inline_comment_prefixes
     )
     if preserve_key_case:
-        config.optionxform = lambda option: option
+        config.preserve_case = True
     print(f"Trying to read config file from: `{file_path}`.")
     try:
         if not path.exists(file_path):
