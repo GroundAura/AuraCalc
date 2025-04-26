@@ -10,6 +10,7 @@ from types import UnionType
 
 # TYPES #
 
+# Keep this alias in sync with unittest.case._ClassInfo
 if sys.version_info >= (3, 10):
     _ClassInfo: TypeAlias = Union[type, UnionType, Tuple['_ClassInfo', ...]]
 else:
@@ -105,28 +106,41 @@ def matches_key(string: str, key: str | Container[str]) -> bool:
 def str_to_bool(
     string: str,
     case_sensitive: bool = False,
-    true_values: str | Container[str] = (
+    true_values: str | Iterable[str] = (
         ('TRUE', 'True', 'true', 'T', 't', '1')
     ),
-    false_values: str | Container[str] = (
+    false_values: str | Iterable[str] = (
         ('FALSE', 'False', 'false', 'F', 'f', '0')
     )
 ) -> bool:
     try:
         if not case_sensitive:
             string = string.lower()
-            true_values = sorted(set(value.lower() for value in true_values))
-            false_values = sorted(set(value.lower() for value in false_values))
+            if type(true_values) is str:
+                true_values = true_values.lower()
+            else:
+                true_values = sorted(
+                    set(value.lower() for value in true_values)
+                )
+            if type(false_values) is str:
+                false_values = false_values.lower()
+            else:
+                false_values = sorted(
+                    set(value.lower() for value in false_values)
+                )
+        else:
+            if type(true_values) is not str:
+                true_values = sorted(set(true_values))
+            if type(false_values) is not str:
+                false_values = sorted(set(false_values))
         if string in true_values:
             return True
         elif string in false_values:
             return False
         else:
-            true_values = sorted(set(true_values))
-            false_values = sorted(set(false_values))
             raise Exception(
                 "Failed to convert str to bool. "
-                f"Valid values are: {true_values + false_values}. "
+                f"Valid values are: '{true_values}' and '{false_values}'. "
                 f"Case sensitive: '{case_sensitive}'."
             )
     except Exception as e:

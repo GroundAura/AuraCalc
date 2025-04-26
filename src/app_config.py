@@ -1,7 +1,7 @@
 # IMPORTS #
 
 # builtins
-from collections.abc import Container, Sequence
+from collections.abc import Iterable, Sequence
 from configparser import ConfigParser
 from os import getcwd, path
 from typing import Any
@@ -34,8 +34,8 @@ def config_to_dict(
     root_dir_value: str,
     root_path: str | None,
     bool_case_sens: bool,
-    bool_true: str | Container[str],
-    bool_false: str | Container[str]
+    bool_true: str | Iterable[str],
+    bool_false: str | Iterable[str]
 ) -> dict[str, dict[str, Any]]:
     root_path = root_path if root_path else getcwd()
     config_dict: dict = {}
@@ -95,10 +95,10 @@ def read_config(
     root_dir_value: str = '[ROOT]',
     root_path: str | None = None,
     bool_case_sens: bool = False,
-    bool_true: str | Container[str] = (
+    bool_true: str | Iterable[str] = (
         ('TRUE', 'True', 'true', 'T', 't', '1')
     ),
-    bool_false: str | Container[str] = (
+    bool_false: str | Iterable[str] = (
         ('FALSE', 'False', 'false', 'F', 'f', '0')
     )
 ) -> dict[str, dict[str, Any]]:
