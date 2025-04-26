@@ -13,15 +13,16 @@ from app_globals import DEBUG_MODE, PATH_LOG
 
 # FUNCTIONS #
 
+
 def logging_print(
-    message: Any | str = '',
+    message: Any | str = "",
     indent: int = 0,
     timestamp: bool = True,
     print_to_console: bool = True,
     print_to_file: bool = True,
     debug_mode_only: bool = True,
     log_path: Path = PATH_LOG,
-    debug_mode: bool = DEBUG_MODE
+    debug_mode: bool = DEBUG_MODE,
 ) -> None:
     """
     Displays a debug message in the console and in the debug log file.
@@ -55,8 +56,8 @@ def logging_print(
     message = str(message)
     if debug_mode or not debug_mode_only:
         if timestamp or indent > 0:
-            if '\n' in message:
-                lines = message.split('\n')
+            if "\n" in message:
+                lines = message.split("\n")
                 for line in lines:
                     logging_print(
                         message=line,
@@ -64,7 +65,7 @@ def logging_print(
                         timestamp=timestamp,
                         print_to_console=print_to_console,
                         print_to_file=print_to_file,
-                        debug_mode_only=debug_mode_only
+                        debug_mode_only=debug_mode_only,
                     )
                 return
         if indent > 0:
@@ -73,19 +74,20 @@ def logging_print(
             message = (
                 f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')}] "
                 f"{message}"
-                )
+            )
         if print_to_console:
             print(message)
         if print_to_file:
-            with open(log_path, 'a') as log_file:
+            with open(log_path, "a") as log_file:
                 log_file.write(f"{message}\n")
 
 
 # TESTING #
 
+
 def _test():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

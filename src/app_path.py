@@ -10,10 +10,9 @@ from app_type import validate_type
 
 # FUNCTIONS #
 
+
 def get_full_path(
-    dir_name: str,
-    file_name: str,
-    root_path: Path | None = None
+    dir_name: str, file_name: str, root_path: Path | None = None
 ) -> Path:
     if root_path is None:
         root_path = get_root_path()
@@ -38,9 +37,10 @@ def get_root_path() -> Path:
 
 # TESTING #
 
+
 def _test():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

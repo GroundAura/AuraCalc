@@ -13,6 +13,7 @@ from app_type import str_to_dict, str_to_list, str_to_set, str_to_tuple
 
 # CLASSES #
 
+
 class Config(ConfigParser):
     # constructor
     def __init__(self, *args, **kwargs):
@@ -28,6 +29,7 @@ class Config(ConfigParser):
 
 # FUNCTIONS #
 
+
 def config_to_dict(
     config: ConfigParser,
     root_dir_key: str | tuple[str, ...],
@@ -35,7 +37,7 @@ def config_to_dict(
     root_path: str | None,
     bool_case_sens: bool,
     bool_true: str | Iterable[str],
-    bool_false: str | Iterable[str]
+    bool_false: str | Iterable[str],
 ) -> dict[str, dict[str, Any]]:
     root_path = root_path if root_path else getcwd()
     config_dict: dict = {}
@@ -43,28 +45,27 @@ def config_to_dict(
         section_dict: dict = {}
         for option in config.options(section):
             value: str | Any = config.get(section, option)
-            if option.startswith('s', 0, 1):
-                if (
-                    option[1:].startswith(root_dir_key)
-                    or option.endswith(root_dir_key)
+            if option.startswith("s", 0, 1):
+                if option[1:].startswith(root_dir_key) or option.endswith(
+                    root_dir_key
                 ):
                     if value.startswith(root_dir_value):
                         value = root_path + value[len(root_dir_value):]
-            elif option.startswith('b', 0, 1):
+            elif option.startswith("b", 0, 1):
                 value = str_to_bool(
                     value, bool_case_sens, bool_true, bool_false
                 )
-            elif option.startswith('i', 0, 1):
+            elif option.startswith("i", 0, 1):
                 value = str_to_int(value)
-            elif option.startswith('f', 0, 1):
+            elif option.startswith("f", 0, 1):
                 value = str_to_float(value)
-            elif option.startswith('l', 0, 1):
+            elif option.startswith("l", 0, 1):
                 value = str_to_list(value)
-            elif option.startswith('t', 0, 1):
+            elif option.startswith("t", 0, 1):
                 value = str_to_tuple(value)
-            elif option.startswith('d', 0, 1):
+            elif option.startswith("d", 0, 1):
                 value = str_to_dict(value)
-            elif option.startswith('o', 0, 1):
+            elif option.startswith("o", 0, 1):
                 value = str_to_set(value)
             section_dict[option] = value
         config_dict[section] = section_dict
@@ -76,7 +77,7 @@ def get_config_value(
     cfg_section: str,
     cfg_key: str,
     def_val: Any = None,
-    use_config: bool = True
+    use_config: bool = True,
 ) -> Any:
     if config is None or not use_config:
         return def_val
@@ -89,22 +90,20 @@ def get_config_value(
 def read_config(
     file_path: str,
     preserve_key_case: bool = False,
-    comment_prefixes: Sequence[str] = (';', '#', '//'),
-    inline_comment_prefixes: Sequence[str] = (';', '#', '//'),
-    root_dir_key: str | tuple[str, ...] = ('PATH', 'Path', 'path'),
-    root_dir_value: str = '[ROOT]',
+    comment_prefixes: Sequence[str] = (";", "#", "//"),
+    inline_comment_prefixes: Sequence[str] = (";", "#", "//"),
+    root_dir_key: str | tuple[str, ...] = ("PATH", "Path", "path"),
+    root_dir_value: str = "[ROOT]",
     root_path: str | None = None,
     bool_case_sens: bool = False,
-    bool_true: str | Iterable[str] = (
-        ('TRUE', 'True', 'true', 'T', 't', '1')
-    ),
+    bool_true: str | Iterable[str] = (("TRUE", "True", "true", "T", "t", "1")),
     bool_false: str | Iterable[str] = (
-        ('FALSE', 'False', 'false', 'F', 'f', '0')
-    )
+        ("FALSE", "False", "false", "F", "f", "0")
+    ),
 ) -> dict[str, dict[str, Any]]:
     config = Config(
         comment_prefixes=comment_prefixes,
-        inline_comment_prefixes=inline_comment_prefixes
+        inline_comment_prefixes=inline_comment_prefixes,
     )
     if preserve_key_case:
         config.preserve_case = True
@@ -113,7 +112,7 @@ def read_config(
         if not path.exists(file_path):
             raise Exception(f"Config file not found: '{file_path}'.")
         config.read(file_path)
-        print('Config file read successfully.')
+        print("Config file read successfully.")
     except Exception as e:
         raise Exception(f"ERROR: Error while trying to read config file: {e}")
     try:
@@ -124,7 +123,7 @@ def read_config(
             root_path,
             bool_case_sens,
             bool_true,
-            bool_false
+            bool_false,
         )
     except Exception as e:
         raise Exception(
@@ -135,9 +134,10 @@ def read_config(
 
 # TESTING #
 
+
 def _test():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

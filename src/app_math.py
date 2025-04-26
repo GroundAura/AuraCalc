@@ -15,17 +15,18 @@ from app_logging import logging_print
 
 TAU = sp.pi * 2
 
-CHAR_EUL = 'e'
-CHAR_IMAG = 'i'
+CHAR_EUL = "e"
+CHAR_IMAG = "i"
 CHAR_INF = chr(0x221E)  # '∞'
-CHAR_INFJ = 'ComplexInfinity'
-CHAR_NAN = 'NaN'
+CHAR_INFJ = "ComplexInfinity"
+CHAR_NAN = "NaN"
 CHAR_PHI = chr(0x03C6)  # 'φ'
 CHAR_PI = chr(0x03C0)  # 'π'
 CHAR_TAU = chr(0x03C4)  # 'τ'
 
 
 # FUNCTIONS #
+
 
 def roll_dice(dice_string: str) -> tuple[int, list[int]]:
     """
@@ -40,10 +41,10 @@ def roll_dice(dice_string: str) -> tuple[int, list[int]]:
             The total result of the roll and a list of individual roll results.
     """
     try:
-        num_dice, num_sides = map(int, dice_string.lower().split('d'))
-        rolls: list[int] = (
-            [random.randint(1, num_sides) for _ in range(num_dice)]
-        )
+        num_dice, num_sides = map(int, dice_string.lower().split("d"))
+        rolls: list[int] = [
+            random.randint(1, num_sides) for _ in range(num_dice)
+        ]
         total: int = sum(rolls)
         logging_print(
             f"Rolling '{dice_string}'... Total: `{total}`,  Rolls: `{rolls}`"
@@ -55,7 +56,7 @@ def roll_dice(dice_string: str) -> tuple[int, list[int]]:
         )
 
 
-def sym_quad_zero(a: str, b: str, c: str, positive: str = '+') -> str:
+def sym_quad_zero(a: str, b: str, c: str, positive: str = "+") -> str:
     """
     Returns a symbolic expression (for SymPy)
     for one of the zeros of a quadratic equation.
@@ -76,9 +77,9 @@ def sym_quad_zero(a: str, b: str, c: str, positive: str = '+') -> str:
     Returns:
         str: Symbolic expression for the zero of the quadratic equation.
     """
-    if positive in ['True', '+', 'p', 'pos', 'positive']:
+    if positive in ["True", "+", "p", "pos", "positive"]:
         return f"(-({b}) + sqrt(({b})**2 - 4 * {a} * {c})) / (2 * {a})"
-    elif positive in ['False', '-', 'n', 'neg', 'negative']:
+    elif positive in ["False", "-", "n", "neg", "negative"]:
         return f"(-({b}) - sqrt(({b})**2 - 4 * {a} * {c})) / (2 * {a})"
     else:
         raise ValueError(
@@ -89,9 +90,10 @@ def sym_quad_zero(a: str, b: str, c: str, positive: str = '+') -> str:
 
 # TESTING #
 
+
 def _test():
 
-    dice_string = '3*d*6'
+    dice_string = "3*d*6"
     expression = sympify(dice_string)
     print(expression)
 
@@ -104,5 +106,5 @@ def _test():
     print(CHAR_PI)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

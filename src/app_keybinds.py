@@ -12,6 +12,7 @@ from app_type import validate_type
 
 # FUNCTIONS #
 
+
 def bind_event(
     widget: CTkBaseClass,
     sequence: str,
@@ -19,39 +20,28 @@ def bind_event(
     pass_event: bool = False,
     command: Callable = lambda: None,
     *args,
-    **kwargs
+    **kwargs,
 ) -> None:
     if not sequence:
         return
-    if sequence.lower().strip() in ('', '<>', 'none', '<none>'):
+    if sequence.lower().strip() in ("", "<>", "none", "<none>"):
         return
     validate_type(sequence, str)
     if excluded_seq and excluded_seq is not None:
         widget.bind(
             sequence,
             lambda event: _on_event(
-                event, excluded_seq,
-                command, *args, **kwargs
-            )
+                event, excluded_seq, command, *args, **kwargs
+            ),
         )
     elif pass_event:
-        widget.bind(
-            sequence,
-            lambda event: command(event, *args, **kwargs)
-        )
+        widget.bind(sequence, lambda event: command(event, *args, **kwargs))
     else:
-        widget.bind(
-            sequence,
-            lambda event: command(*args, **kwargs)
-        )
+        widget.bind(sequence, lambda event: command(*args, **kwargs))
 
 
 def _on_event(
-    event,
-    excluded_keys: str | Container[str],
-    func,
-    *args,
-    **kwargs
+    event, excluded_keys: str | Container[str], func, *args, **kwargs
 ) -> None:
     if not excluded_keys or excluded_keys is None:
         func(*args, **kwargs)
@@ -77,9 +67,10 @@ def _on_event(
 
 # TESTING #
 
+
 def _test():
     pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()

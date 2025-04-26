@@ -12,12 +12,13 @@ from types import UnionType
 
 # Keep this alias in sync with unittest.case._ClassInfo
 if sys.version_info >= (3, 10):
-    _ClassInfo: TypeAlias = Union[type, UnionType, Tuple['_ClassInfo', ...]]
+    _ClassInfo: TypeAlias = Union[type, UnionType, Tuple["_ClassInfo", ...]]
 else:
-    _ClassInfo: TypeAlias = Union[type, Tuple['_ClassInfo', ...]]
+    _ClassInfo: TypeAlias = Union[type, Tuple["_ClassInfo", ...]]
 
 
 # FUNCTIONS #
+
 
 def function_exists(
     func_name: str,
@@ -53,11 +54,7 @@ def function_exists(
     ):
         return True
 
-    if (
-        check_local
-        and func_name in locals()
-        and callable(locals()[func_name])
-    ):
+    if check_local and func_name in locals() and callable(locals()[func_name]):
         return True
 
     if (
@@ -107,11 +104,11 @@ def str_to_bool(
     string: str,
     case_sensitive: bool = False,
     true_values: str | Iterable[str] = (
-        ('TRUE', 'True', 'true', 'T', 't', '1')
+        ("TRUE", "True", "true", "T", "t", "1")
     ),
     false_values: str | Iterable[str] = (
-        ('FALSE', 'False', 'false', 'F', 'f', '0')
-    )
+        ("FALSE", "False", "false", "F", "f", "0")
+    ),
 ) -> bool:
     try:
         if not case_sensitive:
@@ -152,14 +149,14 @@ def str_to_bool(
 
 def str_to_dict(string: str) -> dict[str, str]:
     try:
-        if string.startswith('{') and string.endswith('}'):
+        if string.startswith("{") and string.endswith("}"):
             new_val: dict = eval(string)
         else:
-            new_val = eval('{' + string + '}')
+            new_val = eval("{" + string + "}")
         if type(string) is dict:
             return new_val
         else:
-            raise Exception('Failed to convert str to dict.')
+            raise Exception("Failed to convert str to dict.")
     except Exception as e:
         raise Exception(
             "Error while trying to convert "
@@ -173,7 +170,7 @@ def str_to_float(string: str) -> float:
         if type(new_val) is float:
             return new_val
         else:
-            raise Exception('Failed to convert str to float.')
+            raise Exception("Failed to convert str to float.")
     except Exception as e:
         raise Exception(
             "Error while trying to convert "
@@ -187,7 +184,7 @@ def str_to_int(string: str) -> int:
         if type(new_val) is int:
             return new_val
         else:
-            raise Exception('Failed to convert str to int.')
+            raise Exception("Failed to convert str to int.")
     except Exception as e:
         raise Exception(
             "Error while trying to convert "
@@ -197,12 +194,12 @@ def str_to_int(string: str) -> int:
 
 def str_to_list(string: str) -> list[str]:
     try:
-        string = string.lstrip('[').rstrip(']')
-        new_val: list = string.split(', ')
+        string = string.lstrip("[").rstrip("]")
+        new_val: list = string.split(", ")
         if type(new_val) is list:
             return new_val
         else:
-            raise Exception('Failed to convert str to list.')
+            raise Exception("Failed to convert str to list.")
     except Exception as e:
         raise Exception(
             "Error while trying to convert "
@@ -212,12 +209,12 @@ def str_to_list(string: str) -> list[str]:
 
 def str_to_set(string: str) -> set[str]:
     try:
-        string = string.lstrip('{').rstrip('}')
-        new_val: set = set(string.split(', '))
+        string = string.lstrip("{").rstrip("}")
+        new_val: set = set(string.split(", "))
         if type(new_val) is set:
             return new_val
         else:
-            raise Exception('Failed to convert str to set.')
+            raise Exception("Failed to convert str to set.")
     except Exception as e:
         raise Exception(
             "Error while trying to convert "
@@ -227,12 +224,12 @@ def str_to_set(string: str) -> set[str]:
 
 def str_to_tuple(string: str) -> tuple[str, ...]:
     try:
-        string = string.lstrip('(').rstrip(')')
-        new_val: tuple = tuple(string.split(', '))
+        string = string.lstrip("(").rstrip(")")
+        new_val: tuple = tuple(string.split(", "))
         if type(new_val) is tuple:
             return new_val
         else:
-            raise Exception('Failed to convert str to tuple.')
+            raise Exception("Failed to convert str to tuple.")
     except Exception as e:
         raise Exception(
             "Error while trying to convert "
@@ -248,24 +245,25 @@ def validate_type(value, valid_type: _ClassInfo) -> bool:
 
 # TESTING #
 
+
 def _test() -> None:
     try:
         # get_type()
         data = 123
         data_type = get_type(data)
-        print('get_type():')
+        print("get_type():")
         print(f"data = {data}")
         print(f"data_type = {data_type}")
         print()
         # str_to_bool()
-        bool_as_str = 'TrUe'
+        bool_as_str = "TrUe"
         bool_as_bool = str_to_bool(
             bool_as_str,
             case_sensitive=False,
-            true_values=('TRUE', 'True', 'true', 'T', 't', '1'),
-            false_values=('FALSE', 'False', 'false', 'F', 'f', '0')
+            true_values=("TRUE", "True", "true", "T", "t", "1"),
+            false_values=("FALSE", "False", "false", "F", "f", "0"),
         )
-        print('str_to_bool():')
+        print("str_to_bool():")
         print(f"bool_as_str = {bool_as_str}")
         print(f"bool_as_bool = {bool_as_bool}")
         print(f"data_type = {get_type(bool_as_bool)}")
@@ -273,47 +271,47 @@ def _test() -> None:
         # str_to_dict()
         dict_as_str = '{"key": "value"}'
         dict_as_dict = str_to_dict(dict_as_str)
-        print('str_to_dict():')
+        print("str_to_dict():")
         print(f"dict_as_str = {dict_as_str}")
         print(f"dict_as_dict = {dict_as_dict}")
         print(f"data_type = {get_type(dict_as_dict)}")
         print()
         # str_to_float()
-        float_as_str = '123.456'
+        float_as_str = "123.456"
         float_as_float = str_to_float(float_as_str)
-        print('str_to_float():')
+        print("str_to_float():")
         print(f"float_as_str = {float_as_str}")
         print(f"float_as_float = {float_as_float}")
         print(f"data_type = {get_type(float_as_float)}")
         print()
         # str_to_int()
-        int_as_str = '123'
+        int_as_str = "123"
         int_as_int = str_to_int(int_as_str)
-        print('str_to_int():')
+        print("str_to_int():")
         print(f"int_as_str = {int_as_str}")
         print(f"int_as_int = {int_as_int}")
         print(f"data_type = {get_type(int_as_int)}")
         print()
         # str_to_list()
-        list_as_str = '[1, 2, 3]'
+        list_as_str = "[1, 2, 3]"
         list_as_list = str_to_list(list_as_str)
-        print('str_to_list():')
+        print("str_to_list():")
         print(f"list_as_str = {list_as_str}")
         print(f"list_as_list = {list_as_list}")
         print(f"data_type = {get_type(list_as_list)}")
         print()
         # str_to_set()
-        set_as_str = '{1, 2, 3}'
+        set_as_str = "{1, 2, 3}"
         set_as_set = str_to_set(set_as_str)
-        print('str_to_set():')
+        print("str_to_set():")
         print(f"set_as_str = {set_as_str}")
         print(f"set_as_set = {set_as_set}")
         print(f"data_type = {get_type(set_as_set)}")
         print()
         # str_to_tuple()
-        tuple_as_str = '(1, 2, 3)'
+        tuple_as_str = "(1, 2, 3)"
         tuple_as_tuple = str_to_tuple(tuple_as_str)
-        print('str_to_tuple():')
+        print("str_to_tuple():")
         print(f"tuple_as_str = {tuple_as_str}")
         print(f"tuple_as_tuple = {tuple_as_tuple}")
         print(f"data_type = {get_type(tuple_as_tuple)}")
@@ -351,5 +349,5 @@ def _test() -> None:
     print(f"issubclass(str, Collection): {issubclass(str, Collection)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _test()
