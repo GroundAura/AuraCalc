@@ -1,15 +1,15 @@
-Calculator icon is licensed under CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/deed.en
-Attribution: Font Awesome Free 5.3.0 by @fontawesome - https://fontawesome.com
+Calculator icon is licensed under CC BY 4.0 - https://creativecommons.org/licenses/by/4.0/
+  Attribution: Font Awesome Free 5.3.0 by @fontawesome - https://fontawesome.com
 
 
 Code and remaining files are licensed under The Clear BSD License
-Attribution: GroundAura - https://github.com/GroundAura
+  Attribution: GroundAura - https://github.com/GroundAura
 
 ==============================================================================
 
 The Clear BSD License
 
-Copyright (c) [2024] [GroundAura]
+Copyright (c) [2026] [GroundAura]
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
