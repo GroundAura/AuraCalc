@@ -5,9 +5,6 @@ A text-based calculator app written in Python.
 ## Requirements
 
 - [Python](https://www.python.org) 3.12.2 or newer
-
-> Tested on Python 3.12.2. It might not work on earlier versions, such as Codio's Python 3.10.9.
-
 - [CustomTkinter](https://customtkinter.tomschimansky.com)
 - [SymPy](https://www.sympy.org/en/index.html)
 
@@ -17,17 +14,13 @@ A text-based calculator app written in Python.
 - Install Required Packages
 
 Option A:
-```bash
+```sh
 pip install -r scripts/requirements.txt
 ```
 
 Option B:
-```bash
-pip install customtkinter
-```
-
-```bash
-pip install sympy
+```sh
+pip install customtkinter sympy
 ```
 
 - Download calculator source code
@@ -37,7 +30,7 @@ pip install sympy
 - Follow Installation instructions above
 - Open a terminal or IDE and navigate to the downloaded source code
 - Run `main.py`
-```bash
+```sh
 python src/main.py
 ```
 
@@ -52,12 +45,12 @@ Basic Arithmetic Operators:
 - Modulo `%`
 - Exponentiation `**` or `^`
 
-Intuitive Non-Rigid Formatting:
+Intuitive, Flexible Formatting:
 - eg: `2 + 3`, `2+3`, `2+ 3`, `2 +3`, `2--3`, `2 - -3` evaluates to `5`
 - eg: `3**2`, `3^2` evaluates to `9`
 - eg: `3*2`, `2*3`, `(2)(3)`, `2(3)` evaluates to `6`
 
-Variables:
+Variable Arithmetic:
 - eg: `x + x` evaluates to `2x`
 
 Common Math Functions:
@@ -84,19 +77,15 @@ Stay On Top Window:
 - pins the window to stay in front of all other windows
 - toggleable with `Pin`/`Unpin` button
 
-History:
+Session History:
 - save an expression with `Return` (`Enter`) key
 - navigate saved expressions with `Up`/`Down` arrow keys
 - clear history with `Clear` button
 - also clear history with `Alt`+`Backspace` key combo
 
-## Final Notes
+## Notes
 
-- Can't seem to get it to work in a Codio environment. Not sure if it's an issue with the python version, virtual environment, Linux, or what.
-- It works on my Windows 10 machine with Python 3.12.2.
-- If you don't enter a valid expression, the output will show a custom message such as `ERROR: Invalid characters in expression` or `ERROR: Incomplete expression`. This is intended to provide user feedback and not an issue with the program.
-- The program is reliant on the `icon.ico` file.
-- There's a config and debug log file.
-- Some unused code for future features has been left in the source code since I'm going to continue working on this project after submitting it as my CS1410 final project.
-- I adjusted the formatting with flake8, mypy, and black, so hopefully that's enough for whatever you're using to check against PEP8 style checks.
+- If you enter an invalid expression, the output will show a custom message such as `ERROR: Invalid characters in expression` or `ERROR: Incomplete expression`. This is intended to provide user feedback and not an issue with the program.
+- The program is dependant on the `icon.ico` file to run.
+- Includes config and log files.
 
